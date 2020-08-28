@@ -1,0 +1,5 @@
+export const CARDS_SET = 'CARDS_SET'
+export const CARD_SET = 'CARD_SET'
+export const CARD_UPDATED = 'CARD_UPDATED'
+export const CARD_UNSET = 'CARD_UNSET'
+export const SEARCH_QUERY_SET = 'SEARCH_QUERY_SET'
