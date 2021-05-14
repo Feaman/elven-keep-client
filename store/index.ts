@@ -5,7 +5,8 @@ import CardModel from '~/models/card'
 export const state = () => {
   return {
     cards: [] as Array<CardModel>,
-    searchQuery: ''
+    currentCard: null as CardModel | null,
+    searchQuery: '',
   }
 }
 

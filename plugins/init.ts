@@ -1,12 +1,10 @@
 import Vue from 'vue'
+import { Context } from '@nuxt/types'
+import draggable from 'vuedraggable'
 import BaseService from '~/services/base'
 import ApiService from '~/services/api'
-import HeaderComponent from '~/components/header'
-import CardsComponent from '~/components/cards'
-import CardComponent from '~/components/card'
-import SearchComponent from '~/components/search'
 
-export default (context) => {
+export default (context: Context) => {
   BaseService.error = context.error
   BaseService.api = ApiService
   BaseService.vuex = context.store
@@ -15,8 +13,15 @@ export default (context) => {
   // Fix 100vh for mobile
   document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)
 
-  Vue.component('header-row', HeaderComponent)
-  Vue.component('search', SearchComponent)
-  Vue.component('card', CardComponent)
-  Vue.component('cards', CardsComponent)
+  // Register all the components
+  const componentsFolderFiles: any = require.context('../components', true, /\.vue$/i)
+  componentsFolderFiles.keys().forEach((key: String) => {
+    const part: String | undefined = key.split('/').pop()
+    if (part) {
+      Vue.component(part.split('.')[0], componentsFolderFiles(key).default)
+    }
+  })
+
+  // Draggable
+  Vue.component('Draggable', draggable)
 }

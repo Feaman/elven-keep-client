@@ -73,11 +73,20 @@
 }
 
 // List
-.list-item 
-  transition all 0.3s
-  display inline-flex
-.list-enter, .list-leave-to
-  opacity 0
-  transform translateY(30px)
-.list-leave-active
-  position absolute
+.list-effect-item {
+  display: inline-block;
+  margin-right: 10px;
+}
+.list-effect-leave-active {
+  position: absolute;
+}
+.list-effect-enter-active, .list-effect-leave-active {
+  transition: all 0.3s;
+}
+.list-effect-enter, .list-effect-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.list-effect-move {
+  transition: transform 0.3s;
+}

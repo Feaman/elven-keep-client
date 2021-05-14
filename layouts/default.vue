@@ -1,24 +1,25 @@
 <template lang="pug">
-.container
-  .loader-container.center(
-    v-if="loading"
-  )
-    .loader
-  Nuxt(
-    v-else
-  )
+v-app
+  v-main
+    .content
+      v-progress-circular(
+        v-if="loading"
+        color="primary"
+        indeterminate
+      )
+      nuxt(v-else)
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import BaseService from '~/services/base'
+import CardService from '~/services/card'
 
 @Component
 export default class CardsComponent extends Vue {
   loading = true
   created () {
-    BaseService.initData()
+    CardService.getCards()
       .then(() => this.loading = false)
   }
 }

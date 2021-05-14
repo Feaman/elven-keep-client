@@ -1,8 +1,12 @@
 <template lang="pug">
 .search
-  input(
+  v-text-field(
     @input="handleSearch($event)"
     :value="searchQuery"
+    placeholder="Поиск..."
+    hide-details
+    outlined
+    dense
   )
 </template>
 
@@ -11,13 +15,11 @@ import { Vue, Component } from 'vue-property-decorator'
 import { State } from 'vuex-class'
 
 @Component
-export default class CardsComponent extends Vue {
+export default class SearchComponent extends Vue {
   @State searchQuery!: string
 
-  handleSearch (event: Event) {
-    if (event.target && event.target instanceof HTMLInputElement) {
-      this.$store.dispatch('setQuerySearch', event.target.value)
-    }
+  handleSearch (searchQuery: string) {
+    this.$store.dispatch('setQuerySearch', searchQuery)
   }
 }
 </script>
@@ -33,5 +35,4 @@ export default class CardsComponent extends Vue {
     border none
     border-radius 6px
     outline none
-    font-family()
 </style>

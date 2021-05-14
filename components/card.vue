@@ -1,95 +1,99 @@
 <template lang="pug">
-.card.column
-  input.title(
-    v-model="title"
+.card.d-flex.flex-column.fill-width.pa-4
+  v-text-field(
+    @input="card.update({ title: $event })"
+    :value="card.title"
+    placeholder="Set note title"
+    hide-details
   )
-  textarea.text(
-    v-model="text"
-    ref="textarea"
+  v-textarea.text(
+    v-if="card.type === CARD_TYPE_TEXT"
+    @input="card.update({ text: $event })"
+    :value="card.text"
+    outlined
+    auto-grow
   )
-  .footer
-    .button.center(
-      @click="remove(card)"
-      title="Delete card"
-    )
-      .icon(
-        v-html="$svg.delete"
+  template(v-if="card.type === CARD_TYPE_LIST")
+    template(v-if="mainListItems.length")
+      card-list.mt-4(
+        :card="card"
+        :list="mainListItems"
+        :is-main="true"
       )
+    template(v-if="completedListItems.length")
+      v-divider.my-2(v-if="mainListItems.length")
+      v-expansion-panels.mt-4(
+        v-model="expandedListItems"
+        multiple
+      )
+        v-expansion-panel
+          v-expansion-panel-header
+            template(v-slot:actions)
+              v-icon.icon $expand
+            .completed-list-header.d-flex.align-center.ml-4
+              .green--text {{ completedListItems.length }}
+              .ml-2 Completed
+          v-expansion-panel-content
+            card-list(
+              :card="card"
+              :list="completedListItems"
+            )
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Ref, Watch } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 import CardModel from '~/models/card'
 
 @Component
-export default class CardsComponent extends Vue {
+export default class CardComponent extends Vue {
   @Prop(CardModel) card!: CardModel
 
-  @Ref('textarea') $textarea!: HTMLTextAreaElement
+  CARD_TYPE_LIST = CardModel.TYPE_LIST
+  CARD_TYPE_TEXT = CardModel.TYPE_TEXT
 
-  @Watch('title')
-  onTitleChanged () {
-    this.card.save(this.title, this.text)
+  get expandedListItems () {
+    return this.card.isCompletedListExpanded ? [0] : []
   }
 
-  @Watch('text')
-  onTextChanged () {
-    this.recalculateTextHeight()
-    this.card.save(this.title, this.text)
+  set expandedListItems (expandedPanelsArray: number[]) {
+    this.card.update({ isCompletedListExpanded: !!expandedPanelsArray.length })
   }
 
-  title = this.card.title
-  text = this.card.text
-
-  mounted (): void {
-    this.recalculateTextHeight()
+  get completedListItems () {
+    return this.card.list.filter(listItem => listItem.completed)
   }
 
-  remove (card: CardModel): void {
-    card.delete()
-  }
-
-  recalculateTextHeight (): void {
-    this.$textarea.style.height = 'auto'
-    this.$textarea.style.height = this.$textarea.scrollHeight + 'px'
+  get mainListItems () {
+    return this.card.list
+      .filter(listItem => !listItem.completed)
+      .sort((previousItem, nextItem) => {
+        if (previousItem.checked === nextItem.checked) {
+          return 0
+        }
+        return previousItem.checked ? 1 : -1
+      })
   }
 }
 </script>
 
 <style lang="stylus" scoped>
-@import '~assets/css/mixins'
+@import '~assets/css/variables'
+
+$active-row-color = #6A1B9A
 
 .card
-  min-width 112px
-  height fit-content
-  box-shadow 0 0 5px rgba(0, 0, 0, 0.3)
-  border-radius 6px
-  padding 16px
+  max-width 900px
 
-  .title, .text
-    border none
-    outline none
-    font-family()
+  .v-expansion-panel-header
+    min-height 32px
 
-  .title
-    font-weight bold
-    font-size 18px
+  .completed-list-header
+    order 1
 
-  .text
-    margin 8px 0 0 0
-    resize none
+  .v-expansion-panel
+    &:before
+      box-shadow none
 
-  .footer
-    .button
-      width 28px
-      height 28px
-      border-radius 6px
-      cursor pointer
-
-      &:hover
-        background-color rgba(0, 0, 0, 0.1)
-
-      .icon
-        width 20px
-        height 20px
+    ::v-deep .v-expansion-panel-content__wrap, .v-expansion-panel-header
+      padding 0
 </style>

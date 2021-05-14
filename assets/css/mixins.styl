@@ -1,16 +1,7 @@
-font-family()
-  font-family Roboto
-  font-size 16px
-
-loader(color = #fff, size = 50px, thickness = 4px)
-  width size
-  height size
-  border thickness solid rgba(color, 0.5)
-  border-top thickness solid color
-  border-radius 50%
-  animation spin 2s linear infinite
-
-@keyframes spin {
-  0% { transform: rotate(0deg) }
-  100% { transform: rotate(360deg) }
+limit-width(maxWidth) {
+  display inline-block
+  max-width maxWidth 
+  white-space nowrap
+  overflow hidden
+  text-overflow ellipsis
 }

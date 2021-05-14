@@ -45,12 +45,15 @@ export default {
   ** See https://nuxtjs.org/api/configuration-components
   */
   components: true,
-  /*
-  ** Nuxt.js dev-modules
-  */
+
+  // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
-    '@nuxt/typescript-build'
+    // https://go.nuxtjs.dev/typescript
+    '@nuxt/typescript-build',
+    // https://go.nuxtjs.dev/vuetify
+    '@nuxtjs/vuetify'
   ],
+
   /*
   ** Nuxt.js modules
   */
