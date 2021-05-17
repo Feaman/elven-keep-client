@@ -2,29 +2,29 @@
 .card-list
   .list
     transition-group(
-      name="list-effect"
+      name="vertical-list-effect"
     )
       div(
         v-for="(listItem, index) in list"
         :key="listItem._id"
       )
-        .list-item.d-flex.align-center(
-          :class="{ focused: listItem.focused, checked: listItem.checked, completed: listItem.completed }"
+        .list-item.d-flex.align-center.py-1(
+          :class="{ first: index === 0, focused: listItem.focused, checked: listItem.checked, completed: listItem.completed }"
         )
           v-checkbox.ma-0.pa-0(
             @change="listItem.update({ completed: !!$event })"
             :input-value="!!listItem.completed"
             :disabled="!listItem.text"
-            color="purple"
+            color="primary"
             hide-details
           )
-          v-textarea.list-item__text.fill-width.mx-2.my-1.pa-0(
+          v-textarea.list-item__text.fill-width.mx-1.mt-1.pa-0(
             @input="listItem.update({ text: $event })"
             @focus="listItem.update({ focused: true })"
             @blur="listItem.update({ focused: false })"
             :value="listItem.text"
             :ref="`textarea-${listItem.id || -index}`"
-            rows="1"
+            :rows="1"
             hide-details
             auto-grow
           )
@@ -32,24 +32,26 @@
             @change="listItem.update({ checked: !!$event })"
             :input-value="!!listItem.checked"
             :disabled="!listItem.text"
-            color="purple"
+            color="primary"
             hide-details
           )
-          v-btn(
+          v-btn.remove-button(
             v-if="list.length > 1 || list[0].text"
             @click="listItem.remove()"
+            color="grey lighten-2"
             icon
           )
             v-icon mdi-close
-    transition(name="slide-fade")
-      .d-flex.align-center.mt-2.cursor-text(
-        v-if="isMain && !list.find(item => !item.text)"
-        @click="addNewListItem()"
-      )
-        v-icon(
-          color="grey"
-        ) mdi-plus
-        .grey--text.ml-4 Add item
+    .new-list-item-button.mt-2
+      transition(name="slide-fade")
+        .d-flex.align-center.cursor-text(
+          v-if="isMain && !list.find(item => !item.text)"
+          @click="addNewListItem()"
+        )
+          v-icon(
+            color="grey"
+          ) mdi-plus
+          .grey--text.ml-4 Add item
 </template>
 
 <script lang="ts">
@@ -86,36 +88,53 @@ export default class CardListComponent extends Vue {
 <style lang="stylus" scoped>
 @import '~assets/css/variables'
 
-$active-row-color = #CFD8DC
+$inactive-row-color = #ECEFF1
 
 .card-list
   .list
     .list-item
-      border-top  1px solid transparent
+      border-top  1px solid $inactive-row-color
       border-bottom  1px solid transparent
       transition border-top 0.3s, border-bottom 0.3s
 
-      &.checked, &.completed
-        ::v-deep .v-input__slot textarea
-          color $blue-grey-lighten-3
+      &.first
+        border-top  1px solid transparent
 
       &.checked
-        ::v-deep .v-input__slot textarea
+        ::v-deep .v-input .v-input__slot textarea
+          color $grey-lighten-2
           text-decoration line-through
 
       &.focused
-        border-top  1px solid $active-row-color
-        border-bottom  1px solid $active-row-color
+        border-top  1px solid $grey-darken-1
+        border-bottom  1px solid $grey-darken-1
 
-      ::v-deep .v-input__slot
-        textarea
-          min-height 24px
-          border none
-          outline none
-          resize none
-          text-decoration none
+      .v-input
+        ::v-deep .mdi-checkbox-blank-outline
+          &:before
+            color $grey-lighten-2
 
-        &:before, &:after
-          border none
-          border-color transparent
+        ::v-deep .v-input__slot
+          textarea
+            min-height 24px
+            border none
+            outline none
+            resize none
+            text-decoration none
+            line-height 20px
+
+          &:before, &:after
+            border none
+            border-color transparent
+
+      .remove-button
+        margin-right -8px
+
+  .new-list-item-button
+    height 24px
+
+@media (max-width: 600px)
+  ::v-deep .mdi-checkbox-blank-outline, ::v-deep .mdi-checkbox-marked
+    &:before
+      font-size 28px
 </style>

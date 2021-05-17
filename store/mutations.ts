@@ -2,10 +2,14 @@ import * as types from './mutations-types'
 import { RootState } from '~/store'
 import CardModel from '~/models/card'
 import ListItemModel, { ListItemDataObject } from '~/models/list-item'
+import TypeModel from '~/models/type'
 
 export default {
   [types.CARDS_SET] (state: RootState, cards: Array<CardModel>) {
     state.cards = cards
+  },
+  [types.TYPES_SET] (state: RootState, types: TypeModel[]) {
+    state.types = types
   },
   [types.CARD_SET] (state: RootState, card: CardModel) {
     state.cards.unshift(card)

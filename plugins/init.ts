@@ -9,9 +9,9 @@ export default (context: Context) => {
   BaseService.api = ApiService
   BaseService.vuex = context.store
   BaseService.events = new Vue()
+  BaseService.axios = context.app.$axios
 
-  // Fix 100vh for mobile
-  document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)
+  ApiService.init()
 
   // Register all the components
   const componentsFolderFiles: any = require.context('../components', true, /\.vue$/i)

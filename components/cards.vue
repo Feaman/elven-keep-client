@@ -1,12 +1,17 @@
 <template lang="pug">
-.cards.d-flex.pa-4
-  .d-flex.flex-wrap
-    card-preview.ma-4(
-      v-for="card in filteredCards"
-      @click.native="$store.dispatch('setCurrentCard', card)"
-      :key="card.id"
-      :card="card"
+.cards.pr-4.pb-4
+    transition-group.d-flex.flex-wrap(
+      name="horizontal-list-effect"
+      tag="div"
     )
+      .card.ml-4.mt-4.pa-1(
+        v-for="card in filteredCards"
+        :key="card.id"
+      )
+        card-preview(
+          @click.native="$store.dispatch('setCurrentCard', card)"
+          :card="card"
+        )
 </template>
 
 <script lang="ts">
@@ -25,8 +30,29 @@ export default class CardsComponent extends Vue {
     }
     return this.cards.filter((card: CardModel) => {
       const regExp = new RegExp(this.searchQuery, 'i')
-      return regExp.test(card.title || '') || regExp.test(card.text || '')
+      let foundInLisListItems = false
+      card.list.forEach(listItem => {
+        if (regExp.test(listItem.text || '')) {
+          foundInLisListItems = true
+        }
+      })
+      return regExp.test(card.title || '') || regExp.test(card.text || '') || foundInLisListItems
     })
   }
 }
 </script>
+
+<style lang="stylus" scoped>
+.cards
+  .card
+    min-width 250px
+    max-width 350px
+    height 250px
+    flex 1
+    overflow hidden
+
+@media (max-width: 600px)
+  .cards
+    .card
+      min-width 148px
+</style>

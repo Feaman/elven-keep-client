@@ -13,5 +13,6 @@ export default class CardService extends BaseService {
         })
         this.vuex.dispatch('setCards', cards)
       })
+      .catch(error => this.error(error))
   }
 }

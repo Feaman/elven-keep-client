@@ -1,60 +1,68 @@
+import { AxiosResponse } from 'axios'
 import BaseService from './base'
 import CardModel, { CardDataObject } from '~/models/card'
 import ListItemModel, { ListItemDataObject } from '~/models/list-item'
-
-const cards: Array<CardDataObject> = []
-for (let i = 1; i < 10; i++) {
-  cards.push({
-    id: i,
-    title: 'Title one',
-    text: 'The only little one the text of glorThe only little one the text of glorThe only little one the text of gloryyy',
-    list: [
-      new ListItemModel({ id: 1, text: '1asdf asdf asdfas df adsf asd fsdaf' }),
-      new ListItemModel({ id: 2, text: '2asdf asdf asdfas df adsf asd fsdaf' }),
-      new ListItemModel({ id: 3, text: '3asdf asdf asdfas df adsf asd fsdaf' }),
-      new ListItemModel({ id: 4, text: '4asdf asdf asdfas df adsf asd fsdaf' }),
-      new ListItemModel({ id: 5, text: '5asdf asdf asdfas df adsf asd fsdaf' }),
-      new ListItemModel({ id: 6, text: '6asdf asdf asdfas df adsf asd fsdaf' }),
-    ],
-  })
-}
+import { TypeDataObject } from '~/models/type'
 
 export default class ApiService extends BaseService {
-  static getCards (): Promise<Array<CardDataObject>> {
-    return new Promise((resolve) => {
-      resolve(cards)
-    })
+  static URL = 'http://api.notes.pavlo.ru/'
+
+  static init () {
+    this.axios.setBaseURL(this.URL)
+  }
+
+  static getCards (): Promise<CardDataObject[]> {
+    return this.axios.get('cards')
+      .then((response: AxiosResponse) => {
+        response.data.forEach((card: any) => {
+          card.typeId = card.type_id
+          card.isCompletedListExpanded = card.is_completed_list_expanded
+        })
+        return response.data
+      })
+  }
+
+  static getTypes (): Promise<TypeDataObject[]> {
+    return this.axios.get('card-types')
+      .then((response: AxiosResponse) => {
+        return response.data
+      })
   }
 
   static addCard (card: CardModel): Promise<CardDataObject> {
-    console.log('card added', card)
-    return new Promise((resolve) => {
-      resolve({
-        id: this.vuex.state.cards.length + 1,
+    return this.axios.post('cards', card)
+      .then((response: AxiosResponse) => {
+        return response.data
       })
-    })
+      .catch(error => this.error(error))
+  }
+
+  static updateCard (card: CardModel): Promise<CardDataObject> {
+    return this.axios.put(`cards/${card.id}`, card)
+      .then((response: AxiosResponse) => {
+        return response.data
+      })
+      .catch(error => this.error(error))
   }
 
   static saveListItem (listItem: ListItemModel): Promise<ListItemDataObject> {
-    console.log('list item saved', listItem)
-    return new Promise((resolve) => {
-      resolve({
-        id: (listItem?.card?.list?.length || -10000) + 1,
+    return this.axios.post('list-item', { data: listItem })
+      .then((response: AxiosResponse) => {
+        return response.data
       })
-    })
   }
 
   static removeListItem (listItem: ListItemModel) {
-    console.log('list item removed', listItem)
-    return new Promise((resolve) => {
-      resolve('')
-    })
+    return this.axios.delete('list-item', { data: listItem })
+      .then((response: AxiosResponse) => {
+        return response.data
+      })
   }
 
   static removeCard (card: CardModel) {
-    console.log('card removed', card)
-    return new Promise((resolve) => {
-      resolve('')
-    })
+    return this.axios.delete('cards', { data: card })
+      .then((response: AxiosResponse) => {
+        return response.data
+      })
   }
 }

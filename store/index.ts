@@ -1,10 +1,12 @@
 import mutations from './mutations'
 import actions from './actions'
 import CardModel from '~/models/card'
+import TypeModel from '~/models/type'
 
 export const state = () => {
   return {
-    cards: [] as Array<CardModel>,
+    cards: [] as CardModel[],
+    types: [] as TypeModel[],
     currentCard: null as CardModel | null,
     searchQuery: '',
   }

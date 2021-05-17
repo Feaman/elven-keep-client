@@ -14,6 +14,7 @@ module.exports = {
     // allow trailing comma
     'comma-dangle': ['error', 'only-multiline'],
     'prefer-promise-reject-errors': 0,
+    camelcase: ["error", { properties: "never", ignoreDestructuring: true }],
     // allow paren-less arrow functions
     'arrow-parens': 0,
     quotes: 'off',

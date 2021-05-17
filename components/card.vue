@@ -1,19 +1,21 @@
 <template lang="pug">
-.card.d-flex.flex-column.fill-width.pa-4
-  v-text-field(
+.card.d-flex.flex-column.fill-width.py-4.px-3
+  v-text-field.pa-0(
     @input="card.update({ title: $event })"
     :value="card.title"
-    placeholder="Set note title"
+    placeholder="Title"
     hide-details
   )
-  v-textarea.text(
-    v-if="card.type === CARD_TYPE_TEXT"
+  v-textarea.text.mt-4(
+    v-if="card.type.name === CARD_TYPE_TEXT"
     @input="card.update({ text: $event })"
     :value="card.text"
+    placeholder="Text"
+    rows="1"
     outlined
     auto-grow
   )
-  template(v-if="card.type === CARD_TYPE_LIST")
+  template(v-if="card.type.name === CARD_TYPE_LIST")
     template(v-if="mainListItems.length")
       card-list.mt-4(
         :card="card"
@@ -31,8 +33,8 @@
             template(v-slot:actions)
               v-icon.icon $expand
             .completed-list-header.d-flex.align-center.ml-4
-              .green--text {{ completedListItems.length }}
-              .ml-2 Completed
+              .green--text.font-weight-bold.font-size-16 {{ completedListItems.length }}
+              .ml-2 completed
           v-expansion-panel-content
             card-list(
               :card="card"
@@ -43,13 +45,14 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import CardModel from '~/models/card'
+import TypeModel from '~/models/type'
 
 @Component
 export default class CardComponent extends Vue {
   @Prop(CardModel) card!: CardModel
 
-  CARD_TYPE_LIST = CardModel.TYPE_LIST
-  CARD_TYPE_TEXT = CardModel.TYPE_TEXT
+  CARD_TYPE_LIST = TypeModel.TYPE_LIST
+  CARD_TYPE_TEXT = TypeModel.TYPE_TEXT
 
   get expandedListItems () {
     return this.card.isCompletedListExpanded ? [0] : []
@@ -89,6 +92,20 @@ $active-row-color = #6A1B9A
 
   .completed-list-header
     order 1
+
+  .v-input
+    ::v-deep input
+      font-weight bold
+      font-size 24px
+
+    ::v-deep fieldset
+      border none
+
+    ::v-deep .v-input__slot
+      padding 0 !important
+
+      &:before
+        border none
 
   .v-expansion-panel
     &:before
