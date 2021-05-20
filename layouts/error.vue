@@ -1,13 +1,13 @@
 <template lang="pug">
 .error-page.d-flex.flex-column.align-center.justify-center.fill-height.white--text.pt-8.pb-12
-  .code.font-weight-black.grey--text.text--darken-3.ml-4 Ошибка {{ error.statusCode }}
-  img.error-gif.mt-12(src="~/assets/images/error.gif")
-  .oops.font-weight-black.mt-4 Упс...
-  .text.scroll.font-weight-bold.text-center.green--text.text--lighten-4.px-4 {{ errorText }}
-  v-btn.mt-10(
-    @click="reloadPage()"
-    color="amber accent-2"
-  ) НА ЗАГЛАВНУЮ
+  .container.d-flex.flex-column.align-center.justify-center.fill-height
+    img.error-gif.mt-12(src="~/assets/images/error.gif")
+    .oops.font-weight-black.mt-4 Упс...
+    .text.scroll.font-weight-bold.text-center.green--text.text--lighten-4.px-4 {{ errorText }}
+    v-btn.mt-10(
+      @click="reloadPage()"
+      color="amber accent-2"
+    ) НА ЗАГЛАВНУЮ
 </template>
 
 <script lang="ts">
@@ -18,7 +18,9 @@ interface ErrorObject {
   message: String,
 }
 
-@Component
+@Component({
+  layout: 'plain'
+})
 export default class ErrorLayout extends Vue {
    @Prop() error!: ErrorObject
    @Prop() message!: String
@@ -32,7 +34,11 @@ export default class ErrorLayout extends Vue {
    }
 
    reloadPage () {
-     this.$router.push('/')
+     if (this.$route.name === 'index') {
+       this.$router.go(0)
+     } else {
+       this.$router.push('/')
+     }
    }
 }
 </script>
@@ -41,24 +47,30 @@ export default class ErrorLayout extends Vue {
 .error-page
   background #2692a9  url("~/assets/images/bg-pattern.png") repeat
 
-  .error-image
-    width 50px
-    height 50px
+  .container
+    max-height 700px
 
-  .code
-    font-size 30px
-    text-align right
-    text-transform uppercase
+    .error-image
+      width 50px
+      height 50px
 
-  .oops
-    font-size 56px
+    .code
+      font-size 30px
+      text-align right
+      text-transform uppercase
 
-  .text
-    font-size 28px
-    line-height 32px
-    flex 1
-    word-break: break-word;
+    .oops
+      font-size 56px
 
-  .error-gif
-    height 72px
+    .text
+      max-width 980px
+      max-height 250px
+      font-size 28px
+      line-height 32px
+      flex 1
+      word-break: break-word;
+      overflow auto
+
+    .error-gif
+      height 72px
 </style>

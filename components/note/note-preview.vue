@@ -1,9 +1,11 @@
 <template lang="pug">
-v-card.card-preview.cursor-pointer.fill-height.pa-4
-  .title.limit-width(v-if="card.title") {{ card.title }}
-  template(v-if="card.type.name === CARD_TYPE_LIST")
+v-card.note-preview.cursor-pointer.fill-height(
+  :class="{ 'with-completed': completedListItems.length }"
+)
+  .title.limit-width(v-if="note.title") {{ note.title }}
+  template(v-if="note.type.name === NOTE_TYPE_LIST")
     .list(
-      :class="{ 'mt-2': card.title }"
+      :class="{ 'mt-2': note.title }"
     )
       .list-item.d-flex.align-center.mt-1(
         v-for="(listItem, i) in mainListItems"
@@ -12,35 +14,41 @@ v-card.card-preview.cursor-pointer.fill-height.pa-4
       )
         v-icon(color="grey lighten-1") mdi-checkbox-blank-outline
         .list-item__text.limit-width.ml-2 {{ listItem.text }}
-    .completed-list-header.d-flex.align-center.grey--text.mt-2.ml-2(
+    .completed-list-header.d-flex.align-center.grey--text.mt-2.ml-1(
       v-if="completedListItems.length"
     )
       div +
-      .font-weight-bold.ml-1 {{ completedListItems.length }}
+      .green--text.font-weight-bold.ml-1 {{ completedListItems.length }}
       .ml-1 completed
   .text(
     v-else
-  ) {{ card.text }}
+  ) {{ note.text }}
+
+  v-btn.remove-button(
+    @click.stop="$emit('remove')"
+    icon
+  )
+    v-icon mdi-close
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import CardModel from '~/models/card'
+import NoteModel from '~/models/note'
 import TypeModel from '~/models/type'
 
 @Component
-export default class CardPreviewComponent extends Vue {
-  @Prop(CardModel) card!: CardModel
+export default class NotePreviewComponent extends Vue {
+  @Prop(NoteModel) note!: NoteModel
 
-  CARD_TYPE_LIST = TypeModel.TYPE_LIST
-  CARD_TYPE_TEXT = TypeModel.TYPE_TEXT
+  NOTE_TYPE_LIST = TypeModel.TYPE_LIST
+  NOTE_TYPE_TEXT = TypeModel.TYPE_TEXT
 
   get completedListItems () {
-    return this.card.list.filter(listItem => listItem.completed)
+    return this.note.list.filter(listItem => listItem.completed)
   }
 
   get mainListItems () {
-    return this.card.list
+    return this.note.list
       .filter(listItem => !listItem.completed)
       .sort((previousItem, nextItem) => {
         if (previousItem.checked === nextItem.checked) {
@@ -55,19 +63,30 @@ export default class CardPreviewComponent extends Vue {
 <style lang="stylus" scoped>
 @import '~assets/css/variables'
 
-.card-preview
+.note-preview
   position relative
   overflow hidden
+  padding 8px 16px 16px 16px
 
   &:after
     content ''
     width 100%
-    height 50px
+    height 90px
     position absolute
     bottom 0
     left 0
     z-index 20
-    background linear-gradient(transparent, #fff, #fff 60px);
+    background linear-gradient(transparent, #fff 65px)
+
+  &.with-completed:after
+    height 170px
+    background linear-gradient(transparent, #fff 120px)
+
+  .remove-button
+    position absolute
+    right 4px
+    top 4px
+    background radial-gradient(#fff 30%, transparent)
 
   .title
     line-height normal
@@ -79,7 +98,20 @@ export default class CardPreviewComponent extends Vue {
           text-decoration line-through
           color $blue-grey-lighten-3
 
+  .completed-list-header
+    position absolute
+    bottom 16px
+    z-index 30
+
   ::v-deep .mdi-checkbox-blank-outline, ::v-deep .mdi-checkbox-marked
     &:before
       font-size 16px
+
+@media (max-width: 600px)
+  .note-preview
+    padding 8px 10px 10px 10px
+
+    .remove-button
+      right 2px
+      top 2px
 </style>

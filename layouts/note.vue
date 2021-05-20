@@ -1,7 +1,6 @@
 <template lang="pug">
 v-app
-  app-bar
-  v-main
+  v-main.content
     .d-flex.fill-height.flex-center(
       v-if="isInitInfoLoading"
     )
@@ -25,5 +24,5 @@ export default class DefaultLayout extends Vue {
 
 <style lang="stylus" scoped>
 ::v-deep .v-main__wrap
-  height calc(100vh - 56px)
+  height 100vh
 </style>

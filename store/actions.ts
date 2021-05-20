@@ -1,14 +1,15 @@
 import { ActionContext } from 'vuex/types/index'
 import * as mutationTypes from './mutations-types'
 import { RootState } from '.'
-import CardModel from '~/models/card'
+import NoteModel from '~/models/note'
 import ListItemModel from '~/models/list-item'
 import TypeModel from '~/models/type'
+import StatusModel from '~/models/status'
 
 export default {
-  setCards (actionContext: ActionContext<Function, RootState>, cards: Array<CardModel>) {
+  setNotes (actionContext: ActionContext<Function, RootState>, notes: Array<NoteModel>) {
     return new Promise(function (resolve) {
-      actionContext.commit(mutationTypes.CARDS_SET, cards)
+      actionContext.commit(mutationTypes.NOTES_SET, notes)
       resolve('')
     })
   },
@@ -18,15 +19,33 @@ export default {
       resolve('')
     })
   },
-  setCard (actionContext: ActionContext<Function, RootState>, card: CardModel) {
+  setStatuses (actionContext: ActionContext<Function, RootState>, statuses: StatusModel[]) {
     return new Promise(function (resolve) {
-      actionContext.commit(mutationTypes.CARD_SET, card)
+      actionContext.commit(mutationTypes.STATUSES_SET, statuses)
       resolve('')
     })
   },
-  updateCard (actionContext: ActionContext<Function, RootState>, payload: any) {
+  setNote (actionContext: ActionContext<Function, RootState>, note: NoteModel) {
     return new Promise(function (resolve) {
-      actionContext.commit(mutationTypes.CARD_UPDATED, payload)
+      actionContext.commit(mutationTypes.NOTE_SET, note)
+      resolve('')
+    })
+  },
+  setIsNoteSaving (actionContext: ActionContext<Function, RootState>, isNoteSaving: boolean) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.NOTE_SAVING_SET, isNoteSaving)
+      resolve('')
+    })
+  },
+  setIsInitInfoLoading (actionContext: ActionContext<Function, RootState>, isInitInfoLoading: boolean) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.INIT_INFO_LOADING_SET, isInitInfoLoading)
+      resolve('')
+    })
+  },
+  updateNote (actionContext: ActionContext<Function, RootState>, payload: any) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.NOTE_UPDATED, payload)
       resolve('')
     })
   },
@@ -48,15 +67,21 @@ export default {
       resolve('')
     })
   },
-  setCurrentCard (actionContext: ActionContext<Function, RootState>, currentCard: CardModel) {
+  clearListItemTimeout (actionContext: ActionContext<Function, RootState>, listItem: ListItemModel) {
     return new Promise(function (resolve) {
-      actionContext.commit(mutationTypes.CURRENT_CARD_SET, currentCard)
+      actionContext.commit(mutationTypes.LIST_ITEM_TIMEOUT_CLEARED, listItem)
       resolve('')
     })
   },
-  unsetCard (actionContext: ActionContext<Function, RootState>, card: CardModel) {
+  setCurrentNote (actionContext: ActionContext<Function, RootState>, currentNote: NoteModel) {
     return new Promise(function (resolve) {
-      actionContext.commit(mutationTypes.CARD_UNSET, card)
+      actionContext.commit(mutationTypes.CURRENT_NOTE_SET, currentNote)
+      resolve('')
+    })
+  },
+  unsetNote (actionContext: ActionContext<Function, RootState>, note: NoteModel) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.NOTE_UNSET, note)
       resolve('')
     })
   },

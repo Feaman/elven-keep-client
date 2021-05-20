@@ -1,38 +1,51 @@
 import * as types from './mutations-types'
 import { RootState } from '~/store'
-import CardModel from '~/models/card'
+import NoteModel from '~/models/note'
 import ListItemModel, { ListItemDataObject } from '~/models/list-item'
 import TypeModel from '~/models/type'
+import StatusModel from '~/models/status'
 
 export default {
-  [types.CARDS_SET] (state: RootState, cards: Array<CardModel>) {
-    state.cards = cards
+  [types.NOTES_SET] (state: RootState, notes: Array<NoteModel>) {
+    state.notes = notes
   },
   [types.TYPES_SET] (state: RootState, types: TypeModel[]) {
     state.types = types
   },
-  [types.CARD_SET] (state: RootState, card: CardModel) {
-    state.cards.unshift(card)
+  [types.STATUSES_SET] (state: RootState, statuses: StatusModel[]) {
+    state.statuses = statuses
   },
-  [types.CARD_UNSET] (state: RootState, card: CardModel) {
-    state.cards = state.cards.filter((_card: CardModel) => _card.id !== card.id)
+  [types.NOTE_SAVING_SET] (state: RootState, isNoteSaving: boolean) {
+    state.isNoteSaving = isNoteSaving
+  },
+  [types.INIT_INFO_LOADING_SET] (state: RootState, isInitInfoLoading: boolean) {
+    state.isInitInfoLoading = isInitInfoLoading
+  },
+  [types.NOTE_SET] (state: RootState, note: NoteModel) {
+    state.notes.unshift(note)
+  },
+  [types.NOTE_UNSET] (state: RootState, note: NoteModel) {
+    state.notes = state.notes.filter((_note: NoteModel) => _note.id !== note.id)
+  },
+  [types.LIST_ITEM_TIMEOUT_CLEARED] (_state: RootState, listItem: ListItemModel) {
+    listItem.saveTimeout && clearTimeout(listItem.saveTimeout)
   },
   [types.LIST_ITEM_ADDED] (_state: RootState, listItem: ListItemModel) {
-    listItem.card?.list.push(listItem)
+    listItem.note?.list.push(listItem)
   },
   [types.LIST_ITEM_REMOVED] (_state: RootState, listItem: ListItemModel) {
-    if (listItem.card?.list) {
-      listItem.card.list = listItem?.card?.list.filter(_listItem => _listItem.id !== listItem.id)
+    if (listItem.note?.list) {
+      listItem.note.list = listItem?.note?.list.filter(_listItem => _listItem.id !== listItem.id)
     }
   },
   [types.LIST_ITEM_UPDATED] (_state: RootState, { listItem, data }: { listItem: ListItemModel, data: ListItemDataObject }) {
     Object.assign(listItem, data)
   },
-  [types.CURRENT_CARD_SET] (state: RootState, currentCard: CardModel) {
-    state.currentCard = currentCard
+  [types.CURRENT_NOTE_SET] (state: RootState, currentNote: NoteModel) {
+    state.currentNote = currentNote
   },
-  [types.CARD_UPDATED] (_state: RootState, { card, data }: { card: CardModel, data: any }) {
-    Object.assign(card, data)
+  [types.NOTE_UPDATED] (_state: RootState, { note, data }: { note: NoteModel, data: any }) {
+    Object.assign(note, data)
   },
   [types.SEARCH_QUERY_SET] (state: RootState, searchQuery: string) {
     state.searchQuery = searchQuery

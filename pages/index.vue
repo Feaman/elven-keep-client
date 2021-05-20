@@ -1,6 +1,5 @@
 <template lang="pug" >
-div
-  cards
+notes
 </template>
 
 <script lang="ts">

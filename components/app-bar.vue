@@ -15,13 +15,13 @@
           v-slot:activator="{ on, attrs }"
         )
           v-btn.ml-4(
-            @click="createListCard()"
+            @click="createListNote()"
             v-bind="attrs"
             v-on="on"
             icon
           )
             v-icon mdi-format-list-bulleted-square
-        span Create list card
+        span Create list notw
       v-tooltip(
         bottom
       )
@@ -29,62 +29,42 @@
           v-slot:activator="{ on, attrs }"
         )
           v-btn.ml-2(
-            @click="createTextCard()"
+            @click="createTextNote()"
             v-bind="attrs"
             v-on="on"
             icon
           )
             v-icon mdi-text-box-outline
-        span Create text card
-    v-dialog.dialog(
-      v-if="currentCard"
-      :value="!!currentCard"
-      transition="dialog-bottom-transition"
-      content-class="dialog"
-      fullscreen
-      hide-overlay
-    )
-      v-toolbar(
-        color="primary"
-        dark
-      )
-        v-btn(
-          @click="$store.dispatch('setCurrentCard', null)"
-          icon
-          dark
-        )
-          v-icon mdi-close
-      .d-flex.flex-center
-        card(:card="currentCard")
+        span Create text note
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
-import CardModel from '@/models/card'
 import { State } from 'vuex-class'
+import NoteModel from '~/models/note'
 import ListItemModel from '~/models/list-item'
 import TypeModel from '~/models/type'
 import TypeService from '~/services/type'
 
 @Component
 export default class AppBarComponent extends Vue {
-  @State(state => state.currentCard) currentCard!: CardModel
+  @State(state => state.currentNote) currentNote!: NoteModel
 
-  createTextCard () {
-    this.$store.dispatch('setCurrentCard', new CardModel({ typeId: TypeService.findByName(TypeModel.TYPE_TEXT).id }))
+  createTextNote () {
+    this.$store.dispatch('setCurrentNote', new NoteModel({ typeId: TypeService.findByName(TypeModel.TYPE_TEXT).id }))
   }
 
-  createListCard () {
-    const card = new CardModel({})
-    this.$store.dispatch('setCurrentCard', card)
-    this.currentCard.addListItem(new ListItemModel({ card }))
+  createListNote () {
+    const note = new NoteModel({})
+    this.$store.dispatch('setCurrentNote', note)
+    this.currentNote.addListItem(new ListItemModel({ note }))
   }
 }
 </script>
 
 <style lang="stylus" scoped>
 .app-bar
-  z-index 30
+  z-index 100
 
   .logo
     display flex
@@ -94,6 +74,9 @@ export default class AppBarComponent extends Vue {
 
 ::v-deep .dialog
   background-color #fff
+
+  .v-toolbar
+    z-index 20
 
 @media (max-width: 600px)
   .app-bar

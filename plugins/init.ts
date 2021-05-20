@@ -4,12 +4,12 @@ import draggable from 'vuedraggable'
 import BaseService from '~/services/base'
 import ApiService from '~/services/api'
 
-export default (context: Context) => {
+export default async (context: Context) => {
   BaseService.error = context.error
   BaseService.api = ApiService
   BaseService.vuex = context.store
   BaseService.events = new Vue()
-  BaseService.axios = context.app.$axios
+  ApiService.axios = context.app.$axios
 
   ApiService.init()
 
@@ -24,4 +24,7 @@ export default (context: Context) => {
 
   // Draggable
   Vue.component('Draggable', draggable)
+
+  await BaseService.initData()
+  BaseService.vuex.dispatch('setIsInitInfoLoading', false)
 }
