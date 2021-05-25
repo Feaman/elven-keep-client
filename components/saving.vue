@@ -1,6 +1,6 @@
 <template lang="pug">
 .saving
-  transition(name="fade")
+  transition(name="scale-fade")
     .block.d-flex.align-center(v-if="isNoteSaving")
       .grey--text.text--lighten-3.font-size-13.mr-2 Saving
       v-progress-circular(
@@ -9,7 +9,7 @@
         width="2"
         indeterminate
       )
-  transition(name="fade")
+  transition(name="scale-fade")
     .block.d-flex.align-center(v-if="!isNoteSaving")
       .grey--text.text--lighten-3.font-size-13.mr-2 Saved
       v-icon mdi-cloud-outline
@@ -20,7 +20,7 @@ import { Vue, Component } from 'vue-property-decorator'
 import { State } from 'vuex-class'
 
 @Component
-export default class NoteListComponent extends Vue {
+export default class NoteSavingComponent extends Vue {
   @State(state => state.isNoteSaving) isNoteSaving!: boolean
 }
 </script>

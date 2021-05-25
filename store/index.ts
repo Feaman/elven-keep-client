@@ -9,7 +9,7 @@ export const state = () => {
     notes: [] as NoteModel[],
     types: [] as TypeModel[],
     statuses: [] as StatusModel[],
-    currentNote: null as NoteModel | null,
+    mainListScrollTop: 0,
     searchQuery: '',
     isNoteSaving: false,
     isInitInfoLoading: true,

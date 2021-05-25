@@ -8,17 +8,25 @@ import { TypeDataObject } from '~/models/type'
 export default class ApiService extends BaseService {
   static URL = 'https://api.notes.pavlo.ru/'
   static axios: NuxtAxiosInstance
+  static noteSavingTimeout: ReturnType<typeof setTimeout> | null = null
 
   static init () {
     this.axios.setBaseURL(this.URL)
 
     this.axios.onRequest((config: AxiosRequestConfig) => {
-      this.vuex.dispatch('setIsNoteSaving', true)
+      if (this.noteSavingTimeout) {
+        clearTimeout(this.noteSavingTimeout)
+      }
+      this.noteSavingTimeout = setTimeout(async () => await this.vuex.dispatch('setIsNoteSaving', true), 200)
       return config
     })
 
-    this.axios.onResponse((response: AxiosResponse) => {
-      this.vuex.dispatch('setIsNoteSaving', false)
+    this.axios.onResponse(async (response: AxiosResponse) => {
+      if (this.noteSavingTimeout) {
+        clearTimeout(this.noteSavingTimeout)
+      }
+
+      await this.vuex.dispatch('setIsNoteSaving', false)
       return response
     })
   }

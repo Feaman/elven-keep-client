@@ -7,14 +7,15 @@ import NoteService from '~/services/note'
 import StatusService from '~/services/status'
 
 export interface NoteDataObject {
-   id?: number
-   title?: string | ''
-   text?: string | ''
-   type?: TypeModel
-   typeId?: number
-   statusId?: number
-   isCompletedListExpanded?: Boolean
-   list?: ListItemDataObject[]
+  id?: number
+  title?: string | ''
+  text?: string | ''
+  type?: TypeModel
+  typeId?: number
+  statusId?: number
+  isCompletedListExpanded?: Boolean
+  saveTimeout?: ReturnType<typeof setTimeout> | null
+  list?: ListItemDataObject[]
 }
 
 export default class NoteModel {
@@ -26,6 +27,7 @@ export default class NoteModel {
   statusId: number
   type?: TypeModel
   status?: StatusModel
+  saveTimeout: ReturnType<typeof setTimeout> | null = null
   isCompletedListExpanded?: Boolean
 
   constructor (data: NoteDataObject) {
@@ -80,14 +82,25 @@ export default class NoteModel {
   }
 
   async save (): Promise<NoteDataObject> {
-    if (this.id) {
-      return ApiService.updateNote(this)
-    } else {
-      await NoteService.vuex.dispatch('setNote', this)
-      return ApiService.addNote(this)
-        .then(noteData => this.updateState({ id: noteData.id }))
-        .catch(error => NoteService.error(error))
-    }
+    await NoteService.vuex.dispatch('clearNoteTimeout', this)
+    return new Promise((resolve) => {
+      const saveTimeout = setTimeout(async () => {
+        if (this.id) {
+          ApiService.updateNote(this)
+            .then(data => resolve(data))
+            .catch(error => NoteService.error(error))
+        } else {
+          await NoteService.vuex.dispatch('setNote', this)
+          return ApiService.addNote(this)
+            .then(noteData => {
+              history.replaceState({}, '', `/notes/${noteData.id}`)
+              resolve(this.updateState({ id: noteData.id }))
+            })
+            .catch(error => NoteService.error(error))
+        }
+      }, 400)
+      this.updateState({ saveTimeout })
+    })
   }
 
   async update (data: NoteDataObject) {

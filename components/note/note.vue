@@ -1,63 +1,63 @@
 <template lang="pug">
-.note.d-flex.flex-column.align-center.fill-height
-  v-toolbar.toolbar.fill-width(
-    color="primary"
-    dark
-  )
-    v-btn(
-      @click="$router.back()"
-      icon
+  .note.d-flex.flex-column.align-center.fill-height
+    v-toolbar.toolbar.fill-width(
+      color="primary"
       dark
     )
-      v-icon mdi-arrow-left
-    v-spacer
-    saving
-
-  .content.d-flex.flex-column.fill-width.fill-height.pt-2.px-3
-    v-text-field.title-field.mt-1.mb-2(
-      @input="note.update({ title: $event })"
-      :value="note.title"
-      placeholder="Title"
-      hide-details
-      dense
-    )
-    v-textarea.text.mt-4(
-      v-if="note.type.name === NOTE_TYPE_TEXT"
-      @input="note.update({ text: $event })"
-      :value="note.text"
-      height="100%"
-      placeholder="Text"
-      hide-details
-      outlined
-      auto-grow
-    )
-    template(v-if="note.type.name === NOTE_TYPE_LIST")
-      note-list(
-        :note="note"
-        :list="mainListItems"
-        :is-main="true"
+      v-btn(
+        @click="$router.back()"
+        icon
+        dark
       )
-      template(v-if="completedListItems.length")
-        v-divider(
-          :class="{ 'my-2': isNewButtonShown, 'my-2 mt-6': !isNewButtonShown }"
-          v-if="completedListItems.length"
+        v-icon mdi-arrow-left
+      v-spacer
+      saving(v-if="note.id")
+
+    .content.d-flex.flex-column.fill-width.fill-height.pt-2.px-3
+      v-text-field.title-field.mt-1.mb-2(
+        @input="note.update({ title: $event })"
+        :value="note.title"
+        placeholder="Title"
+        hide-details
+        dense
+      )
+      v-textarea.text(
+        v-if="note.type.name === NOTE_TYPE_TEXT"
+        @input="note.update({ text: $event })"
+        :value="note.text"
+        height="100%"
+        placeholder="Text"
+        hide-details
+        outlined
+        auto-grow
+      )
+      template(v-if="note.type.name === NOTE_TYPE_LIST")
+        note-list(
+          :note="note"
+          :list="mainListItems"
+          :is-main="true"
         )
-        v-expansion-panels.mt-2.mb-4(
-          v-model="expandedListItems"
-          multiple
-        )
-          v-expansion-panel
-            v-expansion-panel-header
-              template(v-slot:actions)
-                v-icon.icon $expand
-              .completed-list-header.green--text.d-flex.align-center.ml-4
-                .font-weight-bold.font-size-16 {{ completedListItems.length }}
-                .ml-2 completed
-            v-expansion-panel-content
-              note-list(
-                :note="note"
-                :list="completedListItems"
-              )
+        template(v-if="completedListItems.length")
+          v-divider(
+            :class="{ 'my-2': isNewButtonShown, 'my-2 mt-6': !isNewButtonShown }"
+            v-if="completedListItems.length"
+          )
+          v-expansion-panels.mt-2.mb-4(
+            v-model="expandedListItems"
+            multiple
+          )
+            v-expansion-panel
+              v-expansion-panel-header
+                template(v-slot:actions)
+                  v-icon.icon $expand
+                .completed-list-header.green--text.d-flex.align-center.ml-4
+                  .font-weight-bold.font-size-16 {{ completedListItems.length }}
+                  .ml-2 completed
+              v-expansion-panel-content
+                note-list(
+                  :note="note"
+                  :list="completedListItems"
+                )
 </template>
 
 <script lang="ts">
@@ -98,6 +98,20 @@ export default class NoteComponent extends Vue {
         return previousItem.checked ? 1 : -1
       })
   }
+
+  mounted () {
+    const app = this
+    document.onkeydown = function (event) {
+      event = event || window.event
+      if (event.key === "Escape" || event.key === "Esc") {
+        app.$router.go(-1)
+      }
+    }
+  }
+
+  destroyed () {
+    document.onkeydown = null
+  }
 }
 </script>
 
@@ -137,6 +151,7 @@ $active-row-color = #6A1B9A
       ::v-deep textarea
         height 100% !important
         overflow auto
+        margin-top 0
 
       ::v-deep fieldset
         border none

@@ -1,8 +1,8 @@
 import { ActionContext } from 'vuex/types/index'
 import * as mutationTypes from './mutations-types'
 import { RootState } from '.'
-import NoteModel from '~/models/note'
-import ListItemModel from '~/models/list-item'
+import NoteModel, { NoteDataObject } from '~/models/note'
+import ListItemModel, { ListItemDataObject } from '~/models/list-item'
 import TypeModel from '~/models/type'
 import StatusModel from '~/models/status'
 
@@ -25,6 +25,12 @@ export default {
       resolve('')
     })
   },
+  setMainListScrollTop (actionContext: ActionContext<Function, RootState>, scrollTop: number) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.MAIN_LIST_SCROLL_TOP_SET, scrollTop)
+      resolve('')
+    })
+  },
   setNote (actionContext: ActionContext<Function, RootState>, note: NoteModel) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.NOTE_SET, note)
@@ -43,7 +49,7 @@ export default {
       resolve('')
     })
   },
-  updateNote (actionContext: ActionContext<Function, RootState>, payload: any) {
+  updateNote (actionContext: ActionContext<Function, RootState>, payload: NoteDataObject) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.NOTE_UPDATED, payload)
       resolve('')
@@ -61,21 +67,21 @@ export default {
       resolve('')
     })
   },
-  updateListItem (actionContext: ActionContext<Function, RootState>, payload: any) {
+  updateListItem (actionContext: ActionContext<Function, RootState>, payload: ListItemDataObject) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.LIST_ITEM_UPDATED, payload)
+      resolve('')
+    })
+  },
+  clearNoteTimeout (actionContext: ActionContext<Function, RootState>, note: NoteModel) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.NOTE_TIMEOUT_CLEARED, note)
       resolve('')
     })
   },
   clearListItemTimeout (actionContext: ActionContext<Function, RootState>, listItem: ListItemModel) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.LIST_ITEM_TIMEOUT_CLEARED, listItem)
-      resolve('')
-    })
-  },
-  setCurrentNote (actionContext: ActionContext<Function, RootState>, currentNote: NoteModel) {
-    return new Promise(function (resolve) {
-      actionContext.commit(mutationTypes.CURRENT_NOTE_SET, currentNote)
       resolve('')
     })
   },

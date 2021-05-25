@@ -7,7 +7,7 @@ export default class BaseService {
   static api: typeof ApiService
   static vuex: Store<any>
   static error: Function
-  static router: VueRouter
+  static router: VueRouter | undefined
   static events: Vue
 
   static initData () {

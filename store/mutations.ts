@@ -1,6 +1,6 @@
 import * as types from './mutations-types'
 import { RootState } from '~/store'
-import NoteModel from '~/models/note'
+import NoteModel, { NoteDataObject } from '~/models/note'
 import ListItemModel, { ListItemDataObject } from '~/models/list-item'
 import TypeModel from '~/models/type'
 import StatusModel from '~/models/status'
@@ -15,6 +15,9 @@ export default {
   [types.STATUSES_SET] (state: RootState, statuses: StatusModel[]) {
     state.statuses = statuses
   },
+  [types.MAIN_LIST_SCROLL_TOP_SET] (state: RootState, scrollTop: number) {
+    state.mainListScrollTop = scrollTop
+  },
   [types.NOTE_SAVING_SET] (state: RootState, isNoteSaving: boolean) {
     state.isNoteSaving = isNoteSaving
   },
@@ -26,6 +29,9 @@ export default {
   },
   [types.NOTE_UNSET] (state: RootState, note: NoteModel) {
     state.notes = state.notes.filter((_note: NoteModel) => _note.id !== note.id)
+  },
+  [types.NOTE_TIMEOUT_CLEARED] (_state: RootState, note: NoteModel) {
+    note.saveTimeout && clearTimeout(note.saveTimeout)
   },
   [types.LIST_ITEM_TIMEOUT_CLEARED] (_state: RootState, listItem: ListItemModel) {
     listItem.saveTimeout && clearTimeout(listItem.saveTimeout)
@@ -41,10 +47,7 @@ export default {
   [types.LIST_ITEM_UPDATED] (_state: RootState, { listItem, data }: { listItem: ListItemModel, data: ListItemDataObject }) {
     Object.assign(listItem, data)
   },
-  [types.CURRENT_NOTE_SET] (state: RootState, currentNote: NoteModel) {
-    state.currentNote = currentNote
-  },
-  [types.NOTE_UPDATED] (_state: RootState, { note, data }: { note: NoteModel, data: any }) {
+  [types.NOTE_UPDATED] (_state: RootState, { note, data }: { note: NoteModel, data: NoteDataObject }) {
     Object.assign(note, data)
   },
   [types.SEARCH_QUERY_SET] (state: RootState, searchQuery: string) {

@@ -34,7 +34,7 @@
             template(
               v-slot:activator="{ on, attrs }"
             )
-              v-textarea.list-item__text.fill-width.mx-1.ml-10.mt-1.pa-0(
+              v-textarea.list-item__text.fill-width.mx-1.ml-8.mt-1.pa-0(
                 @input="updateText(listItem, $event.trim())"
                 @focus="listItem.updateState({ focused: true })"
                 @blur="handleBlur(listItem)"
@@ -53,7 +53,7 @@
                   @click="listItem.update({ text: variant })"
                 ) {{ variant }}
           transition(name="scale-fade")
-            v-checkbox.ma-0.pa-0(
+            v-checkbox.ma-0.mr-1.pa-0(
               v-if="listItem.text"
               @change="listItem.check($event)"
               :input-value="!!listItem.checked"
@@ -78,7 +78,7 @@
         v-icon(
           color="grey"
         ) mdi-plus
-        .grey--text.ml-4 Add item
+        .grey--text.ml-2 Add item
 </template>
 
 <script lang="ts">
@@ -98,7 +98,7 @@ export default class NoteListComponent extends Vue {
   }
 
   mounted () {
-    if (this.isMain && this.list.length === 1) {
+    if (this.isMain && this.list.length === 1 && !this.list[0].text) {
       setTimeout(() => {
         const textareaComponents = this.$refs[`textarea-${this.list[0].id || 0}`] as HTMLTextAreaElement[]
         textareaComponents[0].focus()
@@ -116,8 +116,12 @@ export default class NoteListComponent extends Vue {
   }
 
   updateText (listItem: ListItemModel, text: string) {
-    text ? listItem.update({ text }) : listItem.remove(false)
-    listItem.updateState({ text, variants: NoteService.findListItemVariants(listItem, text) })
+    if (text) {
+      listItem.update({ text, variants: NoteService.findListItemVariants(listItem, text) })
+    } else {
+      listItem.remove(false)
+      listItem.updateState({ text })
+    }
   }
 
   handleBlur (listItem: ListItemModel) {
@@ -162,6 +166,9 @@ $inactive-row-color = #ECEFF1
         border-bottom  1px solid $grey-lighten-1
 
       .v-input
+        ::v-deep .v-input--selection-controls__input
+          margin 0
+
         ::v-deep .mdi-checkbox-blank-outline
           &:before
             color $grey-lighten-2

@@ -8,19 +8,14 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
-import { State } from 'vuex-class'
 import NoteModel from '~/models/note'
 import BaseService from '~/services/base'
 
 @Component({
   transition: 'slide-fade',
-  layout: 'note',
 })
-export default class IndexPage extends Vue {
-  @State(state => state.isInitInfoLoading) isInitInfoLoading!: boolean
-
+export default class NotePage extends Vue {
   note: NoteModel | null = null
-  loading = true
 
   created () {
     // Find note

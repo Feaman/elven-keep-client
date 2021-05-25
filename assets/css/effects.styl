@@ -5,12 +5,14 @@
   opacity 0
   left -184px !important
 
+
 // Tools-right
 .tools-right-enter-active, .tools-right-leave-active
   transition opacity 0.7s, right 0.7s
 .tools-right-enter, .tools-right-leave-to
   opacity 0
   right -36px !important
+
 
 // Tools-buttons
 .tools-buttons-enter-active, .tools-buttons-leave-active
@@ -19,6 +21,7 @@
   opacity 0
   bottom 0 !important
   right 24px !important
+
 
 // Fade
 .fade-enter-active, .fade-leave-active
@@ -31,6 +34,7 @@
 .fade-5-enter, .fade-5-leave-to
   opacity 0
 
+
 // Slide-fade
 .slide-fade-enter-active 
   transition all 0.2s ease
@@ -39,6 +43,18 @@
   transition all 0.1s cubic-bezier(1.0, 0.5, 0.8, 1.0)
 
 .slide-fade-enter, .slide-fade-leave-to 
+  transform translateX(30px)
+  opacity 0
+
+
+// Slide-fade-fast
+.slide-fade-fast-enter-active 
+  transition all 0.1s ease
+
+.slide-fade-fast-leave-active 
+  transition all 0.1s cubic-bezier(1.0, 0.5, 0.8, 1.0)
+
+.slide-fade-fast-enter, .slide-fade-fast-leave-to 
   transform translateX(30px)
   opacity 0
 

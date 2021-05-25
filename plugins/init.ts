@@ -9,6 +9,7 @@ export default async (context: Context) => {
   BaseService.api = ApiService
   BaseService.vuex = context.store
   BaseService.events = new Vue()
+  BaseService.router = context.app.router
   ApiService.axios = context.app.$axios
 
   ApiService.init()
@@ -24,6 +25,8 @@ export default async (context: Context) => {
 
   // Draggable
   Vue.component('Draggable', draggable)
+
+  BaseService.vuex.dispatch('setMainListScrollTop', 0)
 
   await BaseService.initData()
   BaseService.vuex.dispatch('setIsInitInfoLoading', false)

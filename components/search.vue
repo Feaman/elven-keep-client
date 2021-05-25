@@ -6,6 +6,7 @@
     placeholder="Поиск..."
     hide-details
     outlined
+    clearable
     dense
   )
 </template>

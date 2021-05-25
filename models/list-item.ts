@@ -43,8 +43,10 @@ export default class ListItemModel {
           .then(data => {
             return BaseService.vuex.dispatch('updateListItem', { listItem: this, data: { id: data.id } })
           })
+          .catch(error => BaseService.error(error))
       } else {
         return ApiService.updateListItem(this)
+          .catch(error => BaseService.error(error))
       }
     }, 400)
     this.updateState({ saveTimeout })
@@ -68,13 +70,13 @@ export default class ListItemModel {
     return BaseService.vuex.dispatch('removeListItem', this)
   }
 
-  complete (isCompleted: any) {
+  complete (isCompleted: boolean) {
     if (this.text) {
       this.update({ completed: !!isCompleted })
     }
   }
 
-  check (isChecked: any) {
+  check (isChecked: boolean) {
     if (this.text) {
       this.update({ checked: !!isChecked })
     }
@@ -85,5 +87,6 @@ export default class ListItemModel {
       await this.removeFromState()
     }
     return ApiService.removeListItem(this)
+      .catch(error => BaseService.error(error))
   }
 }
