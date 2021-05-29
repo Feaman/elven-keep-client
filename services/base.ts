@@ -19,13 +19,13 @@ export default class BaseService {
   }
 
   static handleInitData (data: ConfigObject) {
-    const TypeService = require('~/services/type').default
-    const StatusService = require('~/services/status').default
-    const NoteService = require('~/services/note').default
+    const TypesService = require('~/services/types').default
+    const StatusesService = require('~/services/statuses').default
+    const NotesService = require('~/services/notes').default
 
-    TypeService.generateTypes(data.types)
-    StatusService.generateStatuses(data.statuses)
-    NoteService.generateNotes(data.notes)
+    TypesService.generateTypes(data.types)
+    StatusesService.generateStatuses(data.statuses)
+    NotesService.generateNotes(data.notes)
     return this.vuex.dispatch('setUser', new UserModel(data.user))
   }
 }

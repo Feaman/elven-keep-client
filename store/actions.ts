@@ -26,6 +26,18 @@ export default {
       resolve('')
     })
   },
+  addNoteCoAuthor (actionContext: ActionContext<Function, RootState>, payload: object) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.NOTE_CO_AUTHOR_ADDED, payload)
+      resolve('')
+    })
+  },
+  removeNoteCoAuthor (actionContext: ActionContext<Function, RootState>, payload: object) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.NOTE_CO_AUTHOR_REMOVED, payload)
+      resolve('')
+    })
+  },
   setStatuses (actionContext: ActionContext<Function, RootState>, statuses: StatusModel[]) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.STATUSES_SET, statuses)

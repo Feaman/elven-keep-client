@@ -8,7 +8,9 @@ v-app
         color="primary"
         indeterminate
       )
-    nuxt
+    nuxt(
+      v-else
+    )
 </template>
 
 <script lang="ts">

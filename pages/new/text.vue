@@ -7,7 +7,7 @@
 import { Vue, Component } from 'vue-property-decorator'
 import NoteModel from '~/models/note'
 import TypeModel from '~/models/type'
-import TypeService from '~/services/type'
+import TypeService from '~/services/types'
 
 @Component({
   transition: 'slide-fade',

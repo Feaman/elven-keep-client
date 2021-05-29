@@ -21,4 +21,8 @@ export default class UserModel {
   getFio () {
     return `${this.secondName} ${this.firstName}`
   }
+
+  getInitials () {
+    return `${this.secondName.charAt(0).toUpperCase()}${this.firstName.charAt(0).toUpperCase()}`
+  }
 }

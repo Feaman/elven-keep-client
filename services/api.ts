@@ -1,12 +1,13 @@
 import { NuxtAxiosInstance } from '@nuxtjs/axios'
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
+import { Route } from 'vue-router/types'
 import BaseService from './base'
 import NoteModel, { NoteDataObject } from '~/models/note'
 import ListItemModel, { ListItemDataObject } from '~/models/list-item'
 import { TypeDataObject } from '~/models/type'
 import StorageService from '~/services/storage'
-import UserService from '~/services/user'
-import { UserDataObject } from '~/models/user'
+import UserService from '~/services/users'
+import UserModel, { UserDataObject } from '~/models/user'
 import { StatusDataObject } from '~/models/status'
 
 export interface ConfigObject {
@@ -21,6 +22,7 @@ export default class ApiService extends BaseService {
   static URL = 'https://api.notes.pavlo.ru/'
   static axios: NuxtAxiosInstance
   static redirect: Function
+  static route: Route
   static noteSavingTimeout: ReturnType<typeof setTimeout> | null = null
 
   static init () {
@@ -51,9 +53,10 @@ export default class ApiService extends BaseService {
 
     this.axios.onError((error: AxiosError) => {
       if (error.response) {
-        debugger
         if (error.response.status === 401) {
-          this.redirect('/login')
+          if (this.route.name !== 'login') {
+            this.redirect('/login')
+          }
         } else if (error.response.status !== 400) {
           this.error({ statusCode: error.response.status, message: error.response.data.message })
         }
@@ -135,6 +138,18 @@ export default class ApiService extends BaseService {
 
   static register (email: string, password: string, firstName: string, secondName: string): Promise<ConfigObject> {
     return this.axios.post('users', { email, password, firstName, secondName })
+      .then((response: AxiosResponse) => response.data)
+  }
+
+  static addNoteCoAuthor (email: string): Promise<UserModel> {
+    return Promise.resolve(new UserModel({ id: (new Date()).getMilliseconds(), email, firstName: 'Pavel', secondName: 'Chingachguk' }))
+    // return Promise.reject('asdf')
+    // return this.axios.post('notes/co-author', { email })
+    // .then((response: AxiosResponse) => response.data)
+  }
+
+  static removeNoteCoAuthor (coAuthor: UserModel) {
+    return this.axios.delete(`notes/co-author/${coAuthor.id}`)
       .then((response: AxiosResponse) => response.data)
   }
 }

@@ -35,4 +35,8 @@ export default class NotesService extends BaseService {
 
     return variants
   }
+
+  static addCoAuthor (email: string) {
+    return this.api.addNoteCoAuthor(email)
+  }
 }

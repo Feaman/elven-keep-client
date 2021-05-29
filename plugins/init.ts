@@ -12,6 +12,7 @@ export default (context: Context) => {
   BaseService.router = context.app.router
   ApiService.axios = context.app.$axios
   ApiService.redirect = context.redirect
+  ApiService.route = context.route
 
   ApiService.init()
 
@@ -28,6 +29,7 @@ export default (context: Context) => {
   Vue.component('Draggable', draggable)
 
   BaseService.vuex.dispatch('setMainListScrollTop', 0)
-  BaseService.vuex.dispatch('setIsInitInfoLoading', false)
-  return BaseService.initData()
+  BaseService.initData()
+    .then(() => BaseService.vuex.dispatch('setIsInitInfoLoading', false))
+    .catch(() => BaseService.vuex.dispatch('setIsInitInfoLoading', false))
 }

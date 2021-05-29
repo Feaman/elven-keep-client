@@ -1,10 +1,11 @@
 import ApiService from '@/services/api'
-import TypesService from '@/services/type'
 import ListItemModel, { ListItemDataObject } from './list-item'
 import TypeModel from './type'
 import StatusModel from './status'
-import NotesService from '~/services/note'
-import StatusService from '~/services/status'
+import UserModel from './user'
+import TypesService from '~/services/types'
+import NotesService from '~/services/notes'
+import StatusService from '~/services/statuses'
 
 export interface NoteDataObject {
   id?: number
@@ -16,6 +17,7 @@ export interface NoteDataObject {
   isCompletedListExpanded?: Boolean
   saveTimeout?: ReturnType<typeof setTimeout> | null
   list?: ListItemDataObject[]
+  coAuthors?: UserModel[]
 }
 
 export default class NoteModel {
@@ -29,11 +31,13 @@ export default class NoteModel {
   status?: StatusModel
   saveTimeout: ReturnType<typeof setTimeout> | null = null
   isCompletedListExpanded?: Boolean
+  coAuthors: UserModel[] = []
 
   constructor (data: NoteDataObject) {
     this.id = data.id
     this.title = data.title || ''
     this.text = data.text || ''
+    this.coAuthors = data.coAuthors || []
     this.typeId = data.typeId || TypesService.getDefault().id
     this.statusId = data.statusId || StatusService.getActive().id
 
@@ -128,5 +132,10 @@ export default class NoteModel {
 
   setNoteToListItems () {
     this.list.forEach(listItem => listItem.updateState({ note: this }))
+  }
+
+  async removeCoAuthor (coAuthor: UserModel) {
+    await NotesService.vuex.dispatch('removeNoteCoAuthor', { note: this, coAuthor })
+    return ApiService.removeNoteCoAuthor(coAuthor)
   }
 }

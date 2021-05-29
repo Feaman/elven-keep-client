@@ -85,7 +85,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import NoteModel from '~/models/note'
 import ListItemModel from '~/models/list-item'
-import NoteService from '~/services/note'
+import NoteService from '~/services/notes'
 
 @Component
 export default class NoteListComponent extends Vue {

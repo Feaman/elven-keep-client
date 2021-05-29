@@ -22,6 +22,12 @@ export default {
   [types.MAIN_LIST_SCROLL_TOP_SET] (state: RootState, scrollTop: number) {
     state.mainListScrollTop = scrollTop
   },
+  [types.NOTE_CO_AUTHOR_ADDED] (_state: RootState, payload: any) {
+    payload.note.coAuthors.push(payload.coAuthor)
+  },
+  [types.NOTE_CO_AUTHOR_REMOVED] (_state: RootState, payload: any) {
+    payload.note.coAuthors = payload.note.coAuthors.filter((coAuthor: UserModel) => coAuthor.id !== payload.coAuthor.id)
+  },
   [types.NOTE_SAVING_SET] (state: RootState, isNoteSaving: boolean) {
     state.isNoteSaving = isNoteSaving
   },

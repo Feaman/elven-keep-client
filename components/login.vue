@@ -27,17 +27,20 @@
                 label="Password"
                 outlined
               )
-              .error--text.text-center.mb-3 {{ errors }}
+              transition(name='scale-fade')
+                .error--text.text-center.mb-3(
+                  v-if="errors"
+                ) {{ errors }}
               .d-flex.flex-column.flex-center
                 v-btn.d-flex.flex-center(
                   @click="login"
-                  :disabled="!isFormValid"
+                  :disabled="!isLoginFormValid"
                   :loading="isLoading"
                   color="primary"
                 ) Login
                 .mt-3.font-size-16 or
                 v-btn.d-flex.flex-center(
-                  @click="isLoginForm = false"
+                  @click="switchToRegistrationPage()"
                   color="black"
                   text
                 )
@@ -49,7 +52,6 @@
                 :counter="RULE_1024_LENGTH"
                 type="email"
                 label="Email*"
-                height="48px"
                 dense
                 outlined
               )
@@ -58,7 +60,6 @@
                 :counter="RULE_155_LENGTH"
                 type="password"
                 label="Password*"
-                height="48px"
                 dense
                 outlined
               )
@@ -66,7 +67,6 @@
                 v-model="firstName"
                 :counter="RULE_155_LENGTH"
                 label="First name*"
-                height="48px"
                 dense
                 outlined
               )
@@ -74,20 +74,23 @@
                 v-model="secondName"
                 :counter="RULE_155_LENGTH"
                 label="Second name*"
-                height="48px"
                 dense
                 outlined
               )
-              .error--text.text-center.mb-3 {{ errors }}
+              transition(name='scale-fade')
+                .error--text.text-center.mb-3(
+                  v-if="errors"
+                ) {{ errors }}
               .d-flex.flex-column.flex-center
                 v-btn.d-flex.flex-center(
-                  @click="register()" :disabled="!isFormValid"
+                  @click="register()"
+                  :disabled="!isRegisterFormValid"
                   :loading="isLoading"
                   color="primary"
                 ) Register
                 .mt-3.font-size-16 or
                 v-btn.d-flex.flex-center(
-                  @click="isLoginForm = true"
+                  @click="switchToLoginPage()"
                   color="black"
                   text
                 )
@@ -97,7 +100,7 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { State } from 'vuex-class'
-import UserService from '~/services/user'
+import UserService from '~/services/users'
 
 const RULE_155_LENGTH = 155
 const RULE_1024_LENGTH = 1024
@@ -116,11 +119,15 @@ export default class SearchComponent extends Vue {
   secondName = ''
   password = ''
 
-  get isFormValid () {
-    return this.email.length <= this.RULE_1024_LENGTH &&
-      this.firstName.length <= this.RULE_155_LENGTH &&
-      this.secondName.length <= this.RULE_155_LENGTH &&
-      this.password.length <= this.RULE_155_LENGTH
+  get isLoginFormValid () {
+    return this.email && this.email.length <= this.RULE_1024_LENGTH &&
+      this.password && this.password.length <= this.RULE_155_LENGTH
+  }
+
+  get isRegisterFormValid () {
+    return this.isLoginFormValid &&
+      this.secondName && this.secondName.length <= this.RULE_155_LENGTH &&
+      this.password && this.password.length <= this.RULE_155_LENGTH
   }
 
   async login () {
@@ -129,7 +136,7 @@ export default class SearchComponent extends Vue {
       await UserService.login(this.email, this.password)
       this.$router.push('/')
     } catch (error) {
-      this.errors = error.response.data.message
+      this.errors = error.response?.data?.message || 'Unexpected error'
       this.isLoading = false
     }
   }
@@ -147,6 +154,16 @@ export default class SearchComponent extends Vue {
 
   async logout () {
     await UserService.logout()
+  }
+
+  switchToLoginPage () {
+    this.errors = ''
+    this.isLoginForm = true
+  }
+
+  switchToRegistrationPage () {
+    this.errors = ''
+    this.isLoginForm = false
   }
 
   clear () {
@@ -167,17 +184,10 @@ export default class SearchComponent extends Vue {
     height calc(100% - 56px)
 
   .page-content
-    height 512px
+    height 540px
     position relative
     max-width 500px
 
     .login-page, .register-page
       position absolute
-
-    .register-page
-      ::v-deep .v-label
-        top 14px
-
-      ::v-deep input
-        padding-top 14px
 </style>
