@@ -5,11 +5,18 @@ import NoteModel, { NoteDataObject } from '~/models/note'
 import ListItemModel, { ListItemDataObject } from '~/models/list-item'
 import TypeModel from '~/models/type'
 import StatusModel from '~/models/status'
+import UserModel from '~/models/user'
 
 export default {
   setNotes (actionContext: ActionContext<Function, RootState>, notes: Array<NoteModel>) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.NOTES_SET, notes)
+      resolve('')
+    })
+  },
+  setUser (actionContext: ActionContext<Function, RootState>, user: UserModel) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.USER_SET, user)
       resolve('')
     })
   },

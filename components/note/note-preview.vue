@@ -1,5 +1,5 @@
 <template lang="pug">
-v-card.note-preview.cursor-pointer.fill-height(
+v-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
   :class="{ 'with-completed': completedListItems.length }"
 )
   .title.limit-width(v-if="note.title") {{ note.title }}
@@ -66,7 +66,6 @@ export default class NotePreviewComponent extends Vue {
 .note-preview
   position relative
   overflow hidden
-  padding 8px 16px 16px 16px
 
   &:after
     content ''
@@ -85,7 +84,7 @@ export default class NotePreviewComponent extends Vue {
   .remove-button
     position absolute
     right 4px
-    top 4px
+    top 5px
     background radial-gradient(#fff 30%, transparent)
 
   .title
@@ -110,8 +109,4 @@ export default class NotePreviewComponent extends Vue {
 @media (max-width: 600px)
   .note-preview
     padding 8px 10px 10px 10px
-
-    .remove-button
-      right 2px
-      top 2px
 </style>

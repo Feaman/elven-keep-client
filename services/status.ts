@@ -1,18 +1,13 @@
 import BaseService from '~/services/base'
 import StatusModel, { StatusDataObject } from '~/models/status'
 
-export default class ypeService extends BaseService {
-  static async getStatuses () {
-    try {
-      const statusesData = await this.api.getStatuses()
-      const statuses: StatusModel[] = []
-      statusesData.forEach((statusData: StatusDataObject) => {
-        statuses.push(new StatusModel(statusData))
-      })
-      this.vuex.dispatch('setStatuses', statuses)
-    } catch (error) {
-      this.error(error)
-    }
+export default class StatusesService extends BaseService {
+  static generateStatuses (statusesData: StatusDataObject[]) {
+    const statuses: StatusModel[] = []
+    statusesData.forEach((statusData: StatusDataObject) => {
+      statuses.push(new StatusModel(statusData))
+    })
+    this.vuex.dispatch('setStatuses', statuses)
   }
 
   static getActive () {

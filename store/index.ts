@@ -3,6 +3,7 @@ import actions from './actions'
 import NoteModel from '~/models/note'
 import TypeModel from '~/models/type'
 import StatusModel from '~/models/status'
+import UserModel from '~/models/user'
 
 export const state = () => {
   return {
@@ -10,6 +11,7 @@ export const state = () => {
     types: [] as TypeModel[],
     statuses: [] as StatusModel[],
     mainListScrollTop: 0,
+    user: null as UserModel | null,
     searchQuery: '',
     isNoteSaving: false,
     isInitInfoLoading: true,

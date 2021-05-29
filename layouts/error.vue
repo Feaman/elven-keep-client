@@ -2,7 +2,8 @@
 .error-page.d-flex.flex-column.align-center.justify-center.fill-height.white--text.pt-8.pb-12
   .container.d-flex.flex-column.align-center.justify-center.fill-height
     img.error-gif.mt-12(src="~/assets/images/error.gif")
-    .oops.font-weight-black.mt-4 Упс...
+    .yellow--text.text--lighten-3.font-weight-bold.font-size-16.mt-8 {{ error.statusCode }}
+    .oops.font-weight-black Упс...
     .text.scroll.font-weight-bold.text-center.green--text.text--lighten-4.px-4 {{ errorText }}
     v-btn.mt-10(
       @click="reloadPage()"
@@ -36,6 +37,8 @@ export default class ErrorLayout extends Vue {
    reloadPage () {
      if (this.$route.name === 'index') {
        this.$router.go(0)
+     } else if (this.$route.name === 'login') {
+       window.location.href = '/'
      } else {
        this.$router.push('/')
      }

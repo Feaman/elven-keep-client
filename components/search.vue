@@ -19,6 +19,20 @@ import { State } from 'vuex-class'
 export default class SearchComponent extends Vue {
   @State searchQuery!: string
 
+  mounted () {
+    const app = this
+    document.onkeydown = function (event) {
+      event = event || window.event
+      if (event.key === "Escape" || event.key === "Esc") {
+        app.$store.dispatch('setQuerySearch', '')
+      }
+    }
+  }
+
+  destroyed () {
+    document.onkeydown = null
+  }
+
   handleSearch (searchQuery: string) {
     this.$store.dispatch('setQuerySearch', searchQuery)
   }

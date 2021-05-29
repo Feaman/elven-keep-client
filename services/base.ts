@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import { Store } from 'vuex'
 import VueRouter from 'vue-router/types'
-import ApiService from '~/services/api'
+import ApiService, { ConfigObject } from '~/services/api'
+import UserModel from '~/models/user'
 
 export default class BaseService {
   static api: typeof ApiService
@@ -10,12 +11,21 @@ export default class BaseService {
   static router: VueRouter | undefined
   static events: Vue
 
-  static initData () {
+  static initData (): Promise<any> {
+    return this.api.getConfig()
+      .then((data: ConfigObject) => {
+        return this.handleInitData(data)
+      })
+  }
+
+  static handleInitData (data: ConfigObject) {
     const TypeService = require('~/services/type').default
     const StatusService = require('~/services/status').default
     const NoteService = require('~/services/note').default
 
-    return Promise.all([TypeService.getTypes(), StatusService.getStatuses()])
-      .then(() => NoteService.getNotes())
+    TypeService.generateTypes(data.types)
+    StatusService.generateStatuses(data.statuses)
+    NoteService.generateNotes(data.notes)
+    return this.vuex.dispatch('setUser', new UserModel(data.user))
   }
 }

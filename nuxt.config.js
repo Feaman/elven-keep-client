@@ -56,8 +56,8 @@ export default {
       themes: {
         light: {
           primary: colors.blue.darken2,
+          secondary: colors.blue,
           accent: colors.grey.darken3,
-          secondary: colors.amber.darken3,
           info: colors.teal.lighten1,
           warning: colors.amber.base,
           error: colors.deepOrange.accent4,
@@ -66,6 +66,10 @@ export default {
       }
     }
   },
+
+  // router: {
+  // middleware: 'auth'
+  // },
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [

@@ -1,9 +1,9 @@
 import ApiService from '@/services/api'
-import TypeService from '@/services/type'
+import TypesService from '@/services/type'
 import ListItemModel, { ListItemDataObject } from './list-item'
 import TypeModel from './type'
 import StatusModel from './status'
-import NoteService from '~/services/note'
+import NotesService from '~/services/note'
 import StatusService from '~/services/status'
 
 export interface NoteDataObject {
@@ -34,7 +34,7 @@ export default class NoteModel {
     this.id = data.id
     this.title = data.title || ''
     this.text = data.text || ''
-    this.typeId = data.typeId || TypeService.getDefault().id
+    this.typeId = data.typeId || TypesService.getDefault().id
     this.statusId = data.statusId || StatusService.getActive().id
 
     if (data.isCompletedListExpanded) {
@@ -51,18 +51,18 @@ export default class NoteModel {
   }
 
   handleType () {
-    const type = TypeService.vuex.state.types.find((_type: TypeModel) => _type.id === this.typeId)
+    const type = TypesService.vuex.state.types.find((_type: TypeModel) => _type.id === this.typeId)
     if (!type) {
-      return TypeService.error({ statusCode: 500, message: `Type '${this.typeId}' not found` })
+      return TypesService.error({ statusCode: 500, message: `Type '${this.typeId}' not found` })
     }
 
     this.type = type
   }
 
   handleStatus () {
-    const status = TypeService.vuex.state.statuses.find((_status: TypeModel) => _status.id === this.statusId)
+    const status = TypesService.vuex.state.statuses.find((_status: TypeModel) => _status.id === this.statusId)
     if (!status) {
-      return TypeService.error({ statusCode: 500, message: `Status '${this.statusId}' not found` })
+      return TypesService.error({ statusCode: 500, message: `Status '${this.statusId}' not found` })
     }
 
     this.status = status
@@ -78,49 +78,51 @@ export default class NoteModel {
 
   addListItem (listItem: ListItemModel) {
     listItem.note = this
-    return NoteService.vuex.dispatch('addListItem', listItem)
+    return NotesService.vuex.dispatch('addListItem', listItem)
   }
 
-  async save (): Promise<NoteDataObject> {
-    await NoteService.vuex.dispatch('clearNoteTimeout', this)
+  async save (savingText: boolean = false): Promise<NoteDataObject> {
+    await NotesService.vuex.dispatch('clearNoteTimeout', this)
     return new Promise((resolve) => {
       const saveTimeout = setTimeout(async () => {
         if (this.id) {
           ApiService.updateNote(this)
             .then(data => resolve(data))
-            .catch(error => NoteService.error(error))
+            .catch(error => NotesService.error(error))
         } else {
-          await NoteService.vuex.dispatch('setNote', this)
+          await NotesService.vuex.dispatch('setNote', this)
           return ApiService.addNote(this)
             .then(noteData => {
               history.replaceState({}, '', `/notes/${noteData.id}`)
               resolve(this.updateState({ id: noteData.id }))
             })
-            .catch(error => NoteService.error(error))
+            .catch(error => NotesService.error(error))
         }
-      }, 400)
+      }, savingText ? 400 : 0)
       this.updateState({ saveTimeout })
     })
   }
 
   async update (data: NoteDataObject) {
-    await NoteService.vuex.dispatch('updateNote', { note: this, data })
+    await NotesService.vuex.dispatch('updateNote', { note: this, data })
 
-    if (this.text || this.list.length) {
-      return this.save()
+    if (this.title || this.text || this.list.length) {
+      return this.save(!!(data.text || data.title))
+    } else {
+      await NotesService.vuex.dispatch('clearNoteTimeout', this)
     }
   }
 
   updateState (data: NoteDataObject) {
-    return NoteService.vuex.dispatch('updateNote', { note: this, data })
+    return NotesService.vuex.dispatch('updateNote', { note: this, data })
   }
 
   async remove () {
-    await NoteService.vuex.dispatch('unsetNote', this)
+    await NotesService.vuex.dispatch('unsetNote', this)
     try {
       await ApiService.removeNote(this)
     } catch (error) {
-      NoteService.error(error)
+      NotesService.error(error)
     }
   }
 

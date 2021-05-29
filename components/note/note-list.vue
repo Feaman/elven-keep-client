@@ -35,7 +35,7 @@
               v-slot:activator="{ on, attrs }"
             )
               v-textarea.list-item__text.fill-width.mx-1.ml-8.mt-1.pa-0(
-                @input="updateText(listItem, $event.trim())"
+                @input="updateText(listItem, $event)"
                 @focus="listItem.updateState({ focused: true })"
                 @blur="handleBlur(listItem)"
                 :value="listItem.text"
@@ -115,23 +115,19 @@ export default class NoteListComponent extends Vue {
     })
   }
 
-  updateText (listItem: ListItemModel, text: string) {
+  async updateText (listItem: ListItemModel, text: string) {
     if (text) {
-      listItem.update({ text, variants: NoteService.findListItemVariants(listItem, text) })
+      await listItem.updateState({ variants: NoteService.findListItemVariants(listItem, text) })
     } else {
-      listItem.remove(false)
-      listItem.updateState({ text })
+      await listItem.remove(false)
     }
+    listItem.update({ text })
   }
 
   handleBlur (listItem: ListItemModel) {
     listItem.updateState({ focused: false })
     if (!listItem.text) {
-      if (listItem.id) {
-        listItem.remove()
-      } else {
-        listItem.removeFromState()
-      }
+      listItem.removeFromState()
     }
   }
 }

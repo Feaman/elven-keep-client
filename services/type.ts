@@ -1,18 +1,13 @@
 import BaseService from '~/services/base'
 import TypeModel, { TypeDataObject } from '~/models/type'
 
-export default class TypeService extends BaseService {
-  static async getTypes () {
-    try {
-      const typesData = await this.api.getTypes()
-      const types: TypeModel[] = []
-      typesData.forEach((typeData: TypeDataObject) => {
-        types.push(new TypeModel(typeData))
-      })
-      this.vuex.dispatch('setTypes', types)
-    } catch (error) {
-      this.error(error)
-    }
+export default class TypesService extends BaseService {
+  static generateTypes (typesData: TypeDataObject[]) {
+    const types: TypeModel[] = []
+    typesData.forEach((typeData: TypeDataObject) => {
+      types.push(new TypeModel(typeData))
+    })
+    this.vuex.dispatch('setTypes', types)
   }
 
   static getDefault () {

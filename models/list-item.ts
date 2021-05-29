@@ -35,20 +35,18 @@ export default class ListItemModel {
     this.completed = data.completed || false
   }
 
-  async save () {
+  async save (savingText: boolean = false) {
     await BaseService.vuex.dispatch('clearListItemTimeout', this)
     const saveTimeout = setTimeout(() => {
       if (!this.id) {
         return ApiService.saveListItem(this)
-          .then(data => {
-            return BaseService.vuex.dispatch('updateListItem', { listItem: this, data: { id: data.id } })
-          })
+          .then(data => BaseService.vuex.dispatch('updateListItem', { listItem: this, data: { id: data.id } }))
           .catch(error => BaseService.error(error))
       } else {
         return ApiService.updateListItem(this)
           .catch(error => BaseService.error(error))
       }
-    }, 400)
+    }, savingText ? 400 : 0)
     this.updateState({ saveTimeout })
   }
 
@@ -58,7 +56,9 @@ export default class ListItemModel {
       if (!this?.note?.id) {
         await this?.note?.save()
       }
-      this.save()
+      this.save(data.text !== undefined)
+    } else {
+      await BaseService.vuex.dispatch('clearListItemTimeout', this)
     }
   }
 
@@ -83,10 +83,15 @@ export default class ListItemModel {
   }
 
   async remove (removeFromState = true) {
-    if (removeFromState) {
-      await this.removeFromState()
+    if (this.id) {
+      if (removeFromState) {
+        await this.removeFromState()
+      }
+      return ApiService.removeListItem(this)
+        .then(() => this.updateState({ id: undefined }))
+        .catch(error => BaseService.error(error))
+    } else {
+      return Promise.resolve()
     }
-    return ApiService.removeListItem(this)
-      .catch(error => BaseService.error(error))
   }
 }

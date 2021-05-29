@@ -4,6 +4,7 @@ import NoteModel, { NoteDataObject } from '~/models/note'
 import ListItemModel, { ListItemDataObject } from '~/models/list-item'
 import TypeModel from '~/models/type'
 import StatusModel from '~/models/status'
+import UserModel from '~/models/user'
 
 export default {
   [types.NOTES_SET] (state: RootState, notes: Array<NoteModel>) {
@@ -11,6 +12,9 @@ export default {
   },
   [types.TYPES_SET] (state: RootState, types: TypeModel[]) {
     state.types = types
+  },
+  [types.USER_SET] (state: RootState, user: UserModel) {
+    state.user = user
   },
   [types.STATUSES_SET] (state: RootState, statuses: StatusModel[]) {
     state.statuses = statuses
