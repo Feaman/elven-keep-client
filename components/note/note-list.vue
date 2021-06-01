@@ -3,73 +3,81 @@
   .list(
     :class="{ 'pb-3': showNewButton }"
   )
-    transition-group(
-      name="vertical-list-effect"
+    draggable(
+      v-model="order"
+      @end="drag=false"
+      @start="drag=true"
+      group="people"
+      handle=".handle"
     )
-      div(
-        v-for="(listItem, index) in list"
-        :key="listItem._id"
+      transition-group(
+        name="vertical-list-effect"
       )
-        .list-item.d-flex.align-center.py-1(
-          :class="{ first: index === 0, focused: listItem.focused, checked: listItem.checked, completed: listItem.completed }"
+        div(
+          v-for="(listItem, index) in list"
+          :key="listItem._id"
         )
-          transition(name="scale-fade")
-            v-checkbox.complete-checkbox.ma-0.pa-0(
-              v-if="listItem.text"
-              @change="listItem.complete($event)"
-              :input-value="!!listItem.completed"
-              :disabled="!listItem.text"
-              color="primary"
-              hide-details
-            )
-          v-menu(
-            :value="listItem.variants.length"
-            transition="slide-fade"
-            max-width="300px"
-            content-class="hint-menu"
-            offset-y
-            :top="list.indexOf(listItem) > 0"
-            :bottom="list.indexOf(listItem) === 0"
+          .list-item.d-flex.align-center.py-1(
+            :class="{ first: index === 0, focused: listItem.focused, checked: listItem.checked, completed: listItem.completed }"
           )
-            template(
-              v-slot:activator="{ on, attrs }"
-            )
-              v-textarea.list-item__text.fill-width.mx-1.ml-8.mt-1.pa-0(
-                @input="updateText(listItem, $event)"
-                @focus="listItem.updateState({ focused: true })"
-                @blur="handleBlur(listItem)"
-                :value="listItem.text"
-                :ref="`textarea-${listItem.id || -index}`"
-                :rows="1"
+            v-icon.handle mdi-drag
+            transition(name="scale-fade")
+              v-checkbox.complete-checkbox.ma-0.pa-0(
+                v-if="listItem.text"
+                @change="listItem.complete($event)"
+                :input-value="!!listItem.completed"
+                :disabled="!listItem.text"
+                color="primary"
                 hide-details
-                auto-grow
               )
-            v-list
-              v-list-item.cursor-pointer(
-                v-for="(variant, index) in listItem.variants.slice(0, 4)"
-                :key="index"
+            v-menu(
+              :value="listItem.variants.length"
+              transition="slide-fade"
+              max-width="300px"
+              content-class="hint-menu"
+              offset-y
+              :top="list.indexOf(listItem) > 0"
+              :bottom="list.indexOf(listItem) === 0"
+            )
+              template(
+                v-slot:activator="{ on, attrs }"
               )
-                v-list-item-title(
-                  @click="listItem.update({ text: variant })"
-                ) {{ variant }}
-          transition(name="scale-fade")
-            v-checkbox.ma-0.mr-1.pa-0(
-              v-if="listItem.text"
-              @change="listItem.check($event)"
-              :input-value="!!listItem.checked"
-              :disabled="!listItem.text"
-              :class="{ 'ml-9': !listItem.text }"
-              color="primary"
-              hide-details
-            )
-          transition(name="slide-fade")
-            v-btn.remove-button(
-              v-if="listItem.text"
-              @click="listItem.remove()"
-              color="grey"
-              icon
-            )
-              v-icon mdi-close
+                v-textarea.list-item__text.fill-width.mx-1.ml-8.mt-1.pa-0(
+                  @input="updateText(listItem, $event)"
+                  @focus="listItem.updateState({ focused: true })"
+                  @blur="handleBlur(listItem)"
+                  :value="listItem.text"
+                  :ref="`textarea-${listItem.id || -index}`"
+                  :rows="1"
+                  hide-details
+                  auto-grow
+                )
+              v-list
+                v-list-item.cursor-pointer(
+                  v-for="(variant, index) in listItem.variants.slice(0, 4)"
+                  :key="index"
+                )
+                  v-list-item-title(
+                    @click="listItem.update({ text: variant })"
+                  ) {{ variant }}
+            transition(name="scale-fade")
+              v-checkbox.ma-0.mr-1.pa-0(
+                v-if="listItem.text"
+                @change="listItem.check($event)"
+                :input-value="!!listItem.checked"
+                :disabled="!listItem.text"
+                :class="{ 'ml-9': !listItem.text }"
+                color="primary"
+                hide-details
+              )
+            transition(name="slide-fade")
+              v-btn.remove-button(
+                v-if="listItem.text"
+                @click="listItem.remove()"
+                color="grey"
+                icon
+              )
+                v-icon mdi-close
     transition(name="slide-fade")
       .new-list-item-button.mt-2.d-flex.align-center.cursor-text(
         v-if="showNewButton"
@@ -83,18 +91,29 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import draggable from 'vuedraggable'
 import NoteModel from '~/models/note'
 import ListItemModel from '~/models/list-item'
 import NoteService from '~/services/notes'
 
-@Component
+@Component({
+  components: {
+    draggable,
+  },
+})
 export default class NoteListComponent extends Vue {
   @Prop() list!: ListItemModel[]
   @Prop() note!: NoteModel
   @Prop() isMain!: Boolean
 
+  order: number[] = []
+
   get showNewButton () {
     return !!this.isMain && (!this.list.find(item => !item.text) || !this.list.length)
+  }
+
+  created () {
+    this.list.forEach((listItem: ListItemModel) => this.order.push(listItem.id || 0))
   }
 
   mounted () {
@@ -148,6 +167,10 @@ $inactive-row-color = #ECEFF1
 
       .complete-checkbox
         position absolute
+        left 24px
+
+      .handle
+        cursor ns-resize
 
       &.first
         border-top  1px solid transparent
