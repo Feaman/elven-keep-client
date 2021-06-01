@@ -12,6 +12,7 @@
         v-icon mdi-arrow-left
       v-divider(vertical)
       v-tooltip(
+        v-if="isMyNote"
         bottom
       )
         template(
@@ -23,8 +24,8 @@
             v-on="on"
             icon
           )
-            v-icon mdi-account-plus-outline
-        span Co-authors
+            v-icon mdi-account-group
+        span Manage authors
       v-divider(vertical)
       toolbar-tools
       v-divider(vertical)
@@ -79,19 +80,19 @@
     .co-authors-list.fill-width.pa-4.pt-3(
       v-if="note.coAuthors.length"
     )
-      .grey--text Co-authors
+      .grey--text Authors
       .d-flex.mt-2
-        v-avatar(
+        v-avatar.cursor-pointer(
           v-for="(coAuthor, index) in note.coAuthors"
           @click="coAuthorsDialogShown = true"
-          :key="coAuthor.id"
           :class="{ 'ml-2': index > 0 }"
           size="36"
           color="primary"
         )
-          .white--text {{ coAuthor.getInitials() }}
+          .white--text.font-size-12 {{ coAuthor.user.getInitials() }}
 
     v-dialog(
+      v-if="note.user"
       v-model="coAuthorsDialogShown"
       :max-width="500"
       transition="scale-fade"
@@ -101,44 +102,53 @@
           color="primary"
           dark
         )
+          v-toolbar-title.pa-0 Authors
+          v-spacer
           v-btn(
             @click="coAuthorsDialogShown = false"
             icon
             dark
           )
             v-icon mdi-close
-          v-toolbar-title Co-authors
-        v-list(
+        v-list.pt-2(
           subheader
         )
           .grey--text.px-4.mt-4 Author
           v-list-item
-            v-list-item-content
-              v-list-item-title {{ user.getFio() }}
-              v-list-item-subtitle {{ user.email }}
-        v-divider
-        v-list(
-          subheader
-        )
-          .grey--text.px-4.mt-4 Co-authors
+            v-list-item-content.pt-2
+              v-list-item-title {{ note.user.getFio() }}
+              v-list-item-subtitle {{ note.user.email }}
           .d-flex.flex-column
-            .co-authors
-              transition-group(
-                name="vertical-list-effect"
-              )
-                div(
-                  v-for="coAuthor in note.coAuthors"
-                  :key="coAuthor.id"
+            v-list.pt-3(
+              subheader
+            )
+              .grey--text.px-4 Co-authors
+              .co-authors
+                transition-group(
+                  name="vertical-list-effect"
                 )
-                  v-list-item
-                    v-list-item-content
-                      v-list-item-title {{ coAuthor.getFio() }}
-                      v-list-item-subtitle {{ coAuthor.email }}
-                    v-list-item-icon
-                      v-icon(
-                        @click="note.removeCoAuthor(coAuthor)"
-                      ) mdi-close
-            v-list-item.pr-3
+                  .co-author(
+                    v-for="coAuthor in note.coAuthors"
+                    :key="coAuthor.id"
+                  )
+                    v-list-item
+                      v-list-item-content.pt-1.pb-3
+                        v-list-item-title
+                          .d-flex.align-center
+                            div {{ coAuthor.user.getFio() }}
+                            .is-you.green--text.font-size-11.ml-2(
+                              v-if="coAuthor.user.id === user.id"
+                            ) you
+                        v-list-item-subtitle {{ coAuthor.user.email }}
+                      v-list-item-icon.mt-1(
+                        v-if="isMyNote || coAuthor.user.id === user.id"
+                      )
+                        v-icon(
+                          @click="removeCoAuthor(coAuthor)"
+                        ) mdi-close
+            v-list-item.pr-3(
+              v-if="isMyNote"
+            )
               .d-flex.fill-width
                 v-text-field.pt-0(
                   v-model="coAuthorEmail"
@@ -154,22 +164,36 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { State } from 'vuex-class'
+import CoAuthorModel from '~/models/co-author'
 import NoteModel from '~/models/note'
 import TypeModel from '~/models/type'
+import UserModel from '~/models/user'
 import NotesService from '~/services/notes'
 
 @Component
 export default class NoteComponent extends Vue {
-  @State user!: string
   @Prop(NoteModel) note!: NoteModel
+
+  @State user!: UserModel
+
+  @Watch('coAuthorEmail')
+  onCoAuthorEmailChanged () {
+    if (!this.coAuthorEmail) {
+      this.coAuthorErrors = []
+    }
+  }
 
   NOTE_TYPE_LIST = TypeModel.TYPE_LIST
   NOTE_TYPE_TEXT = TypeModel.TYPE_TEXT
   coAuthorsDialogShown = false
   coAuthorEmail = ''
   coAuthorErrors: string[] = []
+
+  get isMyNote () {
+    return this.user.id === this.note.userId
+  }
 
   get isNewButtonShown () {
     return !this.mainListItems.find(item => !item.text)
@@ -203,7 +227,11 @@ export default class NoteComponent extends Vue {
     document.onkeydown = function (event) {
       event = event || window.event
       if (event.key === "Escape" || event.key === "Esc") {
-        app.$router.go(-1)
+        if (app.coAuthorsDialogShown) {
+          app.coAuthorsDialogShown = false
+        } else {
+          app.$router.go(-1)
+        }
       }
     }
   }
@@ -213,14 +241,15 @@ export default class NoteComponent extends Vue {
   }
 
   addCoAuthor () {
-    NotesService.addCoAuthor(this.coAuthorEmail)
-      .then(user => {
-        this.coAuthorEmail = ''
-        return this.$store.dispatch('addNoteCoAuthor', { note: this.note, coAuthor: user })
-      })
-      .catch(() => {
-        this.coAuthorErrors.push('Wrong email')
-      })
+    NotesService.addCoAuthor(this.note, this.coAuthorEmail)
+      .then(() => this.coAuthorEmail = '')
+      .catch(error => this.coAuthorErrors = [(error?.response?.data?.message || 'Unexpected error')])
+  }
+
+  removeCoAuthor (coAuthor: CoAuthorModel) {
+    this.note.removeCoAuthor(coAuthor)
+    NotesService.vuex.dispatch('unsetNote', this.note)
+    this.$router.push('/')
   }
 }
 </script>
@@ -283,5 +312,6 @@ $active-row-color = #6A1B9A
 
 .co-authors
   max-height 250px
-  overflow auto
+  overflow-x hidden
+  overflow-y auto
 </style>

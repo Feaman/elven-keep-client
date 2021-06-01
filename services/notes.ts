@@ -1,6 +1,7 @@
 import BaseService from '~/services/base'
 import NoteModel, { NoteDataObject } from '~/models/note'
 import ListItemModel from '~/models/list-item'
+import CoAuthorModel, { CoAuthorDataObject } from '~/models/co-author'
 
 export default class NotesService extends BaseService {
   static generateNotes (notesData: NoteDataObject[]) {
@@ -36,7 +37,14 @@ export default class NotesService extends BaseService {
     return variants
   }
 
-  static addCoAuthor (email: string) {
-    return this.api.addNoteCoAuthor(email)
+  static addCoAuthor (note: NoteModel, email: string) {
+    return this.api.addNoteCoAuthor(note, email)
+      .then((coAuthorData: CoAuthorDataObject) => {
+        return this.vuex.dispatch('addNoteCoAuthor', { note, noteCoAuthor: new CoAuthorModel(coAuthorData) })
+      })
+  }
+
+  static removeCoAuthor (note: NoteModel, email: string) {
+    return this.api.addNoteCoAuthor(note, email)
   }
 }

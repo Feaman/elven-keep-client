@@ -7,8 +7,9 @@ import ListItemModel, { ListItemDataObject } from '~/models/list-item'
 import { TypeDataObject } from '~/models/type'
 import StorageService from '~/services/storage'
 import UserService from '~/services/users'
-import UserModel, { UserDataObject } from '~/models/user'
+import { UserDataObject } from '~/models/user'
 import { StatusDataObject } from '~/models/status'
+import CoAuthorModel, { CoAuthorDataObject } from '~/models/co-author'
 
 export interface ConfigObject {
   user: UserDataObject,
@@ -79,12 +80,14 @@ export default class ApiService extends BaseService {
       list: [] as object[],
       isCompletedListExpanded: note.isCompletedListExpanded,
     }
+
     note.list.forEach(listItem => noteData.list.push({
       text: listItem.text,
       noteId: listItem.note?.id,
       checked: listItem.checked,
       completed: listItem.completed,
     }))
+
     return this.axios.post('notes', noteData)
       .then((response: AxiosResponse) => response.data)
   }
@@ -141,14 +144,12 @@ export default class ApiService extends BaseService {
       .then((response: AxiosResponse) => response.data)
   }
 
-  static addNoteCoAuthor (email: string): Promise<UserModel> {
-    return Promise.resolve(new UserModel({ id: (new Date()).getMilliseconds(), email, firstName: 'Pavel', secondName: 'Chingachguk' }))
-    // return Promise.reject('asdf')
-    // return this.axios.post('notes/co-author', { email })
-    // .then((response: AxiosResponse) => response.data)
+  static addNoteCoAuthor (note: NoteModel, email: string): Promise<CoAuthorDataObject> {
+    return this.axios.post(`notes/${note.id}/co-author`, { email })
+      .then((response: AxiosResponse) => response.data)
   }
 
-  static removeNoteCoAuthor (coAuthor: UserModel) {
+  static removeNoteCoAuthor (coAuthor: CoAuthorModel) {
     return this.axios.delete(`notes/co-author/${coAuthor.id}`)
       .then((response: AxiosResponse) => response.data)
   }

@@ -2,7 +2,8 @@ import ApiService from '@/services/api'
 import ListItemModel, { ListItemDataObject } from './list-item'
 import TypeModel from './type'
 import StatusModel from './status'
-import UserModel from './user'
+import UserModel, { UserDataObject } from './user'
+import CoAuthorModel, { CoAuthorDataObject } from './co-author'
 import TypesService from '~/services/types'
 import NotesService from '~/services/notes'
 import StatusService from '~/services/statuses'
@@ -14,10 +15,12 @@ export interface NoteDataObject {
   type?: TypeModel
   typeId?: number
   statusId?: number
+  userId?: number
+  user?: UserDataObject
   isCompletedListExpanded?: Boolean
   saveTimeout?: ReturnType<typeof setTimeout> | null
   list?: ListItemDataObject[]
-  coAuthors?: UserModel[]
+  coAuthors?: CoAuthorDataObject[]
 }
 
 export default class NoteModel {
@@ -27,31 +30,42 @@ export default class NoteModel {
   list: ListItemModel[] = []
   typeId: number
   statusId: number
+  userId?: number
   type?: TypeModel
   status?: StatusModel
+  user?: UserModel
   saveTimeout: ReturnType<typeof setTimeout> | null = null
   isCompletedListExpanded?: Boolean
-  coAuthors: UserModel[] = []
+  coAuthors: CoAuthorModel[] = []
 
   constructor (data: NoteDataObject) {
     this.id = data.id
     this.title = data.title || ''
+    this.userId = data.userId
     this.text = data.text || ''
-    this.coAuthors = data.coAuthors || []
     this.typeId = data.typeId || TypesService.getDefault().id
     this.statusId = data.statusId || StatusService.getActive().id
+
+    if (data.user) {
+      this.user = new UserModel(data.user)
+    }
 
     if (data.isCompletedListExpanded) {
       this.isCompletedListExpanded = data.isCompletedListExpanded
     }
 
     this.handleList(data.list)
+    this.handleCoAuthors(data.coAuthors)
     this.handleType()
     this.handleStatus()
   }
 
   handleList (listData: ListItemDataObject[] = []) {
     listData.forEach(listItemData => this.list.push(new ListItemModel(listItemData)))
+  }
+
+  handleCoAuthors (coAuthorsData: CoAuthorDataObject[] = []) {
+    coAuthorsData.forEach(coAuthorData => this.coAuthors.push(new CoAuthorModel(coAuthorData)))
   }
 
   handleType () {
@@ -98,7 +112,14 @@ export default class NoteModel {
           return ApiService.addNote(this)
             .then(noteData => {
               history.replaceState({}, '', `/notes/${noteData.id}`)
-              resolve(this.updateState({ id: noteData.id }))
+              const newNoteData: NoteDataObject = {
+                id: noteData.id,
+                userId: noteData.userId,
+              }
+              if (noteData.user) {
+                newNoteData.user = new UserModel(noteData.user)
+              }
+              resolve(this.updateState(newNoteData))
             })
             .catch(error => NotesService.error(error))
         }
@@ -134,7 +155,7 @@ export default class NoteModel {
     this.list.forEach(listItem => listItem.updateState({ note: this }))
   }
 
-  async removeCoAuthor (coAuthor: UserModel) {
+  async removeCoAuthor (coAuthor: CoAuthorModel) {
     await NotesService.vuex.dispatch('removeNoteCoAuthor', { note: this, coAuthor })
     return ApiService.removeNoteCoAuthor(coAuthor)
   }

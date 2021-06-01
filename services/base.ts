@@ -26,6 +26,7 @@ export default class BaseService {
     TypesService.generateTypes(data.types)
     StatusesService.generateStatuses(data.statuses)
     NotesService.generateNotes(data.notes)
+
     return this.vuex.dispatch('setUser', new UserModel(data.user))
   }
 }

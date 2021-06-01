@@ -4,7 +4,7 @@
       color="primary"
       dark
     )
-      div ELVEN NOTES
+      .ml-4 ELVEN NOTES
     .d-flex.flex-center.fill-width.height-56.px-8
       .page-content.fill-width
         .headline.fill-width
@@ -100,6 +100,7 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { State } from 'vuex-class'
+import StorageService from '~/services/storage'
 import UserService from '~/services/users'
 
 const RULE_155_LENGTH = 155
@@ -156,6 +157,12 @@ export default class SearchComponent extends Vue {
     await UserService.logout()
   }
 
+  created () {
+    if (StorageService.get(UserService.AUTH_TOKEN_NAME)) {
+      this.$router.push('/')
+    }
+  }
+
   switchToLoginPage () {
     this.errors = ''
     this.isLoginForm = true
@@ -179,6 +186,8 @@ export default class SearchComponent extends Vue {
 
 <style lang="stylus" scoped>
 .login
+  .v-toolbar
+    z-index 20
 
   .height-56
     height calc(100% - 56px)

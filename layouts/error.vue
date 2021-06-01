@@ -1,9 +1,8 @@
 <template lang="pug">
 .error-page.d-flex.flex-column.align-center.justify-center.fill-height.white--text.pt-8.pb-12
   .container.d-flex.flex-column.align-center.justify-center.fill-height
-    img.error-gif.mt-12(src="~/assets/images/error.gif")
-    .yellow--text.text--lighten-3.font-weight-bold.font-size-16.mt-8 {{ error.statusCode }}
-    .oops.font-weight-black Упс...
+    img.error-gif(src="~/assets/images/error.gif")
+    .oops.font-weight-black.mt-8 Упс...
     .text.scroll.font-weight-bold.text-center.green--text.text--lighten-4.px-4 {{ errorText }}
     v-btn.mt-10(
       @click="reloadPage()"
@@ -16,7 +15,8 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 interface ErrorObject {
   statusCode: Number,
-  message: String,
+  response: { data: { message: string }},
+  message: string,
 }
 
 @Component({
@@ -26,7 +26,15 @@ export default class ErrorLayout extends Vue {
    @Prop() error!: ErrorObject
    @Prop() message!: String
 
-   errorText = this.error.statusCode === 404 ? 'Страница не найдена' : this.$route.params.message || this.error.message
+   errorText = ''
+
+   created () {
+     if (this.error.statusCode === 404) {
+       this.errorText = 'Страница не найдена'
+     } else {
+       this.errorText = this.error.response?.data?.message || this.error.message
+     }
+   }
 
    mounted () {
      if (this.$route.name === 'login') {
@@ -35,13 +43,7 @@ export default class ErrorLayout extends Vue {
    }
 
    reloadPage () {
-     if (this.$route.name === 'index') {
-       this.$router.go(0)
-     } else if (this.$route.name === 'login') {
-       window.location.href = '/'
-     } else {
-       this.$router.push('/')
-     }
+     window.location.href = '/'
    }
 }
 </script>

@@ -14,17 +14,42 @@ v-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
       )
         v-icon(color="grey lighten-1") mdi-checkbox-blank-outline
         .list-item__text.limit-width.ml-2 {{ listItem.text }}
-    .completed-list-header.d-flex.align-center.grey--text.mt-2.ml-1(
+
+      .co-authors-container.d-flex.justify-end.fill-width
+        .co-authors.d-flex.justify-end
+          v-avatar(
+            v-for="(coAuthor, index) in note.coAuthors"
+            :key="coAuthor.id"
+            :class="{ 'ml-2': index > 0 }"
+            size="20"
+            color="purple"
+          )
+            .white--text.font-size-10 {{ coAuthor.user.getInitials() }}
+
+    .completed-list-header.d-flex.align-center.grey--text.fill-width.mt-2.pl-5(
       v-if="completedListItems.length"
     )
       div +
       .green--text.font-weight-bold.ml-1 {{ completedListItems.length }}
       .ml-1 completed
-  .text(
+
+  .text.d-flex.flex-column(
     v-else
-  ) {{ note.text }}
+  )
+    div {{ note.text }}
+    .co-authors-container.d-flex.justify-end.fill-width
+      .co-authors.d-flex.justify-end
+        v-avatar(
+          v-for="(coAuthor, index) in note.coAuthors"
+          :key="coAuthor.id"
+          :class="{ 'ml-2': index > 0 }"
+          size="20"
+          color="purple"
+        )
+          .white--text.font-size-10 {{ coAuthor.user.getInitials() }}
 
   v-btn.remove-button(
+    v-if="isMyNote"
     @click.stop="$emit('remove')"
     icon
   )
@@ -33,15 +58,23 @@ v-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import { State } from 'vuex-class'
 import NoteModel from '~/models/note'
 import TypeModel from '~/models/type'
+import UserModel from '~/models/user'
 
 @Component
 export default class NotePreviewComponent extends Vue {
-  @Prop(NoteModel) note!: NoteModel
+  @Prop() note!: NoteModel
+
+  @State user!: UserModel
 
   NOTE_TYPE_LIST = TypeModel.TYPE_LIST
   NOTE_TYPE_TEXT = TypeModel.TYPE_TEXT
+
+  get isMyNote () {
+    return this.user.id === this.note.userId
+  }
 
   get completedListItems () {
     return this.note.list.filter(listItem => listItem.completed)
@@ -81,6 +114,25 @@ export default class NotePreviewComponent extends Vue {
     height 170px
     background linear-gradient(transparent, #fff 120px)
 
+  .co-authors-container
+    position absolute
+    bottom 16px
+
+  .co-authors
+    position relative
+    overflow hidden
+    z-index 30
+
+    &:after
+      content ''
+      width 100%
+      height 20px
+      position absolute
+      bottom 0
+      left 0
+      z-index 20
+      background linear-gradient(to left, transparent, #fff 25px)
+
   .remove-button
     position absolute
     right 4px
@@ -90,7 +142,14 @@ export default class NotePreviewComponent extends Vue {
   .title
     line-height normal
 
+  .text
+    height calc(100% - 16px)
+    position relative
+
   .list
+    height calc(100% - 24px)
+    position relative
+
     .list-item
       &.checked
         .list-item__text
@@ -99,6 +158,7 @@ export default class NotePreviewComponent extends Vue {
 
   .completed-list-header
     position absolute
+    left 0
     bottom 16px
     z-index 30
 
@@ -109,4 +169,8 @@ export default class NotePreviewComponent extends Vue {
 @media (max-width: 600px)
   .note-preview
     padding 8px 10px 10px 10px
+
+@media (max-width: 700px)
+  .co-authors
+    display none !important
 </style>
