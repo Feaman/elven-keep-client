@@ -1,4 +1,4 @@
-export interface UserDataObject {
+export interface IUser {
   id?: number,
   firstName: string,
   secondName: string,
@@ -11,7 +11,7 @@ export default class UserModel {
   secondName: string
   email: string
 
-  constructor (data: UserDataObject) {
+  constructor (data: IUser) {
     this.id = data.id
     this.firstName = data.firstName
     this.secondName = data.secondName

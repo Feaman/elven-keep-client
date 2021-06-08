@@ -1,11 +1,11 @@
-import UserModel, { UserDataObject } from "./user"
+import UserModel, { IUser } from "./user"
 
-export interface CoAuthorDataObject {
+export interface ICoAuthor {
   id?: number,
   noteId: number,
   userId: number,
   statusId: number,
-  user: UserDataObject
+  user: IUser
 }
 
 export default class CoAuthorModel {
@@ -15,7 +15,7 @@ export default class CoAuthorModel {
   statusId: number
   user: UserModel
 
-  constructor (data: CoAuthorDataObject) {
+  constructor (data: ICoAuthor) {
     this.id = data.id
     this.noteId = data.noteId
     this.userId = data.userId

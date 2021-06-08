@@ -5,7 +5,6 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
-import ListItemModel from '~/models/list-item'
 import NoteModel from '~/models/note'
 
 @Component({
@@ -16,7 +15,7 @@ export default class NewListPage extends Vue {
 
   created () {
     this.note = new NoteModel({})
-    this.note.addListItem(new ListItemModel({ note: this.note }))
+    this.note.addListItem()
   }
 }
 </script>

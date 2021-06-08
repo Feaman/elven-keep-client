@@ -1,4 +1,4 @@
-export interface StatusDataObject {
+export interface IStatus {
    id: number
    title: string
    name: string
@@ -12,7 +12,7 @@ export default class StatusModel {
   static STATUS_ACTIVE = "active"
   static STATUS_INACTIVE = "inactive"
 
-  constructor (data: StatusDataObject) {
+  constructor (data: IStatus) {
     this.id = data.id
     this.title = data.title
     this.name = data.name

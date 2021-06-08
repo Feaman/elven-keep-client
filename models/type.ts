@@ -1,4 +1,4 @@
-export interface TypeDataObject {
+export interface IType {
    id: number
    title: string
    name: string
@@ -12,7 +12,7 @@ export default class TypeModel {
   static TYPE_LIST = 'list'
   static TYPE_TEXT = 'text'
 
-  constructor (data: TypeDataObject) {
+  constructor (data: IType) {
     this.id = data.id
     this.title = data.title
     this.name = data.name

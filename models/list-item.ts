@@ -1,17 +1,23 @@
 import NoteModel from './note'
 import BaseService from '~/services/base'
 import ApiService from '~/services/api'
+import ListItemsService from '~/services/list-items'
 
-export interface ListItemDataObject {
+export type Variant = { noteId: number, listItemId: number, text: string, isExists: boolean }
+
+export interface IListItem {
   id?: number
   noteId?: number
+  order?: number
   text?: string | ''
   note?: NoteModel | undefined
   focused?: Boolean
   checked?: Boolean
   completed?: Boolean,
   saveTimeout?: ReturnType<typeof setTimeout> | null
-  variants?: string[]
+  variants?: Variant[]
+  created?: string
+  updated?: string
 }
 
 export default class ListItemModel {
@@ -20,19 +26,27 @@ export default class ListItemModel {
   text?: string | ''
   note: NoteModel | undefined
   focused: Boolean
+  order: number
   checked: Boolean
   completed: Boolean
+  noteId: number | undefined
   saveTimeout: ReturnType<typeof setTimeout> | null = null
-  variants: string[] = []
+  variants: Variant[] = []
+  created: Date | null = null
+  updated: Date | null = null
 
-  constructor (data: ListItemDataObject) {
-    this.id = data?.id
+  constructor (data: IListItem) {
+    this.id = data.id
     this._id = `${(new Date()).getMilliseconds()}-${this.id}`
-    this.text = data?.text
-    this.note = data?.note
+    this.text = data.text
+    this.noteId = data.noteId
+    this.note = data.note
+    this.order = data.order || 0
     this.focused = data.focused || false
     this.checked = data.checked || false
     this.completed = data.completed || false
+    this.created = data.created ? new Date(data.created) : null
+    this.updated = data.updated ? new Date(data.updated) : null
   }
 
   async save (savingText: boolean = false) {
@@ -40,17 +54,21 @@ export default class ListItemModel {
     const saveTimeout = setTimeout(() => {
       if (!this.id) {
         return ApiService.saveListItem(this)
-          .then(data => BaseService.vuex.dispatch('updateListItem', { listItem: this, data: { id: data.id } }))
+          .then(data => BaseService.vuex.dispatch('updateListItem', {
+            listItem: this,
+            data: { id: data.id, created: data.created, updated: new Date(data.updated || '') }
+          }))
           .catch(error => BaseService.error(error))
       } else {
         return ApiService.updateListItem(this)
+          .then(data => BaseService.vuex.dispatch('updateListItem', { listItem: this, data: { updated: new Date(data.updated || '') } }))
           .catch(error => BaseService.error(error))
       }
     }, savingText ? 400 : 0)
     this.updateState({ saveTimeout })
   }
 
-  async update (data: ListItemDataObject) {
+  async update (data: IListItem) {
     await this.updateState(data)
     if (this.text) {
       if (!this?.note?.id) {
@@ -62,7 +80,7 @@ export default class ListItemModel {
     }
   }
 
-  updateState (data: ListItemDataObject) {
+  updateState (data: IListItem) {
     return BaseService.vuex.dispatch('updateListItem', { listItem: this, data })
   }
 
@@ -72,7 +90,7 @@ export default class ListItemModel {
 
   complete (isCompleted: boolean) {
     if (this.text) {
-      this.update({ completed: !!isCompleted })
+      this.update({ completed: !!isCompleted, checked: !!isCompleted, order: ListItemsService.generateMaxOrder(this) })
     }
   }
 
@@ -88,7 +106,9 @@ export default class ListItemModel {
         await this.removeFromState()
       }
       return ApiService.removeListItem(this)
-        .then(() => this.updateState({ id: undefined }))
+        .then(() => {
+          return this.updateState({ id: undefined })
+        })
         .catch(error => BaseService.error(error))
     } else {
       return Promise.resolve()

@@ -1,20 +1,19 @@
 import { NuxtAxiosInstance } from '@nuxtjs/axios'
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
-import { Route } from 'vue-router/types'
 import BaseService from './base'
-import NoteModel, { NoteDataObject } from '~/models/note'
-import ListItemModel, { ListItemDataObject } from '~/models/list-item'
-import { TypeDataObject } from '~/models/type'
+import NoteModel, { INote } from '~/models/note'
+import ListItemModel, { IListItem } from '~/models/list-item'
+import { IType } from '~/models/type'
 import StorageService from '~/services/storage'
 import UserService from '~/services/users'
-import { UserDataObject } from '~/models/user'
-import { StatusDataObject } from '~/models/status'
-import CoAuthorModel, { CoAuthorDataObject } from '~/models/co-author'
+import { IUser } from '~/models/user'
+import { IStatus } from '~/models/status'
+import CoAuthorModel, { ICoAuthor } from '~/models/co-author'
 
 export interface ConfigObject {
-  user: UserDataObject,
-  types: TypeDataObject[],
-  statuses: StatusDataObject[],
+  user: IUser,
+  types: IType[],
+  statuses: IStatus[],
   notes: NoteModel[],
   token?: string,
 }
@@ -23,10 +22,9 @@ export default class ApiService extends BaseService {
   static URL = 'https://api.notes.pavlo.ru/'
   static axios: NuxtAxiosInstance
   static redirect: Function
-  static route: Route
   static noteSavingTimeout: ReturnType<typeof setTimeout> | null = null
 
-  static init () {
+  static initInterceptors () {
     this.axios.setBaseURL(this.URL)
 
     this.axios.onRequest((config: AxiosRequestConfig) => {
@@ -72,7 +70,7 @@ export default class ApiService extends BaseService {
       .then((response: AxiosResponse) => response.data)
   }
 
-  static addNote (note: NoteModel): Promise<NoteDataObject> {
+  static addNote (note: NoteModel): Promise<INote> {
     const noteData = {
       title: note.title,
       text: note.text,
@@ -85,6 +83,7 @@ export default class ApiService extends BaseService {
       text: listItem.text,
       noteId: listItem.note?.id,
       checked: listItem.checked,
+      order: listItem.order,
       completed: listItem.completed,
     }))
 
@@ -92,7 +91,7 @@ export default class ApiService extends BaseService {
       .then((response: AxiosResponse) => response.data)
   }
 
-  static updateNote (note: NoteModel): Promise<NoteDataObject> {
+  static updateNote (note: NoteModel): Promise<INote> {
     const noteData = {
       title: note.title.trim(),
       text: note.text.trim(),
@@ -103,21 +102,23 @@ export default class ApiService extends BaseService {
       .then((response: AxiosResponse) => response.data)
   }
 
-  static saveListItem (listItem: ListItemModel): Promise<ListItemDataObject> {
+  static saveListItem (listItem: ListItemModel): Promise<IListItem> {
     const data = {
       text: listItem.text,
       noteId: listItem.note?.id,
       checked: listItem.checked,
+      order: listItem.order,
       completed: listItem.completed,
     }
     return this.axios.post('list-items', data)
       .then((response: AxiosResponse) => response.data)
   }
 
-  static updateListItem (listItem: ListItemModel): Promise<ListItemDataObject> {
+  static updateListItem (listItem: ListItemModel): Promise<IListItem> {
     const data = {
       text: listItem.text?.trim(),
       checked: listItem.checked,
+      order: listItem.order,
       completed: listItem.completed,
     }
     return this.axios.put(`list-items/${listItem.id}`, data)
@@ -144,7 +145,7 @@ export default class ApiService extends BaseService {
       .then((response: AxiosResponse) => response.data)
   }
 
-  static addNoteCoAuthor (note: NoteModel, email: string): Promise<CoAuthorDataObject> {
+  static addNoteCoAuthor (note: NoteModel, email: string): Promise<ICoAuthor> {
     return this.axios.post(`notes/${note.id}/co-author`, { email })
       .then((response: AxiosResponse) => response.data)
   }

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.13.1",
+    "@types/eventsource": "^1.1.5",
     "core-js": "^3.9.1",
     "moment": "^2.29.1",
     "nuxt": "^2.15.2",

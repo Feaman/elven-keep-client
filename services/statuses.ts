@@ -1,10 +1,10 @@
 import BaseService from '~/services/base'
-import StatusModel, { StatusDataObject } from '~/models/status'
+import StatusModel, { IStatus } from '~/models/status'
 
 export default class StatusesService extends BaseService {
-  static generateStatuses (statusesData: StatusDataObject[]) {
+  static generateStatuses (statusesData: IStatus[]) {
     const statuses: StatusModel[] = []
-    statusesData.forEach((statusData: StatusDataObject) => {
+    statusesData.forEach((statusData: IStatus) => {
       statuses.push(new StatusModel(statusData))
     })
     this.vuex.dispatch('setStatuses', statuses)

@@ -85,6 +85,7 @@
         v-avatar.cursor-pointer(
           v-for="(coAuthor, index) in note.coAuthors"
           @click="coAuthorsDialogShown = true"
+          :key="coAuthor.id"
           :class="{ 'ml-2': index > 0 }"
           size="36"
           color="primary"
@@ -122,7 +123,9 @@
             v-list.pt-3(
               subheader
             )
-              .grey--text.px-4 Co-authors
+              .grey--text.px-4(
+                v-if="note.coAuthors.length"
+              ) Co-authors
               .co-authors
                 transition-group(
                   name="vertical-list-effect"
@@ -152,9 +155,9 @@
               .d-flex.fill-width
                 v-text-field.pt-0(
                   v-model="coAuthorEmail"
+                  :error-messages="coAuthorErrors"
                   name="co-author"
                   placeholder="Co-author email"
-                  :error-messages="coAuthorErrors"
                 )
                 v-btn(
                   @click="addCoAuthor()"
@@ -214,12 +217,21 @@ export default class NoteComponent extends Vue {
   get mainListItems () {
     return this.note.list
       .filter(listItem => !listItem.completed)
+      .sort((previousItem, nextItem) => (previousItem.order || 0) < (nextItem.order || 0) ? -1 : 1)
       .sort((previousItem, nextItem) => {
         if (previousItem.checked === nextItem.checked) {
           return 0
         }
         return previousItem.checked ? 1 : -1
       })
+  }
+
+  created () {
+    NotesService.events.$on('NOTE_REMOVED', (note: NoteModel) => {
+      if (note.id === this.note.id) {
+        this.$router.push('/')
+      }
+    })
   }
 
   mounted () {
@@ -248,8 +260,12 @@ export default class NoteComponent extends Vue {
 
   removeCoAuthor (coAuthor: CoAuthorModel) {
     this.note.removeCoAuthor(coAuthor)
-    NotesService.vuex.dispatch('unsetNote', this.note)
-    this.$router.push('/')
+      .then(() => {
+        if (this.note.userId !== this.user.id) {
+          this.$store.dispatch('unsetNote', this.note)
+          this.$router.push('/')
+        }
+      })
   }
 }
 </script>
