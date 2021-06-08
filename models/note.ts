@@ -1,14 +1,14 @@
 import ApiService from '@/services/api'
-import ListItemModel, { ListItemDataObject } from './list-item'
+import ListItemModel, { IListItem } from './list-item'
 import TypeModel from './type'
 import StatusModel from './status'
-import UserModel, { UserDataObject } from './user'
-import CoAuthorModel, { CoAuthorDataObject } from './co-author'
+import UserModel, { IUser } from './user'
+import CoAuthorModel, { ICoAuthor } from './co-author'
 import TypesService from '~/services/types'
 import NotesService from '~/services/notes'
 import StatusService from '~/services/statuses'
 
-export interface NoteDataObject {
+export interface INote {
   id?: number
   title?: string | ''
   text?: string | ''
@@ -16,11 +16,13 @@ export interface NoteDataObject {
   typeId?: number
   statusId?: number
   userId?: number
-  user?: UserDataObject
+  user?: IUser
   isCompletedListExpanded?: Boolean
   saveTimeout?: ReturnType<typeof setTimeout> | null
-  list?: ListItemDataObject[]
-  coAuthors?: CoAuthorDataObject[]
+  list?: IListItem[]
+  coAuthors?: ICoAuthor[]
+  created?: string
+  updated?: string
 }
 
 export default class NoteModel {
@@ -37,14 +39,18 @@ export default class NoteModel {
   saveTimeout: ReturnType<typeof setTimeout> | null = null
   isCompletedListExpanded?: Boolean
   coAuthors: CoAuthorModel[] = []
+  created: Date | null = null
+  updated: Date | null = null
 
-  constructor (data: NoteDataObject) {
+  constructor (data: INote) {
     this.id = data.id
     this.title = data.title || ''
     this.userId = data.userId
     this.text = data.text || ''
     this.typeId = data.typeId || TypesService.getDefault().id
     this.statusId = data.statusId || StatusService.getActive().id
+    this.created = data.created ? new Date(data.created) : null
+    this.updated = data.updated ? new Date(data.updated) : null
 
     if (data.user) {
       this.user = new UserModel(data.user)
@@ -60,11 +66,11 @@ export default class NoteModel {
     this.handleStatus()
   }
 
-  handleList (listData: ListItemDataObject[] = []) {
+  handleList (listData: IListItem[] = []) {
     listData.forEach(listItemData => this.list.push(new ListItemModel(listItemData)))
   }
 
-  handleCoAuthors (coAuthorsData: CoAuthorDataObject[] = []) {
+  handleCoAuthors (coAuthorsData: ICoAuthor[] = []) {
     coAuthorsData.forEach(coAuthorData => this.coAuthors.push(new CoAuthorModel(coAuthorData)))
   }
 
@@ -94,12 +100,24 @@ export default class NoteModel {
     return this.type?.name === TypeModel.TYPE_TEXT
   }
 
-  addListItem (listItem: ListItemModel) {
-    listItem.note = this
-    return NotesService.vuex.dispatch('addListItem', listItem)
+  async addListItem (listItemData: IListItem | null = null) {
+    const order = this.list.length ? Math.max.apply(Math, this.list.map(listItem => listItem.order)) + 1 : 1
+    const listItem = new ListItemModel(
+      Object.assign(
+        {
+          noteId: this.id,
+          note: this,
+          updated: new Date(),
+          order,
+        },
+        listItemData || {}
+      )
+    )
+    await NotesService.vuex.dispatch('addListItem', listItem)
+    return listItem
   }
 
-  async save (savingText: boolean = false): Promise<NoteDataObject> {
+  async save (savingText: boolean = false): Promise<INote> {
     await NotesService.vuex.dispatch('clearNoteTimeout', this)
     return new Promise((resolve) => {
       const saveTimeout = setTimeout(async () => {
@@ -112,7 +130,7 @@ export default class NoteModel {
           return ApiService.addNote(this)
             .then(noteData => {
               history.replaceState({}, '', `/notes/${noteData.id}`)
-              const newNoteData: NoteDataObject = {
+              const newNoteData: INote = {
                 id: noteData.id,
                 userId: noteData.userId,
               }
@@ -128,7 +146,7 @@ export default class NoteModel {
     })
   }
 
-  async update (data: NoteDataObject) {
+  async update (data: INote) {
     await NotesService.vuex.dispatch('updateNote', { note: this, data })
 
     if (this.title || this.text || this.list.length) {
@@ -138,12 +156,16 @@ export default class NoteModel {
     }
   }
 
-  updateState (data: NoteDataObject) {
+  updateState (data: INote) {
     return NotesService.vuex.dispatch('updateNote', { note: this, data })
   }
 
+  removeFromState () {
+    return NotesService.vuex.dispatch('unsetNote', this)
+  }
+
   async remove () {
-    await NotesService.vuex.dispatch('unsetNote', this)
+    await this.removeFromState()
     try {
       await ApiService.removeNote(this)
     } catch (error) {

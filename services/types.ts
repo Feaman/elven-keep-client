@@ -1,10 +1,10 @@
 import BaseService from '~/services/base'
-import TypeModel, { TypeDataObject } from '~/models/type'
+import TypeModel, { IType } from '~/models/type'
 
 export default class TypesService extends BaseService {
-  static generateTypes (typesData: TypeDataObject[]) {
+  static generateTypes (typesData: IType[]) {
     const types: TypeModel[] = []
-    typesData.forEach((typeData: TypeDataObject) => {
+    typesData.forEach((typeData: IType) => {
       types.push(new TypeModel(typeData))
     })
     this.vuex.dispatch('setTypes', types)

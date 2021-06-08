@@ -32,6 +32,7 @@
       "vuex/types",
       "@types/webpack",
       "@types/webpack-env",
+      "@types/eventsource",
       "@types/quill"
     ]
   },

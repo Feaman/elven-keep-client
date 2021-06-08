@@ -1,8 +1,8 @@
 import { ActionContext } from 'vuex/types/index'
 import * as mutationTypes from './mutations-types'
 import { RootState } from '.'
-import NoteModel, { NoteDataObject } from '~/models/note'
-import ListItemModel, { ListItemDataObject } from '~/models/list-item'
+import NoteModel, { INote } from '~/models/note'
+import ListItemModel, { IListItem } from '~/models/list-item'
 import TypeModel from '~/models/type'
 import StatusModel from '~/models/status'
 import UserModel from '~/models/user'
@@ -68,7 +68,7 @@ export default {
       resolve('')
     })
   },
-  updateNote (actionContext: ActionContext<Function, RootState>, payload: NoteDataObject) {
+  updateNote (actionContext: ActionContext<Function, RootState>, payload: INote) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.NOTE_UPDATED, payload)
       resolve('')
@@ -80,13 +80,19 @@ export default {
       resolve('')
     })
   },
+  sortNotesByUpdated (actionContext: ActionContext<Function, RootState>, note: NoteModel) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.NOTE_LIST_SORTED_BY_UPDATED, note)
+      resolve('')
+    })
+  },
   addListItem (actionContext: ActionContext<Function, RootState>, listItem: ListItemModel) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.LIST_ITEM_ADDED, listItem)
       resolve('')
     })
   },
-  updateListItem (actionContext: ActionContext<Function, RootState>, payload: ListItemDataObject) {
+  updateListItem (actionContext: ActionContext<Function, RootState>, payload: IListItem) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.LIST_ITEM_UPDATED, payload)
       resolve('')

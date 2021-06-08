@@ -1,12 +1,12 @@
 import BaseService from '~/services/base'
-import NoteModel, { NoteDataObject } from '~/models/note'
-import ListItemModel from '~/models/list-item'
-import CoAuthorModel, { CoAuthorDataObject } from '~/models/co-author'
+import NoteModel, { INote } from '~/models/note'
+import ListItemModel, { Variant } from '~/models/list-item'
+import CoAuthorModel, { ICoAuthor } from '~/models/co-author'
 
 export default class NotesService extends BaseService {
-  static generateNotes (notesData: NoteDataObject[]) {
+  static generateNotes (notesData: INote[]) {
     const notes: Array<NoteModel> = []
-    notesData.forEach((noteData: NoteDataObject) => {
+    notesData.forEach((noteData: INote) => {
       const note = new NoteModel(noteData)
       note.setNoteToListItems()
       notes.push(note)
@@ -15,21 +15,15 @@ export default class NotesService extends BaseService {
   }
 
   static findListItemVariants (listItem: ListItemModel, query: string) {
-    const variants: string[] = []
+    const variants: Variant[] = []
 
     if (query.length > 1) {
+      const ownNote = this.vuex.state.notes.find((note: NoteModel) => note.id === listItem.noteId)
+      this.findNoteListItemVariants(ownNote, variants, listItem, query)
+
       this.vuex.state.notes.forEach((note: NoteModel) => {
-        if (note.isList()) {
-          note.list
-            .filter(_listItem => _listItem !== listItem)
-            .forEach(listItem => {
-              if (
-                listItem.text?.toLocaleLowerCase().indexOf(query.toLocaleLowerCase()) === 0 &&
-                listItem.text !== query
-              ) {
-                variants.push(listItem.text)
-              }
-            })
+        if (note.id !== ownNote.id && note.isList()) {
+          this.findNoteListItemVariants(note, variants, listItem, query)
         }
       })
     }
@@ -37,14 +31,28 @@ export default class NotesService extends BaseService {
     return variants
   }
 
-  static addCoAuthor (note: NoteModel, email: string) {
-    return this.api.addNoteCoAuthor(note, email)
-      .then((coAuthorData: CoAuthorDataObject) => {
-        return this.vuex.dispatch('addNoteCoAuthor', { note, noteCoAuthor: new CoAuthorModel(coAuthorData) })
-      })
+  static findNoteListItemVariants (note: NoteModel, variants: Variant[], listItem: ListItemModel, query: string) {
+    if (query.length > 1) {
+      if (note.isList()) {
+        note.list
+          .filter(_listItem => _listItem !== listItem)
+          .forEach((_listItem: ListItemModel) => {
+            if (
+              _listItem.text?.toLocaleLowerCase().indexOf(query.toLocaleLowerCase()) === 0 &&
+              !variants.find(variant => variant.listItemId === _listItem.id)
+            ) {
+              const isExists = listItem.noteId === note.id && !_listItem.completed
+              variants.push({ noteId: Number(_listItem.noteId), listItemId: Number(_listItem.id), text: _listItem.text, isExists })
+            }
+          })
+      }
+    }
   }
 
-  static removeCoAuthor (note: NoteModel, email: string) {
+  static addCoAuthor (note: NoteModel, email: string) {
     return this.api.addNoteCoAuthor(note, email)
+      .then((coAuthorData: ICoAuthor) => {
+        return this.vuex.dispatch('addNoteCoAuthor', { note, noteCoAuthor: new CoAuthorModel(coAuthorData) })
+      })
   }
 }

@@ -1,7 +1,7 @@
 import * as types from './mutations-types'
 import { RootState } from '~/store'
-import NoteModel, { NoteDataObject } from '~/models/note'
-import ListItemModel, { ListItemDataObject } from '~/models/list-item'
+import NoteModel, { INote } from '~/models/note'
+import ListItemModel, { IListItem } from '~/models/list-item'
 import TypeModel from '~/models/type'
 import StatusModel from '~/models/status'
 import UserModel from '~/models/user'
@@ -21,6 +21,9 @@ export default {
   },
   [types.MAIN_LIST_SCROLL_TOP_SET] (state: RootState, scrollTop: number) {
     state.mainListScrollTop = scrollTop
+  },
+  [types.NOTE_LIST_SORTED_BY_UPDATED] (_state: RootState, note: NoteModel) {
+    note.list.sort((previousItem, nextItem) => (previousItem.updated || 0) < (nextItem.updated || 0) ? -1 : 1)
   },
   [types.NOTE_CO_AUTHOR_ADDED] (_state: RootState, payload: any) {
     payload.note.coAuthors.push(payload.noteCoAuthor)
@@ -54,10 +57,10 @@ export default {
       listItem.note.list = listItem?.note?.list.filter(_listItem => _listItem.id !== listItem.id)
     }
   },
-  [types.LIST_ITEM_UPDATED] (_state: RootState, { listItem, data }: { listItem: ListItemModel, data: ListItemDataObject }) {
+  [types.LIST_ITEM_UPDATED] (_state: RootState, { listItem, data }: { listItem: ListItemModel, data: IListItem }) {
     Object.assign(listItem, data)
   },
-  [types.NOTE_UPDATED] (_state: RootState, { note, data }: { note: NoteModel, data: NoteDataObject }) {
+  [types.NOTE_UPDATED] (_state: RootState, { note, data }: { note: NoteModel, data: INote }) {
     Object.assign(note, data)
   },
   [types.SEARCH_QUERY_SET] (state: RootState, searchQuery: string) {

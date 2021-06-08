@@ -49,9 +49,11 @@
                 v-for="(variant, index) in listItem.variants.slice(0, 4)"
                 :key="index"
               )
-                v-list-item-title(
-                  @click="listItem.update({ text: variant })"
-                ) {{ variant }}
+                v-list-item-title.d-flex.align-center.fill-width(
+                  @click="selectVariant(listItem, variant)"
+                )
+                  .limit-width {{ variant.text }}
+                  .green--text.font-size-12.ml-2(v-if="variant.isExists") exists
           transition(name="scale-fade")
             v-checkbox.ma-0.mr-1.pa-0(
               v-if="listItem.text"
@@ -84,8 +86,9 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import NoteModel from '~/models/note'
-import ListItemModel from '~/models/list-item'
+import ListItemModel, { Variant } from '~/models/list-item'
 import NoteService from '~/services/notes'
+import ListItemsService from '~/services/list-items'
 
 @Component
 export default class NoteListComponent extends Vue {
@@ -106,9 +109,8 @@ export default class NoteListComponent extends Vue {
     }
   }
 
-  addNewListItem () {
-    const listItem = new ListItemModel({ note: this.note })
-    this.note.addListItem(listItem)
+  async addNewListItem () {
+    const listItem = await this.note.addListItem()
     setTimeout(() => {
       const textareaComponents = this.$refs[`textarea-${listItem.id || -(this.list.indexOf(listItem))}`] as HTMLTextAreaElement[]
       textareaComponents[textareaComponents.length - 1].focus()
@@ -124,6 +126,18 @@ export default class NoteListComponent extends Vue {
     listItem.update({ text })
   }
 
+  selectVariant (listItem: ListItemModel, variant: Variant) {
+    if (variant.noteId === listItem.noteId && variant.listItemId !== listItem.id) {
+      const existentListItem = this.note.list.find((listItem: ListItemModel) => listItem.id === variant.listItemId)
+      if (existentListItem) {
+        existentListItem.update({ completed: false, checked: false, order: ListItemsService.generateMaxOrder(listItem) })
+        listItem.remove()
+      }
+    } else {
+      listItem.update({ text: variant.text })
+    }
+  }
+
   handleBlur (listItem: ListItemModel) {
     listItem.updateState({ focused: false })
     if (!listItem.text) {
@@ -135,8 +149,9 @@ export default class NoteListComponent extends Vue {
 
 <style lang="stylus" scoped>
 @import '~assets/css/variables'
+@import '~assets/css/mixins'
 
-$inactive-row-color = #ECEFF1
+$inactive-row-color = #F5F5F5
 
 .note-list
   .list
@@ -189,6 +204,9 @@ $inactive-row-color = #ECEFF1
 
   .new-list-item-button
     height 24px
+
+  .limit-width
+    limit-width(100%)
 
 .hint-menu
   .v-list-item
