@@ -69,7 +69,7 @@
               v-expansion-panel-header
                 template(v-slot:actions)
                   v-icon.icon $expand
-                .completed-list-header.green--text.d-flex.align-center.ml-4
+                .completed-list-header.green--text.d-flex.align-center.ml-2
                   .font-weight-bold.font-size-16 {{ completedListItems.length }}
                   .ml-2 completed
               v-expansion-panel-content
@@ -211,7 +211,9 @@ export default class NoteComponent extends Vue {
   }
 
   get completedListItems () {
-    return this.note.list.filter(listItem => listItem.completed)
+    return this.note.list
+      .filter(listItem => listItem.completed)
+      .sort((previousItem, nextItem) => (previousItem.order || 0) < (nextItem.order || 0) ? -1 : 1)
   }
 
   get mainListItems () {
@@ -285,6 +287,7 @@ $active-row-color = #6A1B9A
 
     .v-expansion-panel-header
       min-height 32px
+      margin 0 -4px
 
     .completed-list-header
       order 1

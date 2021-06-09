@@ -154,4 +154,9 @@ export default class ApiService extends BaseService {
     return this.axios.delete(`notes/co-author/${coAuthor.id}`)
       .then((response: AxiosResponse) => response.data)
   }
+
+  static setOrder (note: NoteModel, order: number[]) {
+    return this.axios.put(`notes/${note.id}/set-order`, { order })
+      .then((response: AxiosResponse) => response.data)
+  }
 }

@@ -3,77 +3,82 @@
   .list(
     :class="{ 'pb-3': showNewButton }"
   )
-    transition-group(
-      name="vertical-list-effect"
+    draggable(
+      v-model="order"
+      handle=".handle"
     )
-      div(
-        v-for="(listItem, index) in list"
-        :key="listItem._id"
+      transition-group(
+        name="vertical-list-effect"
       )
-        .list-item.d-flex.align-center.py-1(
-          :class="{ first: index === 0, focused: listItem.focused, checked: listItem.checked, completed: listItem.completed }"
+        .px-3(
+          v-for="(listItem, index) in list"
+          :key="listItem._id"
         )
-          transition(name="scale-fade")
-            v-checkbox.complete-checkbox.ma-0.pa-0(
-              v-if="listItem.text"
-              @change="listItem.complete($event)"
-              :input-value="!!listItem.completed"
-              :disabled="!listItem.text"
-              color="primary"
-              hide-details
-            )
-          v-menu(
-            :value="listItem.variants.length"
-            transition="slide-fade"
-            max-width="300px"
-            content-class="hint-menu"
-            offset-y
-            :top="list.indexOf(listItem) > 0"
-            :bottom="list.indexOf(listItem) === 0"
+          .list-item.d-flex.align-center.py-1(
+            :class="{ first: index === 0, focused: listItem.focused, checked: listItem.checked, completed: listItem.completed }"
           )
-            template(
-              v-slot:activator="{ on, attrs }"
-            )
-              v-textarea.list-item__text.fill-width.mx-1.ml-8.mt-1.pa-0(
-                @input="updateText(listItem, $event)"
-                @focus="listItem.updateState({ focused: true })"
-                @blur="handleBlur(listItem)"
-                :value="listItem.text"
-                :ref="`textarea-${listItem.id || -index}`"
-                :rows="1"
+            v-icon.handle mdi-drag
+            transition(name="scale-fade")
+              v-checkbox.complete-checkbox.ma-0.pa-0(
+                v-if="listItem.text"
+                @change="listItem.complete($event)"
+                :input-value="!!listItem.completed"
+                :disabled="!listItem.text"
+                color="primary"
                 hide-details
-                auto-grow
               )
-            v-list
-              v-list-item.cursor-pointer(
-                v-for="(variant, index) in listItem.variants.slice(0, 4)"
-                :key="index"
+            v-menu(
+              :value="listItem.variants.length"
+              transition="slide-fade"
+              max-width="300px"
+              content-class="hint-menu"
+              offset-y
+              :top="list.indexOf(listItem) > 0"
+              :bottom="list.indexOf(listItem) === 0"
+            )
+              template(
+                v-slot:activator="{ on, attrs }"
               )
-                v-list-item-title.d-flex.align-center.fill-width(
-                  @click="selectVariant(listItem, variant)"
+                v-textarea.list-item__text.fill-width.mx-1.ml-8.mt-1.pa-0(
+                  @input="updateText(listItem, $event)"
+                  @focus="listItem.updateState({ focused: true })"
+                  @blur="handleBlur(listItem)"
+                  :value="listItem.text"
+                  :ref="`textarea-${listItem.id || -index}`"
+                  :rows="1"
+                  hide-details
+                  auto-grow
                 )
-                  .limit-width {{ variant.text }}
-                  .green--text.font-size-12.ml-2(v-if="variant.isExists") exists
-          transition(name="scale-fade")
-            v-checkbox.ma-0.mr-1.pa-0(
-              v-if="listItem.text"
-              @change="listItem.check($event)"
-              :input-value="!!listItem.checked"
-              :disabled="!listItem.text"
-              :class="{ 'ml-9': !listItem.text }"
-              color="primary"
-              hide-details
-            )
-          transition(name="slide-fade")
-            v-btn.remove-button(
-              v-if="listItem.text"
-              @click="listItem.remove()"
-              color="grey"
-              icon
-            )
-              v-icon mdi-close
+              v-list
+                v-list-item.cursor-pointer(
+                  v-for="(variant, index) in listItem.variants.slice(0, 4)"
+                  :key="index"
+                )
+                  v-list-item-title.d-flex.align-center.fill-width(
+                    @click="selectVariant(listItem, variant)"
+                  )
+                    .limit-width {{ variant.text }}
+                    .green--text.font-size-12.ml-2(v-if="variant.isExists") exists
+            transition(name="scale-fade")
+              v-checkbox.ma-0.mr-1.pa-0(
+                v-if="listItem.text"
+                @change="listItem.check($event)"
+                :input-value="!!listItem.checked"
+                :disabled="!listItem.text"
+                :class="{ 'ml-9': !listItem.text }"
+                color="primary"
+                hide-details
+              )
+            transition(name="slide-fade")
+              v-btn.remove-button(
+                v-if="listItem.text"
+                @click="listItem.remove()"
+                color="grey"
+                icon
+              )
+                v-icon(color="grey lighten-2") mdi-close
     transition(name="slide-fade")
-      .new-list-item-button.mt-2.d-flex.align-center.cursor-text(
+      .new-list-item-button.d-flex.align-center.cursor-text.mt-2.ml-8(
         v-if="showNewButton"
         @click="addNewListItem()"
       )
@@ -84,20 +89,42 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import draggable from 'vuedraggable'
 import NoteModel from '~/models/note'
 import ListItemModel, { Variant } from '~/models/list-item'
-import NoteService from '~/services/notes'
 import ListItemsService from '~/services/list-items'
+import NotesService from '~/services/notes'
 
-@Component
+@Component({
+  components: {
+    draggable,
+  },
+})
 export default class NoteListComponent extends Vue {
   @Prop() list!: ListItemModel[]
   @Prop() note!: NoteModel
   @Prop() isMain!: Boolean
 
+  @Watch('order')
+  onOrderChanged () {
+    this.order.forEach((listItemId, index) => {
+      const listItem = this.list.find((listItem: ListItemModel) => listItem.id === listItemId)
+      if (listItem) {
+        listItem.updateState({ order: index + 1 })
+      }
+    })
+    NotesService.setOrder(this.note, this.order)
+  }
+
+  order: number[] = []
+
   get showNewButton () {
     return !!this.isMain && (!this.list.find(item => !item.text) || !this.list.length)
+  }
+
+  created () {
+    this.list.forEach((listItem: ListItemModel) => this.order.push(listItem.id || 0))
   }
 
   mounted () {
@@ -119,7 +146,7 @@ export default class NoteListComponent extends Vue {
 
   async updateText (listItem: ListItemModel, text: string) {
     if (text) {
-      await listItem.updateState({ variants: NoteService.findListItemVariants(listItem, text) })
+      await listItem.updateState({ variants: NotesService.findListItemVariants(listItem, text) })
     } else {
       await listItem.remove(false)
     }
@@ -154,15 +181,26 @@ export default class NoteListComponent extends Vue {
 $inactive-row-color = #F5F5F5
 
 .note-list
+  margin 0 -12px
+
   .list
+    .sortable-drag
+      display none
+
+    .sortable-ghost
+      background-color #fff
+      box-shadow 0 0 5px rgba(0, 0, 0, 0.3)
+      z-index 20
+
     .list-item
+      position relative
       border-top  1px solid $inactive-row-color
       border-bottom  1px solid transparent
       transition border-top 0.3s, border-bottom 0.3s
-      position relative
 
       .complete-checkbox
         position absolute
+        left 22px
 
       &.first
         border-top  1px solid transparent
@@ -175,6 +213,11 @@ $inactive-row-color = #F5F5F5
       &.focused
         border-top  1px solid $grey-lighten-1
         border-bottom  1px solid $grey-lighten-1
+
+      .handle
+        position relative
+        z-index 20
+        margin-left -4px
 
       .v-input
         ::v-deep .v-input--selection-controls__input
