@@ -46,9 +46,6 @@ export default {
   [types.NOTE_TIMEOUT_CLEARED] (_state: RootState, note: NoteModel) {
     note.saveTimeout && clearTimeout(note.saveTimeout)
   },
-  [types.LIST_ITEM_TIMEOUT_CLEARED] (_state: RootState, listItem: ListItemModel) {
-    listItem.saveTimeout && clearTimeout(listItem.saveTimeout)
-  },
   [types.LIST_ITEM_ADDED] (_state: RootState, listItem: ListItemModel) {
     listItem.note?.list.push(listItem)
   },

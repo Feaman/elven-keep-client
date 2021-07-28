@@ -14,7 +14,6 @@ export interface IListItem {
   focused?: Boolean
   checked?: Boolean
   completed?: Boolean,
-  saveTimeout?: ReturnType<typeof setTimeout> | null
   variants?: Variant[]
   created?: string
   updated?: string
@@ -30,7 +29,6 @@ export default class ListItemModel {
   checked: Boolean
   completed: Boolean
   noteId: number | undefined
-  saveTimeout: ReturnType<typeof setTimeout> | null = null
   variants: Variant[] = []
   created: Date | null = null
   updated: Date | null = null
@@ -49,23 +47,19 @@ export default class ListItemModel {
     this.updated = data.updated ? new Date(data.updated) : null
   }
 
-  async save (savingText: boolean = false) {
-    await BaseService.vuex.dispatch('clearListItemTimeout', this)
-    const saveTimeout = setTimeout(() => {
-      if (!this.id) {
-        return ApiService.saveListItem(this)
-          .then(data => BaseService.vuex.dispatch('updateListItem', {
-            listItem: this,
-            data: { id: data.id, created: data.created, updated: new Date(data.updated || '') }
-          }))
-          .catch(error => BaseService.error(error))
-      } else {
-        return ApiService.updateListItem(this)
-          .then(data => BaseService.vuex.dispatch('updateListItem', { listItem: this, data: { updated: new Date(data.updated || '') } }))
-          .catch(error => BaseService.error(error))
-      }
-    }, savingText ? 400 : 0)
-    this.updateState({ saveTimeout })
+  save () {
+    if (!this.id) {
+      return ApiService.saveListItem(this)
+        .then(data => BaseService.vuex.dispatch('updateListItem', {
+          listItem: this,
+          data: { id: data.id, created: data.created, updated: new Date(data.updated || '') }
+        }))
+        .catch(error => BaseService.error(error))
+    } else {
+      return ApiService.updateListItem(this)
+        .then(data => BaseService.vuex.dispatch('updateListItem', { listItem: this, data: { updated: new Date(data.updated || '') } }))
+        .catch(error => BaseService.error(error))
+    }
   }
 
   async update (data: IListItem) {
@@ -74,9 +68,7 @@ export default class ListItemModel {
       if (!this?.note?.id) {
         await this?.note?.save()
       }
-      this.save(data.text !== undefined)
-    } else {
-      await BaseService.vuex.dispatch('clearListItemTimeout', this)
+      this.save()
     }
   }
 

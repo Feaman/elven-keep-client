@@ -104,12 +104,6 @@ export default {
       resolve('')
     })
   },
-  clearListItemTimeout (actionContext: ActionContext<Function, RootState>, listItem: ListItemModel) {
-    return new Promise(function (resolve) {
-      actionContext.commit(mutationTypes.LIST_ITEM_TIMEOUT_CLEARED, listItem)
-      resolve('')
-    })
-  },
   unsetNote (actionContext: ActionContext<Function, RootState>, note: NoteModel) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.NOTE_UNSET, note)

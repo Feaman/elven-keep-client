@@ -102,6 +102,8 @@ import NotesService from '~/services/notes'
   },
 })
 export default class NoteListComponent extends Vue {
+  saveTimeout: ReturnType<typeof setTimeout> | null = null
+
   @Prop() list!: ListItemModel[]
   @Prop() note!: NoteModel
   @Prop() isMain!: Boolean
@@ -144,13 +146,18 @@ export default class NoteListComponent extends Vue {
     })
   }
 
-  async updateText (listItem: ListItemModel, text: string) {
-    if (text) {
-      await listItem.updateState({ variants: NotesService.findListItemVariants(listItem, text) })
-    } else {
-      await listItem.remove(false)
+  updateText (listItem: ListItemModel, text: string) {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout)
     }
-    listItem.update({ text })
+    this.saveTimeout = setTimeout(async () => {
+      if (text) {
+        await listItem.updateState({ variants: NotesService.findListItemVariants(listItem, text) })
+      } else {
+        await listItem.remove(false)
+      }
+      listItem.update({ text })
+    }, 300)
   }
 
   selectVariant (listItem: ListItemModel, variant: Variant) {
@@ -185,7 +192,7 @@ $inactive-row-color = #F5F5F5
 
   .list
     .sortable-drag
-      display none
+      opacity 0 !important
 
     .sortable-ghost
       background-color #fff
