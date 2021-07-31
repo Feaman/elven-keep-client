@@ -11,7 +11,7 @@ module.exports = {
   plugins: [
   ],
   rules: {
-    // allow trailing comma
+  // allow trailing comma
     'comma-dangle': ['error', 'only-multiline'],
     'prefer-promise-reject-errors': 0,
     camelcase: ["error", { properties: "never", ignoreDestructuring: true }],
@@ -23,5 +23,7 @@ module.exports = {
     'generator-star-spacing': 0,
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
+    indent: "off",
+    "@typescript-eslint/indent": ["error", 2]
   }
 }

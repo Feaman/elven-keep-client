@@ -16,18 +16,30 @@ export default class NotesService extends BaseService {
   }
 
   static findListItemVariants (listItem: ListItemModel, query: string) {
-    const variants: Variant[] = []
+    let variants: Variant[] = []
 
     if (query.length > 1) {
-      const ownNote = this.vuex.state.notes.find((note: NoteModel) => note.id === listItem.noteId)
-      this.findNoteListItemVariants(ownNote, variants, listItem, query)
-
       this.vuex.state.notes.forEach((note: NoteModel) => {
-        if (note.id !== ownNote.id && note.isList()) {
+        if (note.isList()) {
           this.findNoteListItemVariants(note, variants, listItem, query)
         }
       })
     }
+
+    // Sort
+    variants.sort((previousItem, nextItem) => {
+      if (previousItem.text === nextItem.text) {
+        return 0
+      } else {
+        return previousItem.text > nextItem.text ? -1 : 1
+      }
+    })
+
+    // Unique
+    variants = variants.filter((element, position) => {
+      const sameElement = variants.find((_element) => _element.text === element.text)
+      return sameElement ? variants.indexOf(sameElement) === position : false
+    })
 
     return variants
   }
@@ -43,7 +55,13 @@ export default class NotesService extends BaseService {
               !variants.find(variant => variant.listItemId === _listItem.id)
             ) {
               const isExists = listItem.noteId === note.id && !_listItem.completed
-              variants.push({ noteId: Number(_listItem.noteId), listItemId: Number(_listItem.id), text: _listItem.text, isExists })
+              variants.push({
+                noteId: Number(_listItem.noteId),
+                listItemId: Number(_listItem.id),
+                text: _listItem.text,
+                isExists,
+                focused: false,
+              })
             }
           })
       }

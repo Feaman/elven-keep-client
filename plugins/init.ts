@@ -28,6 +28,11 @@ export default (context: Context) => {
   // Draggable
   Vue.component('Draggable', draggable)
 
+  // Keydown events
+  document.onkeydown = (event: KeyboardEvent) => {
+    BaseService.events.$emit('keydown', event)
+  }
+
   BaseService.vuex.dispatch('setMainListScrollTop', 0)
   BaseService.initApplication()
     .then(() => BaseService.vuex.dispatch('setIsInitInfoLoading', false))

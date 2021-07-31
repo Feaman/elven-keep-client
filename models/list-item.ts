@@ -3,7 +3,13 @@ import BaseService from '~/services/base'
 import ApiService from '~/services/api'
 import ListItemsService from '~/services/list-items'
 
-export type Variant = { noteId: number, listItemId: number, text: string, isExists: boolean }
+export type Variant = {
+  noteId: number,
+  listItemId: number,
+  text: string,
+  isExists: boolean,
+  focused: boolean,
+}
 
 export interface IListItem {
   id?: number

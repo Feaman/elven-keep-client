@@ -14,23 +14,21 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { State } from 'vuex-class'
+import BaseService from '~/services/base'
+import KeyboardEvents from '~/services/keyboard-events'
 
 @Component
 export default class SearchComponent extends Vue {
   @State searchQuery!: string
 
   mounted () {
-    const app = this
-    document.onkeydown = function (event) {
-      event = event || window.event
-      if (event.key === "Escape" || event.key === "Esc") {
-        app.$store.dispatch('setQuerySearch', '')
-      }
-    }
-  }
-
-  destroyed () {
-    document.onkeydown = null
+    BaseService.events.$on(
+      'keydown',
+      (event: KeyboardEvent) => {
+        if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
+          this.$store.dispatch('setQuerySearch', '')
+        }
+      })
   }
 
   handleSearch (searchQuery: string) {

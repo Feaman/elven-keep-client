@@ -97,6 +97,7 @@
       v-model="coAuthorsDialogShown"
       :max-width="500"
       transition="scale-fade"
+      @keydown.esc.stop=""
     )
       v-card.pb-4
         v-toolbar(
@@ -174,6 +175,8 @@ import NoteModel from '~/models/note'
 import TypeModel from '~/models/type'
 import UserModel from '~/models/user'
 import NotesService from '~/services/notes'
+import KeyboardEvents from '~/services/keyboard-events'
+import BaseService from '~/services/base'
 
 @Component
 export default class NoteComponent extends Vue {
@@ -237,21 +240,17 @@ export default class NoteComponent extends Vue {
   }
 
   mounted () {
-    const app = this
-    document.onkeydown = function (event) {
-      event = event || window.event
-      if (event.key === "Escape" || event.key === "Esc") {
-        if (app.coAuthorsDialogShown) {
-          app.coAuthorsDialogShown = false
-        } else {
-          app.$router.go(-1)
-        }
-      }
-    }
+    BaseService.events.$on('keydown', this.closeCoAuthorsDialog)
   }
 
-  destroyed () {
-    document.onkeydown = null
+  closeCoAuthorsDialog (event: KeyboardEvent) {
+    if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
+      if (this.coAuthorsDialogShown) {
+        this.coAuthorsDialogShown = false
+      } else {
+        this.$router.go(-1)
+      }
+    }
   }
 
   addCoAuthor () {

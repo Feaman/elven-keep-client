@@ -41,6 +41,7 @@
               )
                 v-textarea.list-item__text.fill-width.mx-1.ml-8.mt-1.pa-0(
                   @input="updateText(listItem, $event)"
+                  @keydown.enter="selectFocusedVariant($event)"
                   @focus="listItem.updateState({ focused: true })"
                   @blur="handleBlur(listItem)"
                   :value="listItem.text"
@@ -49,10 +50,11 @@
                   hide-details
                   auto-grow
                 )
-              v-list
-                v-list-item.cursor-pointer(
+              v-list.variants
+                v-list-item.variant.cursor-pointer(
                   v-for="(variant, index) in listItem.variants.slice(0, 4)"
                   :key="index"
+                  :class="{ focused: variant.focused }"
                 )
                   v-list-item-title.d-flex.align-center.fill-width(
                     @click="selectVariant(listItem, variant)"
@@ -95,6 +97,8 @@ import NoteModel from '~/models/note'
 import ListItemModel, { Variant } from '~/models/list-item'
 import ListItemsService from '~/services/list-items'
 import NotesService from '~/services/notes'
+import KeyboardEvents from '~/services/keyboard-events'
+import BaseService from '~/services/base'
 
 @Component({
   components: {
@@ -136,6 +140,53 @@ export default class NoteListComponent extends Vue {
         textareaComponents[0].focus()
       })
     }
+    BaseService.events.$on('keydown', this.handleKeyDown)
+  }
+
+  handleKeyDown (event: KeyboardEvent) {
+    switch (true) {
+      case KeyboardEvents.is(event, KeyboardEvents.ARROW_UP):
+        this.focusVariant('up')
+        break
+      case KeyboardEvents.is(event, KeyboardEvents.ARROW_DOWN):
+        this.focusVariant('down')
+        break
+    }
+  }
+
+  selectFocusedVariant (event: KeyboardEvent) {
+    const listItem = this.list.find(item => item.focused)
+    if (listItem) {
+      const focusedVariant = listItem.variants.find(variant => variant.focused)
+      if (focusedVariant) {
+        this.selectVariant(listItem, focusedVariant)
+      }
+      setTimeout(() => listItem.update({ text: listItem.text?.trim() }), 400)
+    }
+    event.stopPropagation()
+  }
+
+  async focusVariant (direction: string) {
+    const listItem = this.list.find(item => item.focused)
+    if (listItem) {
+      const focusedVariant = listItem.variants.find(variant => variant.focused)
+      const variants = listItem.variants.map(variant => Object.assign({}, variant, { focused: false }))
+      if (variants.length) {
+        let currentIndex = direction === 'down' ? 0 : variants.length - 1
+        if (focusedVariant) {
+          const adding = (direction === 'down' ? 1 : -1)
+          const currentVariantIndex = listItem.variants.indexOf(focusedVariant)
+          currentIndex = currentVariantIndex + adding
+          if (currentIndex < 0) {
+            currentIndex = variants.length - 1
+          } else if (currentIndex > listItem.variants.length - 1) {
+            currentIndex = 0
+          }
+        }
+        variants[currentIndex].focused = true
+        await listItem.updateState({ variants })
+      }
+    }
   }
 
   async addNewListItem () {
@@ -154,6 +205,7 @@ export default class NoteListComponent extends Vue {
       if (text) {
         await listItem.updateState({ variants: NotesService.findListItemVariants(listItem, text) })
       } else {
+        await listItem.updateState({ variants: [] })
         await listItem.remove(false)
       }
       listItem.update({ text })
@@ -261,4 +313,8 @@ $inactive-row-color = #F5F5F5
 .hint-menu
   .v-list-item
     min-height 32px
+
+.variants
+  .variant.focused
+    background-color rgba(0, 0, 0, 0.1)
 </style>
