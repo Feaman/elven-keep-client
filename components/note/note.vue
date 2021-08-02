@@ -1,45 +1,36 @@
 <template lang="pug">
   .note.d-flex.flex-column.align-center.fill-height
-    v-toolbar.toolbar.fill-width(
-      color="primary"
-      dark
+    note-toolbar(
+      :note="note"
+      @co-authors-clicked="coAuthorsDialogShown = true"
     )
-      v-btn(
-        @click="$router.back()"
-        icon
-        dark
-      )
-        v-icon mdi-arrow-left
-      v-divider(vertical)
-      v-tooltip(
-        v-if="isMyNote"
-        bottom
-      )
-        template(
-          v-slot:activator="{ on, attrs }"
-        )
-          v-btn(
-            @click="coAuthorsDialogShown = true"
-            v-bind="attrs"
-            v-on="on"
-            icon
-          )
-            v-icon mdi-account-group
-        span Manage authors
-      v-divider(vertical)
-      toolbar-tools
-      v-divider(vertical)
-      v-spacer
-      saving(v-if="note.id")
-
     .content.d-flex.flex-column.fill-width.fill-height.pt-2.px-3
-      v-text-field.title-field.mt-1.mb-2(
-        @input="note.update({ title: $event })"
-        :value="note.title"
-        placeholder="Title"
-        hide-details
-        dense
-      )
+      .d-flex.align-center
+        v-text-field.title-field.mt-1.mb-2(
+          @input="note.update({ title: $event })"
+          :value="note.title"
+          placeholder="Title"
+          hide-details
+          dense
+        )
+        v-tooltip(
+          v-if="note.type.name === NOTE_TYPE_LIST"
+          bottom
+        )
+          template(
+            v-slot:activator="{ on, attrs }"
+          )
+            v-btn.complete-checked-button(
+              @click="completeChecked()"
+              :disabled="!checkedListItems.length"
+              v-bind="attrs"
+              v-on="on"
+              color="primary"
+              fab
+              x-small
+            )
+              v-icon mdi-check
+          span Complete checked items
       v-textarea.text(
         v-if="note.type.name === NOTE_TYPE_TEXT"
         @input="note.update({ text: $event })"
@@ -231,6 +222,10 @@ export default class NoteComponent extends Vue {
       })
   }
 
+  get checkedListItems () {
+    return this.note.list.filter(listItem => listItem.checked && !listItem.completed)
+  }
+
   created () {
     NotesService.events.$on('NOTE_REMOVED', (note: NoteModel) => {
       if (note.id === this.note.id) {
@@ -241,6 +236,12 @@ export default class NoteComponent extends Vue {
 
   mounted () {
     BaseService.events.$on('keydown', this.closeCoAuthorsDialog)
+  }
+
+  completeChecked () {
+    this.checkedListItems.forEach((listItem) => {
+      listItem.complete(true)
+    })
   }
 
   closeCoAuthorsDialog (event: KeyboardEvent) {
@@ -277,9 +278,6 @@ export default class NoteComponent extends Vue {
 $active-row-color = #6A1B9A
 
 .note
-  .toolbar
-    z-index 30
-
   .content
     max-width 900px
     overflow auto
@@ -293,6 +291,24 @@ $active-row-color = #6A1B9A
 
     .title-field
       max-height 32px
+      position relative
+
+      &:after
+        content ''
+        width 50px
+        height 100%
+        position absolute
+        top 0
+        right 0
+        background linear-gradient(to left, #fff 20%, transparent)
+
+    .complete-checked-button
+      width 24px
+      height 24px
+      margin 0 -5px 0 0
+
+      &:not(.v-btn--disabled)
+        box-shadow 0px 0px 5px 0 rgba(0, 0, 0, 0.2), 0px 0px 10px 0px rgba(0, 0, 0, 0.14), 0px 0px 16px 0px rgba(0, 0, 0, 0.14)
 
     .text
       ::v-deep

@@ -8,6 +8,12 @@ import StatusModel from '~/models/status'
 import UserModel from '~/models/user'
 
 export default {
+  setSSESalt (actionContext: ActionContext<Function, RootState>, SSESalt: string) {
+    return new Promise(function (resolve) {
+      actionContext.commit(mutationTypes.SSE_SALT_SET, SSESalt)
+      resolve('')
+    })
+  },
   setNotes (actionContext: ActionContext<Function, RootState>, notes: Array<NoteModel>) {
     return new Promise(function (resolve) {
       actionContext.commit(mutationTypes.NOTES_SET, notes)

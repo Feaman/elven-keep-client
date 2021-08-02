@@ -12,6 +12,7 @@ export const state = () => {
     statuses: [] as StatusModel[],
     mainListScrollTop: 0,
     user: null as UserModel | null,
+    SSESalt: '',
     searchQuery: '',
     isNoteSaving: false,
     isInitInfoLoading: true,

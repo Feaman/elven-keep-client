@@ -34,6 +34,9 @@ export default class ApiService extends BaseService {
         config.headers.Authorization = `Bearer ${token}`
       }
 
+      // Set SSE salt
+      config.headers['x-sse-salt'] = this.vuex.state.SSESalt
+
       if (this.noteSavingTimeout) {
         clearTimeout(this.noteSavingTimeout)
       }
@@ -116,7 +119,7 @@ export default class ApiService extends BaseService {
 
   static updateListItem (listItem: ListItemModel): Promise<IListItem> {
     const data = {
-      text: listItem.text?.trim(),
+      text: listItem.text,
       checked: listItem.checked,
       order: listItem.order,
       completed: listItem.completed,

@@ -14,7 +14,7 @@ export default class SSEService extends BaseService {
   static eventSource: EventSource | null = null
 
   static init () {
-    this.eventSource = new EventSource(this.api.URL + `events/${this.vuex.state.user.id}`)
+    this.eventSource = new EventSource(this.api.URL + `events/${this.vuex.state.user.id}/${this.vuex.state.SSESalt}`)
 
     this.eventSource.onerror = function (event: Event) {
       const target = event.target as WebSocket
@@ -56,24 +56,24 @@ export default class SSEService extends BaseService {
       this.events.$emit('NOTE_REMOVED', note)
     })
 
+    this.eventSource.addEventListener(this.EVENT_LIST_ITEM_ADDED, (sourceEvent: Event) => {
+      const event = sourceEvent as MessageEvent
+      const listItemData = JSON.parse(event.data)
+      const note: NoteModel = this.vuex.state.notes.find((note: NoteModel) => note.id === listItemData.noteId)
+      if (note) {
+        note.addListItem(listItemData)
+      }
+    })
+
     this.eventSource.addEventListener(this.EVENT_LIST_ITEM_CHANGED, (sourceEvent: Event) => {
       const event = sourceEvent as MessageEvent
       const listItemData = JSON.parse(event.data)
-      const note = this.vuex.state.notes.find((note: NoteModel) => note.id === listItemData.noteId)
+      const note: NoteModel = this.vuex.state.notes.find((note: NoteModel) => note.id === listItemData.noteId)
       if (note) {
         const listItem = note.list.find((listItem: ListItemModel) => listItem.id === listItemData.id)
         if (listItem) {
           listItem.updateState({ text: listItemData.text, checked: listItemData.checked, completed: listItemData.completed })
         }
-      }
-    })
-
-    this.eventSource.addEventListener(this.EVENT_LIST_ITEM_ADDED, (sourceEvent: Event) => {
-      const event = sourceEvent as MessageEvent
-      const listItemData = JSON.parse(event.data)
-      const note = this.vuex.state.notes.find((note: NoteModel) => note.id === listItemData.noteId)
-      if (note) {
-        note.addListItem(listItemData)
       }
     })
 

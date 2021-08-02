@@ -10,6 +10,9 @@ export default {
   [types.NOTES_SET] (state: RootState, notes: Array<NoteModel>) {
     state.notes = notes
   },
+  [types.SSE_SALT_SET] (state: RootState, SSESalt: string) {
+    state.SSESalt = SSESalt
+  },
   [types.TYPES_SET] (state: RootState, types: TypeModel[]) {
     state.types = types
   },

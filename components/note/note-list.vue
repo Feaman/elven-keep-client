@@ -120,7 +120,9 @@ export default class NoteListComponent extends Vue {
         listItem.updateState({ order: index + 1 })
       }
     })
-    NotesService.setOrder(this.note, this.order)
+    if (this.note.id) {
+      NotesService.setOrder(this.note, this.order)
+    }
   }
 
   order: number[] = []

@@ -106,11 +106,13 @@ export default class NoteModel {
       Object.assign(
         {
           noteId: this.id,
-          note: this,
           updated: new Date(),
           order,
         },
-        listItemData || {}
+        listItemData || {},
+        {
+          note: this,
+        },
       )
     )
     await NotesService.vuex.dispatch('addListItem', listItem)

@@ -4,7 +4,7 @@ import draggable from 'vuedraggable'
 import BaseService from '~/services/base'
 import ApiService from '~/services/api'
 
-export default (context: Context) => {
+export default async (context: Context) => {
   BaseService.error = context.error
   BaseService.api = ApiService
   BaseService.vuex = context.store
@@ -13,6 +13,10 @@ export default (context: Context) => {
   BaseService.route = context.route
   ApiService.axios = context.app.$axios
   ApiService.redirect = context.redirect
+
+  // Generate SSE salt
+  const salt = `_${Math.random().toString(36).substr(2, 9)}_${(new Date()).getMilliseconds()}`
+  await BaseService.vuex.dispatch('setSSESalt', salt)
 
   ApiService.initInterceptors()
 
