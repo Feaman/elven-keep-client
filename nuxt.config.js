@@ -16,7 +16,9 @@ export default {
         hid: "description",
         name: "description",
         content: "Удобные заметки"
-      }
+      },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
     ],
     link: [
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
