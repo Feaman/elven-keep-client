@@ -22,13 +22,17 @@ export default class SearchComponent extends Vue {
   @State searchQuery!: string
 
   mounted () {
-    BaseService.events.$on(
-      'keydown',
-      (event: KeyboardEvent) => {
-        if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
-          this.$store.dispatch('setQuerySearch', '')
-        }
-      })
+    BaseService.events.$on('keydown', this.handleEscapeButton)
+  }
+
+  beforeDestroy () {
+    BaseService.events.$off('keydown', this.handleEscapeButton)
+  }
+
+  handleEscapeButton (event: KeyboardEvent) {
+    if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
+      this.$store.dispatch('setQuerySearch', '')
+    }
   }
 
   handleSearch (searchQuery: string) {

@@ -112,4 +112,44 @@ export default class ListItemModel {
       return Promise.resolve()
     }
   }
+
+  selectVariant (variant: Variant) {
+    if (variant.noteId === this.noteId && variant.listItemId !== this.id) {
+      const existentListItem = this.note?.list.find((listItem: ListItemModel) => listItem.id === variant.listItemId)
+      if (existentListItem) {
+        existentListItem.update({ completed: false, checked: false, order: ListItemsService.generateMaxOrder(this) })
+        this.remove()
+      }
+    } else {
+      this.update({ text: variant.text })
+    }
+  }
+
+  selectFocusedVariant () {
+    const focusedVariant = this.variants.find(variant => variant.focused)
+    if (focusedVariant) {
+      this.selectVariant(focusedVariant)
+      setTimeout(() => this.update({ text: this.text?.trim() }), 400)
+    }
+  }
+
+  async focusVariant (direction: string) {
+    const focusedVariant = this.variants.find(variant => variant.focused)
+    const variants = this.variants.map(variant => Object.assign({}, variant, { focused: false }))
+    if (variants.length) {
+      let currentIndex = direction === 'down' ? 0 : variants.length - 1
+      if (focusedVariant) {
+        const adding = (direction === 'down' ? 1 : -1)
+        const currentVariantIndex = this.variants.indexOf(focusedVariant)
+        currentIndex = currentVariantIndex + adding
+        if (currentIndex < 0) {
+          currentIndex = variants.length - 1
+        } else if (currentIndex > this.variants.length - 1) {
+          currentIndex = 0
+        }
+      }
+      variants[currentIndex].focused = true
+      await this.updateState({ variants })
+    }
+  }
 }

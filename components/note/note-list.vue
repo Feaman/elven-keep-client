@@ -39,17 +39,18 @@
               template(
                 v-slot:activator="{ on, attrs }"
               )
-                v-textarea.list-item__text.fill-width.mx-1.ml-8.mt-1.pa-0(
-                  @input="updateText(listItem, $event)"
-                  @keydown.enter="selectFocusedVariant($event)"
-                  @focus="listItem.updateState({ focused: true })"
-                  @blur="handleBlur(listItem)"
-                  :value="listItem.text"
-                  :ref="`textarea-${listItem.id || -index}`"
-                  :rows="1"
-                  hide-details
-                  auto-grow
-                )
+                .list-item__text.fill-width.mx-1.ml-8.mt-1
+                  v-textarea.ma-0.pa-0(
+                    @input="updateText(listItem, $event)"
+                    @keydown.enter="selectFocusedVariant($event)"
+                    @focus="listItem.updateState({ focused: true })"
+                    @blur="handleBlur(listItem)"
+                    :value="listItemText(listItem)"
+                    :rows="1"
+                    :ref="`textarea-${listItem.id || -index}`"
+                    hide-details
+                    auto-grow
+                  )
               v-list.variants
                 v-list-item.variant.cursor-pointer(
                   v-for="(variant, index) in listItem.variants.slice(0, 4)"
@@ -79,7 +80,7 @@
                 icon
               )
                 v-icon(color="grey lighten-2") mdi-close
-    transition(name="slide-fade")
+    transition(name="slide-fade-absolute")
       .new-list-item-button.d-flex.align-center.cursor-text.mt-2.ml-8(
         v-if="showNewButton"
         @click="addNewListItem()"
@@ -95,7 +96,6 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import draggable from 'vuedraggable'
 import NoteModel from '~/models/note'
 import ListItemModel, { Variant } from '~/models/list-item'
-import ListItemsService from '~/services/list-items'
 import NotesService from '~/services/notes'
 import KeyboardEvents from '~/services/keyboard-events'
 import BaseService from '~/services/base'
@@ -131,6 +131,21 @@ export default class NoteListComponent extends Vue {
     return !!this.isMain && (!this.list.find(item => !item.text) || !this.list.length)
   }
 
+  get listItemText () {
+    return (listItem: ListItemModel) => {
+      let listItemText = listItem.text
+
+      if (listItemText) {
+        const isMultiLine = listItemText.split(/\r?\n/).length > 2
+        if (!listItem.focused && isMultiLine) {
+          listItemText = `${listItemText.split(/\r?\n/)[0]}\r\n...`
+        }
+      }
+
+      return listItemText
+    }
+  }
+
   created () {
     this.list.forEach((listItem: ListItemModel) => this.order.push(listItem.id || 0))
   }
@@ -143,6 +158,64 @@ export default class NoteListComponent extends Vue {
       })
     }
     BaseService.events.$on('keydown', this.handleKeyDown)
+    this.$el.querySelectorAll('.list-item textarea').forEach($textarea => {
+      this.handleTextareaKeydown($textarea as HTMLTextAreaElement)
+    })
+  }
+
+  beforeDestroy () {
+    BaseService.events.$off('keydown', this.handleKeyDown)
+  }
+
+  handleTextareaKeydown ($textarea: HTMLTextAreaElement) {
+    $textarea.onkeydown = (event: KeyboardEvent) => {
+      if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, true)) {
+        this.focusNextItem(event)
+      }
+      if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, false, true)) {
+        this.focusNextItem(event)
+      }
+    }
+  }
+
+  async focusNextItem (event: KeyboardEvent) {
+    const focusedListItem = this.list.find(item => item.focused)
+    if (focusedListItem) {
+      const focusedItemIndex = this.list.indexOf(focusedListItem)
+      if (focusedItemIndex === this.list.length - 1) {
+        if (this.isMain && focusedListItem.text?.trim()) {
+          await focusedListItem.updateState({ variants: [] })
+          this.addNewListItem()
+        } else if (this.isMain && !focusedListItem.id) {
+          const $textarea = this.$el.querySelector('.list .px-3:last-child .list-item textarea') as HTMLTextAreaElement
+          if ($textarea && $textarea.value) {
+            setTimeout(async () => {
+              this.addNewListItem()
+              await focusedListItem.updateState({ variants: [] })
+            }, 400)
+          } else if ($textarea && !$textarea.value) {
+            this.focusListItem(0)
+          }
+        } else {
+          this.focusListItem(0)
+        }
+      } else {
+        this.focusListItem(focusedItemIndex + 1)
+      }
+    }
+    event.preventDefault()
+  }
+
+  focusListItem (index: number) {
+    const nextListItem = this.list[index]
+    nextListItem.updateState({ focused: true })
+    const $textarea = this.getListItemTextarea(nextListItem)
+    $textarea.focus()
+  }
+
+  getListItemTextarea (listItem: ListItemModel) {
+    const textareaComponents = this.$refs[`textarea-${listItem.id}`] as HTMLTextAreaElement[]
+    return textareaComponents[0]
   }
 
   handleKeyDown (event: KeyboardEvent) {
@@ -153,49 +226,36 @@ export default class NoteListComponent extends Vue {
       case KeyboardEvents.is(event, KeyboardEvents.ARROW_DOWN):
         this.focusVariant('down')
         break
+      case KeyboardEvents.is(event, KeyboardEvents.ENTER):
+        this.addNewListItem()
+        break
     }
   }
 
   selectFocusedVariant (event: KeyboardEvent) {
-    const listItem = this.list.find(item => item.focused)
-    if (listItem) {
-      const focusedVariant = listItem.variants.find(variant => variant.focused)
-      if (focusedVariant) {
-        this.selectVariant(listItem, focusedVariant)
-      }
-      setTimeout(() => listItem.update({ text: listItem.text?.trim() }), 400)
+    const focusedListItem = this.list.find(item => item.focused)
+    if (focusedListItem) {
+      focusedListItem.selectFocusedVariant()
     }
     event.stopPropagation()
   }
 
-  async focusVariant (direction: string) {
+  focusVariant (direction: string) {
     const listItem = this.list.find(item => item.focused)
     if (listItem) {
-      const focusedVariant = listItem.variants.find(variant => variant.focused)
-      const variants = listItem.variants.map(variant => Object.assign({}, variant, { focused: false }))
-      if (variants.length) {
-        let currentIndex = direction === 'down' ? 0 : variants.length - 1
-        if (focusedVariant) {
-          const adding = (direction === 'down' ? 1 : -1)
-          const currentVariantIndex = listItem.variants.indexOf(focusedVariant)
-          currentIndex = currentVariantIndex + adding
-          if (currentIndex < 0) {
-            currentIndex = variants.length - 1
-          } else if (currentIndex > listItem.variants.length - 1) {
-            currentIndex = 0
-          }
-        }
-        variants[currentIndex].focused = true
-        await listItem.updateState({ variants })
-      }
+      listItem.focusVariant(direction)
     }
   }
 
   async addNewListItem () {
     const listItem = await this.note.addListItem()
     setTimeout(() => {
-      const textareaComponents = this.$refs[`textarea-${listItem.id || -(this.list.indexOf(listItem))}`] as HTMLTextAreaElement[]
-      textareaComponents[textareaComponents.length - 1].focus()
+      const textareaComponents = this.$refs[`textarea-${listItem.id || -(this.list.indexOf(listItem))}`] as Vue[]
+      const $textarea = textareaComponents[textareaComponents.length - 1].$el.querySelector('textarea') as HTMLTextAreaElement
+      if ($textarea) {
+        $textarea.focus()
+        this.handleTextareaKeydown($textarea)
+      }
     })
   }
 
@@ -215,19 +275,11 @@ export default class NoteListComponent extends Vue {
   }
 
   selectVariant (listItem: ListItemModel, variant: Variant) {
-    if (variant.noteId === listItem.noteId && variant.listItemId !== listItem.id) {
-      const existentListItem = this.note.list.find((listItem: ListItemModel) => listItem.id === variant.listItemId)
-      if (existentListItem) {
-        existentListItem.update({ completed: false, checked: false, order: ListItemsService.generateMaxOrder(listItem) })
-        listItem.remove()
-      }
-    } else {
-      listItem.update({ text: variant.text })
-    }
+    listItem.selectVariant(variant)
   }
 
   handleBlur (listItem: ListItemModel) {
-    listItem.updateState({ focused: false })
+    listItem.updateState({ focused: false, text: listItem.text?.trim() })
     if (!listItem.text) {
       listItem.removeFromState()
     }
@@ -245,6 +297,8 @@ $inactive-row-color = #F5F5F5
   margin 0 -12px
 
   .list
+    position relative
+
     .sortable-drag
       opacity 0 !important
 
@@ -258,6 +312,11 @@ $inactive-row-color = #F5F5F5
       border-top  1px solid $inactive-row-color
       border-bottom  1px solid transparent
       transition border-top 0.3s, border-bottom 0.3s
+
+      .list-item__text
+        max-height 40px
+        overflow hidden
+        transition: max-height 0.3s
 
       .complete-checkbox
         position absolute
@@ -274,6 +333,9 @@ $inactive-row-color = #F5F5F5
       &.focused
         border-top  1px solid $grey-lighten-1
         border-bottom  1px solid $grey-lighten-1
+
+        .list-item__text
+          max-height 1000px
 
       .handle
         position relative

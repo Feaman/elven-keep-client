@@ -50,7 +50,7 @@ export default class KeyboardEvents extends BaseService {
     }
   }
 
-  static is (event: KeyboardEvent, keyNames: string | string[], additionalKey = true) {
+  static is (event: KeyboardEvent, keyNames: string | string[], shiftKey = false, controlKey = false, metaKey = false) {
     if (!Array.isArray(keyNames)) {
       keyNames = [keyNames]
     }
@@ -58,7 +58,9 @@ export default class KeyboardEvents extends BaseService {
     let match = false
     keyNames.forEach(keyName => {
       if (
-        additionalKey &&
+        ((!metaKey && !event.metaKey) || (metaKey && event.metaKey)) &&
+        ((!controlKey && !event.ctrlKey) || (controlKey && event.ctrlKey)) &&
+        ((!shiftKey && !event.shiftKey) || (shiftKey && event.shiftKey)) &&
         this.keyboardEvents[keyName] &&
         (
           (event.key && this.keyboardEvents[keyName].keys.includes(event.key)) ||

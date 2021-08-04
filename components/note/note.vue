@@ -46,10 +46,11 @@
           :note="note"
           :list="mainListItems"
           :is-main="true"
+          ref="noteList"
         )
         template(v-if="completedListItems.length")
           v-divider(
-            :class="{ 'my-2': isNewButtonShown, 'my-2 mt-6': !isNewButtonShown }"
+            :class="{ 'my-2': isNewButtonShown, 'my-2 mt-14px': !isNewButtonShown }"
             v-if="completedListItems.length"
           )
           v-expansion-panels.mt-2.mb-4(
@@ -84,7 +85,7 @@
           .white--text.font-size-12 {{ coAuthor.user.getInitials() }}
 
     v-dialog(
-      v-if="note.user"
+      v-if="noteUser"
       v-model="coAuthorsDialogShown"
       :max-width="500"
       transition="scale-fade"
@@ -109,8 +110,8 @@
           .grey--text.px-4.mt-4 Author
           v-list-item
             v-list-item-content.pt-2
-              v-list-item-title {{ note.user.getFio() }}
-              v-list-item-subtitle {{ note.user.email }}
+              v-list-item-title {{ noteUser.getFio() }}
+              v-list-item-subtitle {{ noteUser.email }}
           .d-flex.flex-column
             v-list.pt-3(
               subheader
@@ -152,6 +153,7 @@
                   placeholder="Co-author email"
                 )
                 v-btn(
+                  :disabled="!this.coAuthorEmail"
                   @click="addCoAuthor()"
                   icon
                 )
@@ -171,13 +173,24 @@ import BaseService from '~/services/base'
 
 @Component
 export default class NoteComponent extends Vue {
+  noteUser: UserModel | null = null
+
   @Prop(NoteModel) note!: NoteModel
 
   @State user!: UserModel
 
+  @Watch('note', { deep: true })
+  onNoteChanged () {
+    if (this.note.user) {
+      this.noteUser = this.note.user
+    }
+  }
+
   @Watch('coAuthorEmail')
   onCoAuthorEmailChanged () {
-    if (!this.coAuthorEmail) {
+    if (this.coAuthorEmail === this.user.email) {
+      this.coAuthorErrors = ['It\'s a note author\'s email']
+    } else {
       this.coAuthorErrors = []
     }
   }
@@ -220,6 +233,7 @@ export default class NoteComponent extends Vue {
         }
         return previousItem.checked ? 1 : -1
       })
+      .sort((previousItem, nextItem) => previousItem.id && !nextItem.id ? -1 : 1)
   }
 
   get checkedListItems () {
@@ -227,15 +241,25 @@ export default class NoteComponent extends Vue {
   }
 
   created () {
-    NotesService.events.$on('NOTE_REMOVED', (note: NoteModel) => {
-      if (note.id === this.note.id) {
-        this.$router.push('/')
-      }
-    })
+    NotesService.events.$on('NOTE_REMOVED', this.handleNoteRemoved)
+    if (this.note.user) {
+      this.noteUser = this.note.user
+    }
+  }
+
+  handleNoteRemoved (note: NoteModel) {
+    if (note.id === this.note.id) {
+      this.$router.push('/')
+    }
   }
 
   mounted () {
-    BaseService.events.$on('keydown', this.closeCoAuthorsDialog)
+    BaseService.events.$on('keydown', this.handleEscapeButton)
+  }
+
+  beforeDestroy () {
+    BaseService.events.$off('keydown', this.handleEscapeButton)
+    NotesService.events.$off('NOTE_REMOVED', this.handleNoteRemoved)
   }
 
   completeChecked () {
@@ -244,10 +268,17 @@ export default class NoteComponent extends Vue {
     })
   }
 
-  closeCoAuthorsDialog (event: KeyboardEvent) {
+  handleEscapeButton (event: KeyboardEvent) {
     if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
+      const focusedListItem = this.note.list.find(item => item.focused)
       if (this.coAuthorsDialogShown) {
         this.coAuthorsDialogShown = false
+      } else if (focusedListItem) {
+        focusedListItem.updateState({ focused: false })
+        const $noteList: HTMLElement = (this.$refs.noteList as Vue).$el as HTMLElement
+        if ($noteList) {
+          $noteList.querySelectorAll('textarea').forEach(($textarea: HTMLTextAreaElement) => $textarea.blur())
+        }
       } else {
         this.$router.go(-1)
       }
@@ -255,9 +286,11 @@ export default class NoteComponent extends Vue {
   }
 
   addCoAuthor () {
-    NotesService.addCoAuthor(this.note, this.coAuthorEmail)
-      .then(() => this.coAuthorEmail = '')
-      .catch(error => this.coAuthorErrors = [(error?.response?.data?.message || 'Unexpected error')])
+    if (!this.coAuthorErrors.length) {
+      NotesService.addCoAuthor(this.note, this.coAuthorEmail)
+        .then(() => this.coAuthorEmail = '')
+        .catch(error => this.coAuthorErrors = [(error?.response?.data?.message || 'Unexpected error')])
+    }
   }
 
   removeCoAuthor (coAuthor: CoAuthorModel) {
@@ -278,6 +311,9 @@ export default class NoteComponent extends Vue {
 $active-row-color = #6A1B9A
 
 .note
+  .mt-14px
+    margin-top 14px !important
+
   .content
     max-width 900px
     overflow auto

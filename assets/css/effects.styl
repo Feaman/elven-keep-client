@@ -46,6 +46,23 @@
   transform translateX(30px)
   opacity 0
 
+// Slide-fade-absolute
+.slide-fade-absolute-enter-active 
+  transition all 0.2 ease
+
+.slide-fade-absolute-leave-active 
+  position absolute !important
+  bottom: 6px
+  transition all 0.1s cubic-bezier(1.0, 0.5, 0.8, 1.0)
+
+.slide-fade-absolute-enter, .slide-fade-absolute-leave-to 
+  transform translateX(30px)
+  opacity 0
+
+.slide-fade-absolute-leave-to 
+  position absolute !important
+  bottom: 6px
+
 
 // Slide-fade-fast
 .slide-fade-fast-enter-active 

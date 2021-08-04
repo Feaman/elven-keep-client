@@ -13,13 +13,12 @@
         )
           v-icon mdi-account-outline
       .white
-        .px-4.pt-2
-          .grey--text.text--darken-2 {{ user.getFio() }}
-          .grey--text.mb-2 {{ user.email }}
-        v-divider
+        .grey.lighten-2.px-4.pt-2.pb-2
+          .font-weight-bold {{ user.getFio() }}
+          .font-size-14.grey--text.text--darken-1 {{ user.email }}
         v-list
           v-list-item
-            v-list-item-title.cursor-pointer(@click="logout()") Logout
+            v-list-item-title.cursor-pointer.py-1(@click="logout()") Logout
 </template>
 
 <script lang="ts">
