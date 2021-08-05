@@ -9,7 +9,6 @@
       v-for="note in filteredNotes"
       :key="note.id"
       :id="note.id"
-      tabindex="0"
     )
       note-preview(
         @click.native="openNote(note)"
@@ -100,12 +99,6 @@ export default class NotesComponent extends Vue {
     max-width 300px
     height 260px
     flex 1
-    overflow hidden
-
-    &:focus
-      outline none
-      box-shadow 0 0 5px rgba(0, 0, 0, 0.5)
-      border-radius 6px
 
 @media (max-width: 700px)
   .notes

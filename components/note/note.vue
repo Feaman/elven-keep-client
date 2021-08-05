@@ -69,17 +69,17 @@
                   :note="note"
                   :list="completedListItems"
                 )
-    .co-authors-list.fill-width.pa-4.pt-3(
+    .co-authors-list.fill-width.cursor-pointer.pa-4.pt-3(
       v-if="note.coAuthors.length"
+      @click="coAuthorsDialogShown = true"
     )
-      .grey--text Co-authors
-      .d-flex.mt-2
-        v-avatar.cursor-pointer(
+      .co-authors-list__title.grey--text Co-authors
+      .co-authors-list__avatars.d-flex.mt-2
+        v-avatar(
           v-for="(coAuthor, index) in note.coAuthors"
-          @click="coAuthorsDialogShown = true"
           :key="coAuthor.id"
           :class="{ 'ml-2': index > 0 }"
-          size="36"
+          size="32"
           color="primary"
         )
           .white--text.font-size-12 {{ coAuthor.user.getInitials() }}
@@ -380,6 +380,23 @@ $active-row-color = #6A1B9A
   .co-authors-list
     box-shadow 0 0 5px rgba(0, 0, 0, 0.5)
     z-index 20
+
+@media (max-width: 700px)
+  .note
+    .co-authors-list
+      height 64px
+      padding 4px 16px 16px 16px !important
+
+      .co-authors-list__title
+        font-size 14px
+
+      .co-authors-list__avatars
+        margin-top 4px !important
+
+        .v-avatar
+          min-width 24px !important
+          width 24px !important
+          height 24px !important
 
 .co-authors
   max-height 250px

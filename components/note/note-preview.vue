@@ -1,6 +1,8 @@
 <template lang="pug">
 v-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
   :class="{ 'with-completed': completedListItems.length }"
+  tabindex="0"
+  :ripple="false"
 )
   .title.limit-width(v-if="note.title") {{ note.title }}
   template(v-if="note.type.name === NOTE_TYPE_LIST")
@@ -99,6 +101,18 @@ export default class NotePreviewComponent extends Vue {
 .note-preview
   position relative
   overflow hidden
+  background none
+  transform scale(1)
+  transition transform 0.3s
+
+  &:focus
+    outline none
+    border-radius 6px
+    box-shadow 0 0 15px rgba(0, 0, 0, 0.3)
+    transform scale(1.05)
+
+  &:before
+    background none
 
   &:after
     content ''
