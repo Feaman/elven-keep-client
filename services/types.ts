@@ -7,7 +7,7 @@ export default class TypesService extends BaseService {
     typesData.forEach((typeData: IType) => {
       types.push(new TypeModel(typeData))
     })
-    this.vuex.dispatch('setTypes', types)
+    this.vuex.commit('setTypes', types)
   }
 
   static getDefault () {

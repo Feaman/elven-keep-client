@@ -4,6 +4,7 @@
     @input="handleSearch($event)"
     :value="searchQuery"
     placeholder="Поиск..."
+    color="black"
     hide-details
     outlined
     clearable
@@ -31,19 +32,17 @@ export default class SearchComponent extends Vue {
 
   handleEscapeButton (event: KeyboardEvent) {
     if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
-      this.$store.dispatch('setQuerySearch', '')
+      this.$store.commit('setSearchQuery', '')
     }
   }
 
   handleSearch (searchQuery: string) {
-    this.$store.dispatch('setQuerySearch', searchQuery)
+    this.$store.commit('setSearchQuery', searchQuery)
   }
 }
 </script>
 
 <style lang="stylus" scoped>
-@import '~assets/css/mixins'
-
 .search
   input
     width 240px

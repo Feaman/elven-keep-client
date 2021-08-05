@@ -24,7 +24,7 @@
                 @change="listItem.complete($event)"
                 :input-value="!!listItem.completed"
                 :disabled="!listItem.text"
-                color="primary"
+                color="secondary"
                 hide-details
               )
             v-menu(
@@ -69,7 +69,7 @@
                 :input-value="!!listItem.checked"
                 :disabled="!listItem.text"
                 :class="{ 'ml-9': !listItem.text }"
-                color="primary"
+                color="secondary"
                 hide-details
               )
             transition(name="slide-fade")
@@ -178,20 +178,20 @@ export default class NoteListComponent extends Vue {
     }
   }
 
-  async focusNextItem (event: KeyboardEvent) {
+  focusNextItem (event: KeyboardEvent) {
     const focusedListItem = this.list.find(item => item.focused)
     if (focusedListItem) {
       const focusedItemIndex = this.list.indexOf(focusedListItem)
       if (focusedItemIndex === this.list.length - 1) {
         if (this.isMain && focusedListItem.text?.trim()) {
-          await focusedListItem.updateState({ variants: [] })
+          focusedListItem.updateState({ variants: [] })
           this.addNewListItem()
         } else if (this.isMain && !focusedListItem.id) {
           const $textarea = this.$el.querySelector('.list .px-3:last-child .list-item textarea') as HTMLTextAreaElement
           if ($textarea && $textarea.value) {
             setTimeout(async () => {
               this.addNewListItem()
-              await focusedListItem.updateState({ variants: [] })
+              focusedListItem.updateState({ variants: [] })
             }, 400)
           } else if ($textarea && !$textarea.value) {
             this.focusListItem(0)
@@ -247,8 +247,8 @@ export default class NoteListComponent extends Vue {
     }
   }
 
-  async addNewListItem () {
-    const listItem = await this.note.addListItem()
+  addNewListItem () {
+    const listItem = this.note.addListItem()
     setTimeout(() => {
       const textareaComponents = this.$refs[`textarea-${listItem.id || -(this.list.indexOf(listItem))}`] as Vue[]
       const $textarea = textareaComponents[textareaComponents.length - 1].$el.querySelector('textarea') as HTMLTextAreaElement
@@ -263,12 +263,12 @@ export default class NoteListComponent extends Vue {
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout)
     }
-    this.saveTimeout = setTimeout(async () => {
+    this.saveTimeout = setTimeout(() => {
       if (text) {
-        await listItem.updateState({ variants: NotesService.findListItemVariants(listItem, text) })
+        listItem.updateState({ variants: NotesService.findListItemVariants(listItem, text) })
       } else {
-        await listItem.updateState({ variants: [] })
-        await listItem.remove(false)
+        listItem.updateState({ variants: [] })
+        listItem.remove(false)
       }
       listItem.update({ text })
     }, 300)

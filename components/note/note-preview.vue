@@ -1,8 +1,9 @@
 <template lang="pug">
 v-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
+  :id="note.id"
   :class="{ 'with-completed': completedListItems.length }"
-  tabindex="0"
   :ripple="false"
+  tabindex="0"
 )
   .title.limit-width(v-if="note.title") {{ note.title }}
   template(v-if="note.type.name === NOTE_TYPE_LIST")
@@ -64,6 +65,8 @@ import { State } from 'vuex-class'
 import NoteModel from '~/models/note'
 import TypeModel from '~/models/type'
 import UserModel from '~/models/user'
+import BaseService from '~/services/base'
+import KeyboardEvents from '~/services/keyboard-events'
 
 @Component
 export default class NotePreviewComponent extends Vue {
@@ -91,6 +94,31 @@ export default class NotePreviewComponent extends Vue {
         }
         return previousItem.checked ? 1 : -1
       })
+  }
+
+  mounted () {
+    BaseService.events.$on('keydown', this.handleKeyDown)
+  }
+
+  beforeDestroy () {
+    BaseService.events.$off('keydown', this.handleKeyDown)
+  }
+
+  handleKeyDown (event: KeyboardEvent) {
+    switch (true) {
+      case KeyboardEvents.is(event, KeyboardEvents.SPACE):
+      case KeyboardEvents.is(event, KeyboardEvents.ENTER):
+        this.selectFocusedNote()
+        break
+    }
+  }
+
+  selectFocusedNote () {
+    const $activeElement: Element | null = document.activeElement
+    const note = this.$store.state.notes.find((note: NoteModel) => note.id === Number($activeElement?.id))
+    if (note) {
+      this.$router.push({ name: 'notes-id', params: { id: String(note.id) } })
+    }
   }
 }
 </script>

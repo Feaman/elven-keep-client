@@ -18,16 +18,19 @@ export default class BaseService {
   }
 
   static handleInitData (data: ConfigObject) {
-    const TypesService = require('~/services/types').default
-    const StatusesService = require('~/services/statuses').default
-    const NotesService = require('~/services/notes').default
-    const SSEService = require('~/services/sse').default
+    return new Promise(resolve => {
+      const TypesService = require('~/services/types').default
+      const StatusesService = require('~/services/statuses').default
+      const NotesService = require('~/services/notes').default
+      const SSEService = require('~/services/sse').default
 
-    TypesService.generateTypes(data.types)
-    StatusesService.generateStatuses(data.statuses)
-    NotesService.generateNotes(data.notes)
+      TypesService.generateTypes(data.types)
+      StatusesService.generateStatuses(data.statuses)
+      NotesService.generateNotes(data.notes)
 
-    return this.vuex.dispatch('setUser', new UserModel(data.user))
-      .then(() => SSEService.init())
+      this.vuex.commit('setUser', new UserModel(data.user))
+      SSEService.init()
+      resolve('')
+    })
   }
 }

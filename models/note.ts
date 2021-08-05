@@ -100,7 +100,7 @@ export default class NoteModel {
     return this.type?.name === TypeModel.TYPE_TEXT
   }
 
-  async addListItem (listItemData: IListItem | null = null) {
+  addListItem (listItemData: IListItem | null = null) {
     const order = this.list.length ? Math.max.apply(Math, this.list.map(listItem => listItem.order)) + 1 : 1
     const listItem = new ListItemModel(
       Object.assign(
@@ -115,20 +115,20 @@ export default class NoteModel {
         },
       )
     )
-    await NotesService.vuex.dispatch('addListItem', listItem)
+    NotesService.vuex.commit('addListItem', listItem)
     return listItem
   }
 
-  async save (savingText: boolean = false): Promise<INote> {
-    await NotesService.vuex.dispatch('clearNoteTimeout', this)
+  save (savingText: boolean = false): Promise<INote> {
+    NotesService.vuex.commit('clearNoteTimeout', this)
     return new Promise((resolve) => {
-      const saveTimeout = setTimeout(async () => {
+      const saveTimeout = setTimeout(() => {
         if (this.id) {
           ApiService.updateNote(this)
             .then(data => resolve(data))
             .catch(error => NotesService.error(error))
         } else {
-          await NotesService.vuex.dispatch('setNote', this)
+          NotesService.vuex.commit('addNote', this)
           return ApiService.addNote(this)
             .then(noteData => {
               history.replaceState({}, '', `/notes/${noteData.id}`)
@@ -139,7 +139,8 @@ export default class NoteModel {
               if (noteData.user) {
                 newNoteData.user = new UserModel(noteData.user)
               }
-              resolve(this.updateState(newNoteData))
+              this.updateState(newNoteData)
+              resolve(newNoteData)
             })
             .catch(error => NotesService.error(error))
         }
@@ -148,26 +149,26 @@ export default class NoteModel {
     })
   }
 
-  async update (data: INote) {
-    await NotesService.vuex.dispatch('updateNote', { note: this, data })
+  update (data: INote) {
+    NotesService.vuex.commit('updateNote', { note: this, data })
 
     if (this.title || this.text || this.list.length) {
       return this.save(!!(data.text || data.title))
     } else {
-      await NotesService.vuex.dispatch('clearNoteTimeout', this)
+      NotesService.vuex.commit('clearNoteTimeout', this)
     }
   }
 
   updateState (data: INote) {
-    return NotesService.vuex.dispatch('updateNote', { note: this, data })
+    NotesService.vuex.commit('updateNote', { note: this, data })
   }
 
   removeFromState () {
-    return NotesService.vuex.dispatch('unsetNote', this)
+    NotesService.vuex.commit('removeNote', this)
   }
 
   async remove () {
-    await this.removeFromState()
+    this.removeFromState()
     try {
       await ApiService.removeNote(this)
     } catch (error) {
@@ -179,8 +180,8 @@ export default class NoteModel {
     this.list.forEach(listItem => listItem.updateState({ note: this }))
   }
 
-  async removeCoAuthor (coAuthor: CoAuthorModel) {
-    await NotesService.vuex.dispatch('removeNoteCoAuthor', { note: this, coAuthor })
+  removeCoAuthor (coAuthor: CoAuthorModel) {
+    NotesService.vuex.commit('removeNoteCoAuthor', { note: this, coAuthor })
     return ApiService.removeNoteCoAuthor(coAuthor)
   }
 }

@@ -33,7 +33,7 @@ export default class SSEService extends BaseService {
       const event = sourceEvent as MessageEvent
       const noteData = JSON.parse(event.data)
       const note = new NoteModel(noteData)
-      NotesService.vuex.dispatch('setNote', note)
+      NotesService.vuex.commit('addNote', note)
     })
 
     this.eventSource.addEventListener(this.EVENT_NOTE_CHANGED, (sourceEvent: Event) => {

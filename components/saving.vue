@@ -2,7 +2,7 @@
 .saving
   transition(name="scale-fade")
     .block.d-flex.align-center(v-if="isNoteSaving")
-      .font-size-13.mr-2 Saving
+      .font-size-13.black--text.mr-2 Saving
       v-progress-circular(
         color="grey lighten-2"
         size="24"
@@ -10,9 +10,9 @@
         indeterminate
       )
   transition(name="scale-fade")
-    .block.d-flex.align-center(v-if="!isNoteSaving")
+    .block.d-flex.align-center.black--text(v-if="!isNoteSaving")
       .font-size-13.mr-2 Saved
-      v-icon mdi-cloud-outline
+      v-icon(color="black") mdi-cloud-outline
 </template>
 
 <script lang="ts">

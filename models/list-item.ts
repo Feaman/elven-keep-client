@@ -56,20 +56,20 @@ export default class ListItemModel {
   save () {
     if (!this.id) {
       return ApiService.saveListItem(this)
-        .then(data => BaseService.vuex.dispatch('updateListItem', {
+        .then(data => BaseService.vuex.commit('updateListItem', {
           listItem: this,
           data: { id: data.id, created: data.created, updated: new Date(data.updated || '') }
         }))
         .catch(error => BaseService.error(error))
     } else {
       return ApiService.updateListItem(this)
-        .then(data => BaseService.vuex.dispatch('updateListItem', { listItem: this, data: { updated: new Date(data.updated || '') } }))
+        .then(data => BaseService.vuex.commit('updateListItem', { listItem: this, data: { updated: new Date(data.updated || '') } }))
         .catch(error => BaseService.error(error))
     }
   }
 
   async update (data: IListItem) {
-    await this.updateState(data)
+    this.updateState(data)
     if (this.text) {
       if (!this?.note?.id) {
         await this?.note?.save()
@@ -79,11 +79,11 @@ export default class ListItemModel {
   }
 
   updateState (data: IListItem) {
-    return BaseService.vuex.dispatch('updateListItem', { listItem: this, data })
+    BaseService.vuex.commit('updateListItem', { listItem: this, data })
   }
 
   removeFromState () {
-    return BaseService.vuex.dispatch('removeListItem', this)
+    BaseService.vuex.commit('removeListItem', this)
   }
 
   complete (isCompleted: boolean) {
@@ -98,10 +98,10 @@ export default class ListItemModel {
     }
   }
 
-  async remove (removeFromState = true) {
+  remove (removeFromState = true) {
     if (this.id) {
       if (removeFromState) {
-        await this.removeFromState()
+        this.removeFromState()
       }
       return ApiService.removeListItem(this)
         .then(() => {
@@ -133,7 +133,7 @@ export default class ListItemModel {
     }
   }
 
-  async focusVariant (direction: string) {
+  focusVariant (direction: string) {
     const focusedVariant = this.variants.find(variant => variant.focused)
     const variants = this.variants.map(variant => Object.assign({}, variant, { focused: false }))
     if (variants.length) {
@@ -149,7 +149,7 @@ export default class ListItemModel {
         }
       }
       variants[currentIndex].focused = true
-      await this.updateState({ variants })
+      this.updateState({ variants })
     }
   }
 }

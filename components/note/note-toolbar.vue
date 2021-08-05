@@ -1,12 +1,10 @@
 <template lang="pug">
   v-toolbar.note-toolbar.fill-width(
     color="primary"
-    dark
   )
     v-btn(
       @click="$router.push('/')"
       icon
-      dark
     )
       v-icon mdi-home
     v-divider(vertical)
@@ -29,10 +27,9 @@
     toolbar-tools
     v-divider(vertical)
     v-spacer
-    div
-      user-menu
-    v-divider.ml-1.mr-4(vertical)
     saving(v-if="note.id")
+    v-divider.ml-4(vertical)
+    user-menu
 </template>
 
 <script lang="ts">
@@ -54,4 +51,8 @@ export default class NoteToolbar extends Vue {
 <style lang="stylus" scoped>
 .note-toolbar
   z-index 30
+
+  ::v-deep .v-toolbar__content
+    padding-left 12px
+    padding-right 0px
 </style>

@@ -80,7 +80,7 @@
           :key="coAuthor.id"
           :class="{ 'ml-2': index > 0 }"
           size="32"
-          color="primary"
+          color="secondary"
         )
           .white--text.font-size-12 {{ coAuthor.user.getInitials() }}
 
@@ -94,14 +94,12 @@
       v-card.pb-4
         v-toolbar(
           color="primary"
-          dark
         )
           v-toolbar-title.pa-0 Authors
           v-spacer
           v-btn(
             @click="coAuthorsDialogShown = false"
             icon
-            dark
           )
             v-icon mdi-close
         v-list.pt-2(
@@ -254,11 +252,11 @@ export default class NoteComponent extends Vue {
   }
 
   mounted () {
-    BaseService.events.$on('keydown', this.handleEscapeButton)
+    BaseService.events.$on('keydown', this.handleKeyDown)
   }
 
   beforeDestroy () {
-    BaseService.events.$off('keydown', this.handleEscapeButton)
+    BaseService.events.$off('keydown', this.handleKeyDown)
     NotesService.events.$off('NOTE_REMOVED', this.handleNoteRemoved)
   }
 
@@ -268,20 +266,36 @@ export default class NoteComponent extends Vue {
     })
   }
 
-  handleEscapeButton (event: KeyboardEvent) {
-    if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
-      const focusedListItem = this.note.list.find(item => item.focused)
-      if (this.coAuthorsDialogShown) {
-        this.coAuthorsDialogShown = false
-      } else if (focusedListItem) {
-        focusedListItem.updateState({ focused: false })
-        const $noteList: HTMLElement = (this.$refs.noteList as Vue).$el as HTMLElement
-        if ($noteList) {
-          $noteList.querySelectorAll('textarea').forEach(($textarea: HTMLTextAreaElement) => $textarea.blur())
-        }
-      } else {
-        this.$router.go(-1)
+  handleKeyDown (event: KeyboardEvent) {
+    switch (true) {
+      case KeyboardEvents.is(event, KeyboardEvents.BACKSPACE):
+        this.back()
+        break
+      case KeyboardEvents.is(event, KeyboardEvents.ESCAPE):
+        this.handleEscapeButton()
+        break
+    }
+  }
+
+  back () {
+    const focusedListItem = this.note.list.find(item => item.focused)
+    if (!this.coAuthorsDialogShown && !focusedListItem) {
+      this.$router.push('/')
+    }
+  }
+
+  handleEscapeButton () {
+    const focusedListItem = this.note.list.find(item => item.focused)
+    if (this.coAuthorsDialogShown) {
+      this.coAuthorsDialogShown = false
+    } else if (focusedListItem) {
+      focusedListItem.updateState({ focused: false })
+      const $noteList: HTMLElement = (this.$refs.noteList as Vue).$el as HTMLElement
+      if ($noteList) {
+        $noteList.querySelectorAll('textarea').forEach(($textarea: HTMLTextAreaElement) => $textarea.blur())
       }
+    } else {
+      this.$router.go(-1)
     }
   }
 
@@ -297,7 +311,7 @@ export default class NoteComponent extends Vue {
     this.note.removeCoAuthor(coAuthor)
       .then(() => {
         if (this.note.userId !== this.user.id) {
-          this.$store.dispatch('unsetNote', this.note)
+          this.$store.commit('removeNote', this.note)
           this.$router.push('/')
         }
       })

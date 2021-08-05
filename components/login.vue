@@ -2,7 +2,6 @@
   .login.fill-height
     v-toolbar(
       color="primary"
-      dark
     )
       .ml-4 ELVEN NOTES
     .d-flex.flex-center.fill-width.height-56.px-8

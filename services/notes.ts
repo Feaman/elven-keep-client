@@ -12,7 +12,7 @@ export default class NotesService extends BaseService {
       note.setNoteToListItems()
       notes.push(note)
     })
-    return this.vuex.dispatch('setNotes', notes)
+    this.vuex.commit('setNotes', notes)
   }
 
   static findListItemVariants (listItem: ListItemModel, query: string) {
@@ -71,7 +71,7 @@ export default class NotesService extends BaseService {
   static addCoAuthor (note: NoteModel, email: string) {
     return this.api.addNoteCoAuthor(note, email)
       .then((coAuthorData: ICoAuthor) => {
-        return this.vuex.dispatch('addNoteCoAuthor', { note, noteCoAuthor: new CoAuthorModel(coAuthorData) })
+        this.vuex.commit('addNoteCoAuthor', { note, noteCoAuthor: new CoAuthorModel(coAuthorData) })
       })
   }
 

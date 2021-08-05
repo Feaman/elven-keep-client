@@ -2,7 +2,6 @@
 .notes-toolbar
   v-toolbar(
     color="primary"
-    dark
   )
     .d-flex.align-center.fill-width
       search

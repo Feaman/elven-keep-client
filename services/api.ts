@@ -40,16 +40,16 @@ export default class ApiService extends BaseService {
       if (this.noteSavingTimeout) {
         clearTimeout(this.noteSavingTimeout)
       }
-      this.noteSavingTimeout = setTimeout(async () => await this.vuex.dispatch('setIsNoteSaving', true), 200)
+      this.noteSavingTimeout = setTimeout(() => this.vuex.commit('setIsNoteSaving', true), 200)
       return config
     })
 
-    this.axios.onResponse(async (response: AxiosResponse) => {
+    this.axios.onResponse((response: AxiosResponse) => {
       if (this.noteSavingTimeout) {
         clearTimeout(this.noteSavingTimeout)
       }
 
-      await this.vuex.dispatch('setIsNoteSaving', false)
+      this.vuex.commit('setIsNoteSaving', false)
       return response
     })
 

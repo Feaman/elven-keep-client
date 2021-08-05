@@ -7,7 +7,7 @@ export default class StatusesService extends BaseService {
     statusesData.forEach((statusData: IStatus) => {
       statuses.push(new StatusModel(statusData))
     })
-    this.vuex.dispatch('setStatuses', statuses)
+    this.vuex.commit('setStatuses', statuses)
   }
 
   static getActive () {

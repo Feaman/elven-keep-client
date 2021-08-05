@@ -4,7 +4,7 @@ import draggable from 'vuedraggable'
 import BaseService from '~/services/base'
 import ApiService from '~/services/api'
 
-export default async (context: Context) => {
+export default (context: Context) => {
   BaseService.error = context.error
   BaseService.api = ApiService
   BaseService.vuex = context.store
@@ -16,7 +16,7 @@ export default async (context: Context) => {
 
   // Generate SSE salt
   const salt = `_${Math.random().toString(36).substr(2, 9)}_${(new Date()).getMilliseconds()}`
-  await BaseService.vuex.dispatch('setSSESalt', salt)
+  BaseService.vuex.commit('setSSESalt', salt)
 
   ApiService.initInterceptors()
 
@@ -37,8 +37,8 @@ export default async (context: Context) => {
     BaseService.events.$emit('keydown', event)
   }
 
-  BaseService.vuex.dispatch('setMainListScrollTop', 0)
+  BaseService.vuex.commit('setMainListScrollTop', 0)
   BaseService.initApplication()
-    .then(() => BaseService.vuex.dispatch('setIsInitInfoLoading', false))
-    .catch(() => BaseService.vuex.dispatch('setIsInitInfoLoading', false))
+    .then(() => BaseService.vuex.commit('setIsInitInfoLoading', false))
+    .catch(() => BaseService.vuex.commit('setIsInitInfoLoading', false))
 }
