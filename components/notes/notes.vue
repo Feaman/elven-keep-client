@@ -8,6 +8,8 @@
     .note.ml-4.mt-4.pa-1(
       v-for="note in filteredNotes"
       :key="note.id"
+      :id="note.id"
+      tabindex="0"
     )
       note-preview(
         @click.native="openNote(note)"
@@ -20,6 +22,8 @@
 import { Vue, Component } from 'vue-property-decorator'
 import { State } from 'vuex-class'
 import NoteModel from '~/models/note'
+import BaseService from '~/services/base'
+import KeyboardEvents from '~/services/keyboard-events'
 
 @Component
 export default class NotesComponent extends Vue {
@@ -48,6 +52,28 @@ export default class NotesComponent extends Vue {
   mounted () {
     this.$el.addEventListener('scroll', this.setMainListScroll)
     this.$el.scrollTo({ top: this.$store.state.mainListScrollTop })
+    BaseService.events.$on('keydown', this.handleKeyDown)
+  }
+
+  beforeDestroy () {
+    BaseService.events.$off('keydown', this.handleKeyDown)
+  }
+
+  handleKeyDown (event: KeyboardEvent) {
+    switch (true) {
+      case KeyboardEvents.is(event, KeyboardEvents.SPACE):
+      case KeyboardEvents.is(event, KeyboardEvents.ENTER):
+        this.selectFocusedNote()
+        break
+    }
+  }
+
+  selectFocusedNote () {
+    const $activeElement: Element | null = document.activeElement
+    const note = this.$store.state.notes.find((note: NoteModel) => note.id === Number($activeElement?.id))
+    if (note) {
+      this.$router.push(`/notes/${note.id}`)
+    }
   }
 
   openNote (note:NoteModel) {
@@ -75,6 +101,11 @@ export default class NotesComponent extends Vue {
     height 260px
     flex 1
     overflow hidden
+
+    &:focus
+      outline none
+      box-shadow 0 0 5px rgba(0, 0, 0, 0.5)
+      border-radius 6px
 
 @media (max-width: 700px)
   .notes

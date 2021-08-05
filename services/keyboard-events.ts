@@ -2,6 +2,7 @@ import BaseService from "./base"
 
 export default class KeyboardEvents extends BaseService {
   static ENTER = 'ENTER'
+  static SPACE = 'SPACE'
   static ESCAPE = 'ESCAPE'
   static DELETE = 'DELETE'
   static BACKSPACE = 'BACKSPACE'
@@ -19,6 +20,10 @@ export default class KeyboardEvents extends BaseService {
     [KeyboardEvents.ENTER]: {
       keyCode: 13,
       keys: ['Enter']
+    },
+    [KeyboardEvents.SPACE]: {
+      keyCode: 32,
+      keys: ['Space']
     },
     [KeyboardEvents.ESCAPE]: {
       keyCode: 27,

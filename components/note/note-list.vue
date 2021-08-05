@@ -279,7 +279,7 @@ export default class NoteListComponent extends Vue {
   }
 
   handleBlur (listItem: ListItemModel) {
-    listItem.updateState({ focused: false, text: listItem.text?.trim() })
+    listItem.updateState({ focused: false, text: listItem.text?.trim(), variants: [] })
     if (!listItem.text) {
       listItem.removeFromState()
     }

@@ -1,4 +1,38 @@
 <template lang="pug">
+  v-toolbar.note-toolbar.fill-width(
+    color="primary"
+    dark
+  )
+    v-btn(
+      @click="$router.push('/')"
+      icon
+      dark
+    )
+      v-icon mdi-home
+    v-divider(vertical)
+    v-tooltip(
+      v-if="isMyNote"
+      bottom
+    )
+      template(
+        v-slot:activator="{ on, attrs }"
+      )
+        v-btn(
+          @click="$emit('co-authors-clicked')"
+          v-bind="attrs"
+          v-on="on"
+          icon
+        )
+          v-icon mdi-account-group
+      span Manage authors
+    v-divider(vertical)
+    toolbar-tools
+    v-divider(vertical)
+    v-spacer
+    div
+      user-menu
+    v-divider.ml-1.mr-4(vertical)
+    saving(v-if="note.id")
 </template>
 
 <script lang="ts">

@@ -72,7 +72,7 @@
     .co-authors-list.fill-width.pa-4.pt-3(
       v-if="note.coAuthors.length"
     )
-      .grey--text Authors
+      .grey--text Co-authors
       .d-flex.mt-2
         v-avatar.cursor-pointer(
           v-for="(coAuthor, index) in note.coAuthors"
@@ -379,6 +379,7 @@ $active-row-color = #6A1B9A
 
   .co-authors-list
     box-shadow 0 0 5px rgba(0, 0, 0, 0.5)
+    z-index 20
 
 .co-authors
   max-height 250px
