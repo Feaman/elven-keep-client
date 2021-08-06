@@ -20,6 +20,7 @@
 import { Vue, Component } from 'vue-property-decorator'
 import { State } from 'vuex-class'
 import NoteModel from '~/models/note'
+import StatusesService from '~/services/statuses'
 
 @Component
 export default class NotesComponent extends Vue {
@@ -30,10 +31,15 @@ export default class NotesComponent extends Vue {
   scrollTimeout: ReturnType<typeof setTimeout> | null = null
 
   get filteredNotes () {
+    const notes = this.notes.filter(note => note.statusId === StatusesService.getActive().id)
+
+    notes.sort((previousItem, nextItem) => (previousItem.id || 0) < (nextItem.id || 0) ? 1 : -1)
+
     if (!this.searchQuery) {
-      return this.notes
+      return notes
     }
-    return this.notes.filter((note: NoteModel) => {
+
+    return notes.filter((note: NoteModel) => {
       const regExp = new RegExp(this.searchQuery, 'i')
       let foundInLisListItems = false
       note.list.forEach(listItem => {

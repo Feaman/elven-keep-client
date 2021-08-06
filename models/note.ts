@@ -7,6 +7,8 @@ import CoAuthorModel, { ICoAuthor } from './co-author'
 import TypesService from '~/services/types'
 import NotesService from '~/services/notes'
 import StatusService from '~/services/statuses'
+import StatusesService from '~/services/statuses'
+import BaseService from '~/services/base'
 
 export interface INote {
   id?: number
@@ -15,6 +17,7 @@ export interface INote {
   type?: TypeModel
   typeId?: number
   statusId?: number
+  status?: StatusModel
   userId?: number
   user?: IUser
   isCompletedListExpanded?: Boolean
@@ -30,11 +33,11 @@ export default class NoteModel {
   title: string | ''
   text: string | ''
   list: ListItemModel[] = []
-  typeId: number
-  statusId: number
   userId?: number
+  typeId: number
   type?: TypeModel
-  status?: StatusModel
+  statusId: number
+  status: StatusModel
   user?: UserModel
   saveTimeout: ReturnType<typeof setTimeout> | null = null
   isCompletedListExpanded?: Boolean
@@ -51,6 +54,8 @@ export default class NoteModel {
     this.statusId = data.statusId || StatusService.getActive().id
     this.created = data.created ? new Date(data.created) : null
     this.updated = data.updated ? new Date(data.updated) : null
+    this.statusId = data.statusId || StatusesService.getActive().id
+    this.status = StatusesService.findById(this.statusId)
 
     if (data.user) {
       this.user = new UserModel(data.user)
@@ -63,7 +68,6 @@ export default class NoteModel {
     this.handleList(data.list)
     this.handleCoAuthors(data.coAuthors)
     this.handleType()
-    this.handleStatus()
   }
 
   handleList (listData: IListItem[] = []) {
@@ -81,15 +85,6 @@ export default class NoteModel {
     }
 
     this.type = type
-  }
-
-  handleStatus () {
-    const status = TypesService.vuex.state.statuses.find((_status: TypeModel) => _status.id === this.statusId)
-    if (!status) {
-      return TypesService.error({ statusCode: 500, message: `Status '${this.statusId}' not found` })
-    }
-
-    this.status = status
   }
 
   isList () {
@@ -132,6 +127,7 @@ export default class NoteModel {
           return ApiService.addNote(this)
             .then(noteData => {
               history.replaceState({}, '', `/notes/${noteData.id}`)
+              // BaseService.router?.push({ name: 'notes-id', params: { id: String(noteData.id) } })
               const newNoteData: INote = {
                 id: noteData.id,
                 userId: noteData.userId,
@@ -164,11 +160,11 @@ export default class NoteModel {
   }
 
   removeFromState () {
-    NotesService.vuex.commit('removeNote', this)
+    BaseService.vuex.commit('removeNote', this)
   }
 
   async remove () {
-    this.removeFromState()
+    this.hide()
     try {
       await ApiService.removeNote(this)
     } catch (error) {
@@ -183,5 +179,24 @@ export default class NoteModel {
   removeCoAuthor (coAuthor: CoAuthorModel) {
     NotesService.vuex.commit('removeNoteCoAuthor', { note: this, coAuthor })
     return ApiService.removeNoteCoAuthor(coAuthor)
+  }
+
+  restore () {
+    if (this.id) {
+      this.setStatus(StatusesService.getActive())
+      return ApiService.restoreNote(this)
+        .catch(error => BaseService.error(error))
+    } else {
+      return Promise.resolve()
+    }
+  }
+
+  hide () {
+    this.setStatus(StatusesService.getInActive())
+    BaseService.vuex.commit('addRemovingNote', this)
+  }
+
+  setStatus (status: StatusModel) {
+    this.updateState({ statusId: status.id, status })
   }
 }

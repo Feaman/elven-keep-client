@@ -62,7 +62,17 @@ export default {
       listItem.note.list = listItem?.note?.list.filter(_listItem => _listItem.id !== listItem.id)
     }
   },
+  addRemovingNote (state: RootState, note: NoteModel) {
+    state.removingEntities.notes.push(note)
+  },
+  addRemovingListItem (state: RootState, listItem: ListItemModel) {
+    state.removingEntities.listItems.push(listItem)
+  },
   setSearchQuery (state: RootState, searchQuery: string) {
     state.searchQuery = searchQuery
+  },
+  clearRemovingEntities (state: RootState) {
+    state.removingEntities.notes = []
+    state.removingEntities.listItems = []
   },
 }

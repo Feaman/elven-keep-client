@@ -1,7 +1,7 @@
 export interface IStatus {
-   id: number
-   title: string
-   name: string
+  id: number
+  title: string
+  name: string
 }
 
 export default class StatusModel {

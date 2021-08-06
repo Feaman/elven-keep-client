@@ -1,7 +1,9 @@
 import NoteModel from './note'
+import StatusModel from './status'
 import BaseService from '~/services/base'
 import ApiService from '~/services/api'
 import ListItemsService from '~/services/list-items'
+import StatusesService from '~/services/statuses'
 
 export type Variant = {
   noteId: number,
@@ -19,7 +21,9 @@ export interface IListItem {
   note?: NoteModel | undefined
   focused?: Boolean
   checked?: Boolean
-  completed?: Boolean,
+  completed?: Boolean
+  statusId?: number
+  status?: StatusModel
   variants?: Variant[]
   created?: string
   updated?: string
@@ -38,6 +42,8 @@ export default class ListItemModel {
   variants: Variant[] = []
   created: Date | null = null
   updated: Date | null = null
+  statusId: number
+  status: StatusModel
 
   constructor (data: IListItem) {
     this.id = data.id
@@ -51,6 +57,8 @@ export default class ListItemModel {
     this.completed = data.completed || false
     this.created = data.created ? new Date(data.created) : null
     this.updated = data.updated ? new Date(data.updated) : null
+    this.statusId = data.statusId || StatusesService.getActive().id
+    this.status = StatusesService.findById(this.statusId)
   }
 
   save () {
@@ -98,15 +106,10 @@ export default class ListItemModel {
     }
   }
 
-  remove (removeFromState = true) {
+  remove () {
     if (this.id) {
-      if (removeFromState) {
-        this.removeFromState()
-      }
+      this.hide()
       return ApiService.removeListItem(this)
-        .then(() => {
-          return this.updateState({ id: undefined })
-        })
         .catch(error => BaseService.error(error))
     } else {
       return Promise.resolve()
@@ -129,7 +132,7 @@ export default class ListItemModel {
     const focusedVariant = this.variants.find(variant => variant.focused)
     if (focusedVariant) {
       this.selectVariant(focusedVariant)
-      setTimeout(() => this.update({ text: this.text?.trim() }), 400)
+      setTimeout(() => this.update({ text: this.text }), 400)
     }
   }
 
@@ -150,6 +153,31 @@ export default class ListItemModel {
       }
       variants[currentIndex].focused = true
       this.updateState({ variants })
+    }
+  }
+
+  restore () {
+    if (this.id) {
+      this.setStatus(StatusesService.getActive())
+      return ApiService.restoreListItem(this)
+        .catch(error => BaseService.error(error))
+    } else {
+      return Promise.resolve()
+    }
+  }
+
+  hide () {
+    this.setStatus(StatusesService.getInActive())
+    BaseService.vuex.commit('addRemovingListItem', this)
+  }
+
+  setStatus (status: StatusModel) {
+    this.updateState({ statusId: status.id, status })
+  }
+
+  clearList () {
+    if (this.note?.list) {
+      this.note.list = this.note?.list.filter(listItem => listItem.statusId !== StatusesService.getInActive().id)
     }
   }
 }

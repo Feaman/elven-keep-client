@@ -69,9 +69,22 @@ export default {
     }
   },
 
-  // router: {
-  // middleware: 'auth'
-  // },
+  router: {
+    extendRoutes (routes, resolve) {
+      routes.push(
+        {
+          name: 'new-list',
+          path: '/new/list',
+          component: resolve(__dirname, 'pages/notes/_id.vue')
+        },
+        {
+          name: 'new-text',
+          path: '/new/text',
+          component: resolve(__dirname, 'pages/notes/_id.vue')
+        }
+      )
+    }
+  },
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [

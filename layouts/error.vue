@@ -23,28 +23,28 @@ interface ErrorObject {
   layout: 'plain'
 })
 export default class ErrorLayout extends Vue {
-   @Prop() error!: ErrorObject
-   @Prop() message!: String
+  @Prop() error!: ErrorObject
+  @Prop() message!: String
 
-   errorText = ''
+  errorText = ''
 
-   created () {
-     if (this.error.statusCode === 404) {
-       this.errorText = 'Страница не найдена'
-     } else {
-       this.errorText = this.error.response?.data?.message || this.error.message
-     }
-   }
+  created () {
+    if (this.error.statusCode === 404) {
+      this.errorText = 'Страница не найдена'
+    } else {
+      this.errorText = this.error.response?.data?.message || this.error.message
+    }
+  }
 
-   mounted () {
-     if (this.$route.name === 'login') {
-       this.$router.push('/login')
-     }
-   }
+  mounted () {
+    if (this.$route.name === 'login') {
+      this.$router.push('/login')
+    }
+  }
 
-   reloadPage () {
-     window.location.href = '/'
-   }
+  reloadPage () {
+    window.location.href = '/'
+  }
 }
 </script>
 

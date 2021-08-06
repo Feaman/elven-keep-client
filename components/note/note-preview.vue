@@ -67,6 +67,7 @@ import TypeModel from '~/models/type'
 import UserModel from '~/models/user'
 import BaseService from '~/services/base'
 import KeyboardEvents from '~/services/keyboard-events'
+import ListItemsService from '~/services/list-items'
 
 @Component
 export default class NotePreviewComponent extends Vue {
@@ -86,14 +87,8 @@ export default class NotePreviewComponent extends Vue {
   }
 
   get mainListItems () {
-    return this.note.list
-      .filter(listItem => !listItem.completed)
-      .sort((previousItem, nextItem) => {
-        if (previousItem.checked === nextItem.checked) {
-          return 0
-        }
-        return previousItem.checked ? 1 : -1
-      })
+    return ListItemsService
+      .filterAndSort(this.note.list)
   }
 
   mounted () {

@@ -96,12 +96,22 @@ export default class ApiService extends BaseService {
 
   static updateNote (note: NoteModel): Promise<INote> {
     const noteData = {
-      title: note.title.trim(),
-      text: note.text.trim(),
+      title: note.title,
+      text: note.text,
       typeId: note.typeId,
       isCompletedListExpanded: note.isCompletedListExpanded,
     }
     return this.axios.put(`notes/${note.id}`, noteData)
+      .then((response: AxiosResponse) => response.data)
+  }
+
+  static removeNote (note: NoteModel) {
+    return this.axios.delete(`notes/${note.id}`)
+      .then((response: AxiosResponse) => response.data)
+  }
+
+  static restoreNote (note: NoteModel) {
+    return this.axios.put(`notes/restore/${note.id}`)
       .then((response: AxiosResponse) => response.data)
   }
 
@@ -133,8 +143,8 @@ export default class ApiService extends BaseService {
       .then((response: AxiosResponse) => response.data)
   }
 
-  static removeNote (note: NoteModel) {
-    return this.axios.delete(`notes/${note.id}`)
+  static restoreListItem (listItem: ListItemModel) {
+    return this.axios.put(`list-items/restore/${listItem.id}`)
       .then((response: AxiosResponse) => response.data)
   }
 

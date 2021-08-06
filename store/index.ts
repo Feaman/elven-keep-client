@@ -17,19 +17,17 @@ export const state = () => {
     isNoteSaving: false,
     isInitInfoLoading: true,
     removingEntities: {
-      notes: {
-        timer: null as ReturnType<typeof setTimeout> | null,
-        items: [] as NoteModel[],
-      },
-      listItems: {
-        timer: null as ReturnType<typeof setTimeout> | null,
-        items: [] as ListItemModel[],
-      }
+      notes: [] as NoteModel[],
+      listItems: [] as ListItemModel[],
     }
   }
 }
 
 export type RootState = ReturnType<typeof state>
+export interface IRemovingEntities {
+  notes: NoteModel[],
+  listItems:ListItemModel[],
+}
 
 export default {
   namespaced: true,

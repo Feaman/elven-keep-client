@@ -1,4 +1,5 @@
 import ApiService from './api'
+import StatusesService from './statuses'
 import BaseService from '~/services/base'
 import NoteModel, { INote } from '~/models/note'
 import ListItemModel, { Variant } from '~/models/list-item'
@@ -77,5 +78,18 @@ export default class NotesService extends BaseService {
 
   static setOrder (note: NoteModel, order: number[]) {
     ApiService.setOrder(note, order)
+  }
+
+  static clear () {
+    this.vuex.state.notes.forEach((note: NoteModel) => {
+      note.list.forEach(listItem => {
+        if (listItem.statusId === StatusesService.getInActive().id) {
+          listItem.removeFromState()
+        }
+      })
+      if (note.statusId === StatusesService.getInActive().id) {
+        note.removeFromState()
+      }
+    })
   }
 }

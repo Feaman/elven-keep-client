@@ -64,7 +64,7 @@
                 .completed-list-header.green--text.d-flex.align-center.ml-2
                   .font-weight-bold.font-size-16 {{ completedListItems.length }}
                   .ml-2 completed
-              v-expansion-panel-content
+              v-expansion-panel-content(:eager="renderCompletedList")
                 note-list(
                   :note="note"
                   :list="completedListItems"
@@ -168,10 +168,12 @@ import UserModel from '~/models/user'
 import NotesService from '~/services/notes'
 import KeyboardEvents from '~/services/keyboard-events'
 import BaseService from '~/services/base'
+import ListItemsService from '~/services/list-items'
 
 @Component
 export default class NoteComponent extends Vue {
   noteUser: UserModel | null = null
+  renderCompletedList = false
 
   @Prop(NoteModel) note!: NoteModel
 
@@ -222,15 +224,8 @@ export default class NoteComponent extends Vue {
   }
 
   get mainListItems () {
-    return this.note.list
-      .filter(listItem => !listItem.completed)
-      .sort((previousItem, nextItem) => (previousItem.order || 0) < (nextItem.order || 0) ? -1 : 1)
-      .sort((previousItem, nextItem) => {
-        if (previousItem.checked === nextItem.checked) {
-          return 0
-        }
-        return previousItem.checked ? 1 : -1
-      })
+    return ListItemsService
+      .filterAndSort(this.note.list)
       .sort((previousItem, nextItem) => previousItem.id && !nextItem.id ? -1 : 1)
   }
 
@@ -243,6 +238,10 @@ export default class NoteComponent extends Vue {
     if (this.note.user) {
       this.noteUser = this.note.user
     }
+
+    setTimeout(() => {
+      this.renderCompletedList = true
+    }, 1000)
   }
 
   handleNoteRemoved (note: NoteModel) {
@@ -279,7 +278,8 @@ export default class NoteComponent extends Vue {
 
   back () {
     const focusedListItem = this.note.list.find(item => item.focused)
-    if (!this.coAuthorsDialogShown && !focusedListItem) {
+    const activeElementTagName = document.activeElement?.tagName.toLowerCase()
+    if (!['input', 'textarea'].includes(activeElementTagName || '') && !this.coAuthorsDialogShown && !focusedListItem) {
       this.$router.push('/')
     }
   }
@@ -335,9 +335,6 @@ $active-row-color = #6A1B9A
     .v-expansion-panel-header
       min-height 32px
       margin 0 -4px
-
-    .completed-list-header
-      order 1
 
     .title-field
       max-height 32px
