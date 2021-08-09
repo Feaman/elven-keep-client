@@ -104,9 +104,9 @@ export default class ListItemModel {
     }
   }
 
-  remove () {
+  remove (addRemovingNote = true) {
     if (this.id) {
-      this.hide()
+      this.hide(addRemovingNote)
       return ApiService.removeListItem(this)
         .catch(error => BaseService.error(error))
     } else {
@@ -119,7 +119,7 @@ export default class ListItemModel {
       const existentListItem = this.note?.list.find((listItem: ListItemModel) => listItem.id === variant.listItemId)
       if (existentListItem) {
         existentListItem.update({ completed: false, checked: false, order: ListItemsService.generateMaxOrder(this) })
-        this.remove()
+        this.remove(false)
       }
     } else {
       this.update({ text: variant.text })
@@ -164,9 +164,11 @@ export default class ListItemModel {
     }
   }
 
-  hide () {
+  hide (addRemovingNote = true) {
     this.setStatus(StatusesService.getInActive())
-    BaseService.vuex.commit('addRemovingListItem', this)
+    if (addRemovingNote) {
+      BaseService.vuex.commit('addRemovingListItem', this)
+    }
   }
 
   setStatus (status: StatusModel) {

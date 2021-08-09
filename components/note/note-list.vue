@@ -51,7 +51,9 @@
                     hide-details
                     auto-grow
                   )
-              v-list.variants
+              v-list.variants(
+                ref="variants"
+              )
                 v-list-item.variant.cursor-pointer(
                   v-for="(variant, index) in listItem.variants.slice(0, 4)"
                   :key="index"
@@ -160,6 +162,7 @@ export default class NoteListComponent extends Vue {
 
   beforeDestroy () {
     BaseService.events.$off('keydown', this.handleKeyDown)
+    this.list.forEach(listItem => listItem.updateState({ variants: [] }))
   }
 
   handleTextareaKeydown ($textarea: HTMLTextAreaElement) {
@@ -221,9 +224,6 @@ export default class NoteListComponent extends Vue {
       case KeyboardEvents.is(event, KeyboardEvents.ARROW_DOWN):
         this.focusVariant('down')
         break
-      case KeyboardEvents.is(event, KeyboardEvents.ENTER):
-        this.addNewListItem()
-        break
     }
   }
 
@@ -244,6 +244,7 @@ export default class NoteListComponent extends Vue {
 
   addNewListItem () {
     const listItem = this.note.addListItem()
+    // this.note.addListItem()
     listItem.save()
     setTimeout(() => {
       const textareaComponents = this.$refs[`textarea-${listItem.id || -(this.list.indexOf(listItem))}`] as Vue[]
@@ -270,7 +271,7 @@ export default class NoteListComponent extends Vue {
   }
 
   handleBlur (listItem: ListItemModel) {
-    listItem.updateState({ focused: false, text: listItem.text, variants: [] })
+    listItem.updateState({ focused: false, text: listItem.text })
   }
 }
 </script>

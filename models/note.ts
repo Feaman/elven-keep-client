@@ -111,6 +111,7 @@ export default class NoteModel {
       )
     )
     NotesService.vuex.commit('addListItem', listItem)
+
     return listItem
   }
 
