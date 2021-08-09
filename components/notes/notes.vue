@@ -57,7 +57,7 @@ export default class NotesComponent extends Vue {
   }
 
   openNote (note:NoteModel) {
-    this.$router.push({ name: 'notes-id', params: { id: String(note.id) } })
+    this.$router.push(`/note/${note.id}`)
   }
 
   setMainListScroll () {

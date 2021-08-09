@@ -115,18 +115,6 @@ export default class ApiService extends BaseService {
       .then((response: AxiosResponse) => response.data)
   }
 
-  static saveListItem (listItem: ListItemModel): Promise<IListItem> {
-    const data = {
-      text: listItem.text,
-      noteId: listItem.note?.id,
-      checked: listItem.checked,
-      order: listItem.order,
-      completed: listItem.completed,
-    }
-    return this.axios.post('list-items', data)
-      .then((response: AxiosResponse) => response.data)
-  }
-
   static updateListItem (listItem: ListItemModel): Promise<IListItem> {
     const data = {
       text: listItem.text,
@@ -135,6 +123,18 @@ export default class ApiService extends BaseService {
       completed: listItem.completed,
     }
     return this.axios.put(`list-items/${listItem.id}`, data)
+      .then((response: AxiosResponse) => response.data)
+  }
+
+  static addListItem (listItem: ListItemModel): Promise<IListItem> {
+    const data = {
+      text: listItem.text,
+      noteId: listItem.note?.id,
+      checked: listItem.checked,
+      order: listItem.order,
+      completed: listItem.completed,
+    }
+    return this.axios.post('list-items', data)
       .then((response: AxiosResponse) => response.data)
   }
 

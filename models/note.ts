@@ -1,7 +1,7 @@
 import ApiService from '@/services/api'
 import ListItemModel, { IListItem } from './list-item'
-import TypeModel from './type'
 import StatusModel from './status'
+import TypeModel from './type'
 import UserModel, { IUser } from './user'
 import CoAuthorModel, { ICoAuthor } from './co-author'
 import TypesService from '~/services/types'
@@ -104,7 +104,7 @@ export default class NoteModel {
           updated: new Date(),
           order,
         },
-        listItemData || {},
+        listItemData || { text: '' },
         {
           note: this,
         },
@@ -127,7 +127,6 @@ export default class NoteModel {
           return ApiService.addNote(this)
             .then(noteData => {
               history.replaceState({}, '', `/notes/${noteData.id}`)
-              // BaseService.router?.push({ name: 'notes-id', params: { id: String(noteData.id) } })
               const newNoteData: INote = {
                 id: noteData.id,
                 userId: noteData.userId,
@@ -147,12 +146,7 @@ export default class NoteModel {
 
   update (data: INote) {
     NotesService.vuex.commit('updateNote', { note: this, data })
-
-    if (this.title || this.text || this.list.length) {
-      return this.save(!!(data.text || data.title))
-    } else {
-      NotesService.vuex.commit('clearNoteTimeout', this)
-    }
+    return this.save(!!(data.text || data.title))
   }
 
   updateState (data: INote) {
@@ -163,8 +157,8 @@ export default class NoteModel {
     BaseService.vuex.commit('removeNote', this)
   }
 
-  async remove () {
-    this.hide()
+  async remove (addRemovingNote = true) {
+    this.hide(addRemovingNote)
     try {
       await ApiService.removeNote(this)
     } catch (error) {
@@ -191,9 +185,11 @@ export default class NoteModel {
     }
   }
 
-  hide () {
+  hide (addRemovingNote = true) {
     this.setStatus(StatusesService.getInActive())
-    BaseService.vuex.commit('addRemovingNote', this)
+    if (addRemovingNote) {
+      BaseService.vuex.commit('addRemovingNote', this)
+    }
   }
 
   setStatus (status: StatusModel) {

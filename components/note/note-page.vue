@@ -1,10 +1,9 @@
 <template lang="pug" >
 .note-page.fill-height
-  keep-alive
-    note(
-      v-if="note"
-      :note="note"
-    )
+  note(
+    v-if="note"
+    :note="note"
+  )
 </template>
 
 <script lang="ts">
@@ -21,12 +20,12 @@ export default class NotePage extends Vue {
   note: NoteModel | null = null
 
   created () {
-    switch (this.$route.name) {
-      case 'new-list':
+    switch (this.$route.path) {
+      case '/new/list':
         this.note = new NoteModel({})
         this.note.addListItem()
         break
-      case 'new-text':
+      case '/new/text':
         this.note = new NoteModel({ typeId: TypesService.findByName(TypeModel.TYPE_TEXT).id })
         break
       default:

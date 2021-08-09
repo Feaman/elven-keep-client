@@ -112,7 +112,7 @@ export default class NotePreviewComponent extends Vue {
     const $activeElement: Element | null = document.activeElement
     const note = this.$store.state.notes.find((note: NoteModel) => note.id === Number($activeElement?.id))
     if (note) {
-      this.$router.push({ name: 'notes-id', params: { id: String(note.id) } })
+      this.$router.push(`/note/${note.id}`)
     }
   }
 }

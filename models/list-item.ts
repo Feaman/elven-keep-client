@@ -63,7 +63,7 @@ export default class ListItemModel {
 
   save () {
     if (!this.id) {
-      return ApiService.saveListItem(this)
+      return ApiService.addListItem(this)
         .then(data => BaseService.vuex.commit('updateListItem', {
           listItem: this,
           data: { id: data.id, created: data.created, updated: new Date(data.updated || '') }
@@ -78,12 +78,10 @@ export default class ListItemModel {
 
   async update (data: IListItem) {
     this.updateState(data)
-    if (this.text) {
-      if (!this?.note?.id) {
-        await this?.note?.save()
-      }
-      this.save()
+    if (!this?.note?.id) {
+      await this?.note?.save()
     }
+    this.save()
   }
 
   updateState (data: IListItem) {

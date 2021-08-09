@@ -107,7 +107,7 @@
         )
           .grey--text.px-4.mt-4 Author
           v-list-item
-            v-list-item-content.pt-2
+            v-list-item-content.pt-1
               v-list-item-title {{ noteUser.getFio() }}
               v-list-item-subtitle {{ noteUser.email }}
           .d-flex.flex-column
@@ -257,6 +257,9 @@ export default class NoteComponent extends Vue {
   beforeDestroy () {
     BaseService.events.$off('keydown', this.handleKeyDown)
     NotesService.events.$off('NOTE_REMOVED', this.handleNoteRemoved)
+    if (this.note.id && !((this.note.list && this.note.list.length) || this.note.text || this.note.title)) {
+      this.note.remove(false)
+    }
   }
 
   completeChecked () {

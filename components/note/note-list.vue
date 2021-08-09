@@ -1,7 +1,7 @@
 <template lang="pug">
 .note-list
   .list(
-    :class="{ 'pb-3': showNewButton }"
+    :class="{ 'pb-3': this.isMain }"
   )
     draggable(
       v-model="order"
@@ -74,21 +74,19 @@
               )
             transition(name="slide-fade")
               v-btn.remove-button(
-                v-if="listItem.text"
                 @click="listItem.remove()"
                 color="grey"
                 icon
               )
                 v-icon(color="grey lighten-2") mdi-close
-    transition(name="slide-fade-absolute")
-      .new-list-item-button.d-flex.align-center.cursor-text.mt-2.ml-8(
-        v-if="showNewButton"
-        @click="addNewListItem()"
-      )
-        v-icon(
-          color="grey"
-        ) mdi-plus
-        .grey--text.ml-2 Add item
+    .new-list-item-button.d-flex.align-center.cursor-text.mt-2.ml-8(
+      v-if="this.isMain"
+      @click="addNewListItem()"
+    )
+      v-icon(
+        color="grey"
+      ) mdi-plus
+      .grey--text.ml-2 Add item
 </template>
 
 <script lang="ts">
@@ -124,10 +122,6 @@ export default class NoteListComponent extends Vue {
     if (this.note.id) {
       NotesService.setOrder(this.note, this.order)
     }
-  }
-
-  get showNewButton () {
-    return !!this.isMain && (!this.list.find(item => !item.text) || !this.list.length)
   }
 
   get listItemText () {
@@ -250,6 +244,7 @@ export default class NoteListComponent extends Vue {
 
   addNewListItem () {
     const listItem = this.note.addListItem()
+    listItem.save()
     setTimeout(() => {
       const textareaComponents = this.$refs[`textarea-${listItem.id || -(this.list.indexOf(listItem))}`] as Vue[]
       const $textarea = textareaComponents[textareaComponents.length - 1].$el.querySelector('textarea') as HTMLTextAreaElement
@@ -265,13 +260,7 @@ export default class NoteListComponent extends Vue {
       clearTimeout(this.saveTimeout)
     }
     this.saveTimeout = setTimeout(() => {
-      if (text) {
-        listItem.updateState({ variants: NotesService.findListItemVariants(listItem, text) })
-      } else {
-        listItem.updateState({ variants: [] })
-        listItem.remove()
-        this.addNewListItem()
-      }
+      listItem.updateState({ variants: NotesService.findListItemVariants(listItem, text) })
       listItem.update({ text })
     }, 300)
   }
@@ -282,9 +271,6 @@ export default class NoteListComponent extends Vue {
 
   handleBlur (listItem: ListItemModel) {
     listItem.updateState({ focused: false, text: listItem.text, variants: [] })
-    if (!listItem.text) {
-      listItem.removeFromState()
-    }
   }
 }
 </script>

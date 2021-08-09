@@ -73,15 +73,10 @@ export default {
     extendRoutes (routes, resolve) {
       routes.push(
         {
-          name: 'new-list',
-          path: '/new/list',
-          component: resolve(__dirname, 'pages/notes/_id.vue')
+          path: '/note/:id',
+          component: resolve(__dirname, 'components/note/note-page.vue'),
+          alias: ['/new/:id'],
         },
-        {
-          name: 'new-text',
-          path: '/new/text',
-          component: resolve(__dirname, 'pages/notes/_id.vue')
-        }
       )
     }
   },
