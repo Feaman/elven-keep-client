@@ -64,7 +64,7 @@
                 .completed-list-header.green--text.d-flex.align-center.ml-2
                   .font-weight-bold.font-size-16 {{ completedListItems.length }}
                   .ml-2 completed
-              v-expansion-panel-content(:eager="renderCompletedList")
+              v-expansion-panel-content
                 note-list(
                   :note="note"
                   :list="completedListItems"
@@ -236,10 +236,6 @@ export default class NoteComponent extends Vue {
     if (this.note.user) {
       this.noteUser = this.note.user
     }
-
-    setTimeout(() => {
-      this.renderCompletedList = true
-    }, 1000)
   }
 
   handleNoteRemoved (note: NoteModel) {
