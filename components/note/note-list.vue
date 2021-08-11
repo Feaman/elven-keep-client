@@ -92,7 +92,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { Vue, Component, Prop } from 'vue-property-decorator'
 import draggable from 'vuedraggable'
 import NoteModel from '~/models/note'
 import ListItemModel, { Variant } from '~/models/list-item'
@@ -107,24 +107,10 @@ import BaseService from '~/services/base'
 })
 export default class NoteListComponent extends Vue {
   saveTimeout: ReturnType<typeof setTimeout> | null = null
-  order: number[] = []
 
   @Prop() list!: ListItemModel[]
   @Prop() note!: NoteModel
   @Prop() isMain!: Boolean
-
-  @Watch('order')
-  onOrderChanged () {
-    this.order.forEach((listItemId, index) => {
-      const listItem = this.list.find((listItem: ListItemModel) => listItem.id === listItemId)
-      if (listItem) {
-        listItem.updateState({ order: index + 1 })
-      }
-    })
-    if (this.note.id) {
-      NotesService.setOrder(this.note, this.order)
-    }
-  }
 
   get listItemText () {
     return (listItem: ListItemModel) => {
@@ -141,10 +127,20 @@ export default class NoteListComponent extends Vue {
     }
   }
 
-  created () {
-    const order: number[] = []
-    this.list.forEach((listItem: ListItemModel) => order.push(listItem.id || 0))
-    this.order = order
+  get order () {
+    return this.list.map(listItem => listItem.id || 0)
+  }
+
+  set order (order) {
+    order.forEach((listItemId, index) => {
+      const listItem = this.list.find((listItem: ListItemModel) => listItem.id === listItemId)
+      if (listItem) {
+        listItem.updateState({ order: index + 1 })
+      }
+    })
+    if (this.note.id) {
+      NotesService.setOrder(this.note, this.order)
+    }
   }
 
   mounted () {
@@ -207,13 +203,20 @@ export default class NoteListComponent extends Vue {
   focusListItem (index: number) {
     const nextListItem = this.list[index]
     nextListItem.updateState({ focused: true })
-    const $textarea = this.getListItemTextarea(nextListItem)
-    $textarea.focus()
+    setTimeout(() => {
+      const $textarea = this.getListItemTextarea(nextListItem)
+      if ($textarea) {
+        $textarea.focus()
+      }
+    })
   }
 
   getListItemTextarea (listItem: ListItemModel) {
     const textareaComponents = this.$refs[`textarea-${listItem.id}`] as HTMLTextAreaElement[]
-    return textareaComponents[0]
+    if (textareaComponents.length) {
+      return textareaComponents[0]
+    }
+    return null
   }
 
   handleKeyDown (event: KeyboardEvent) {
@@ -244,14 +247,13 @@ export default class NoteListComponent extends Vue {
 
   addNewListItem () {
     const listItem = this.note.addListItem()
-    // this.note.addListItem()
-    listItem.save()
     setTimeout(() => {
       const textareaComponents = this.$refs[`textarea-${listItem.id || -(this.list.indexOf(listItem))}`] as Vue[]
       const $textarea = textareaComponents[textareaComponents.length - 1].$el.querySelector('textarea') as HTMLTextAreaElement
       if ($textarea) {
-        $textarea.focus()
         this.handleTextareaKeydown($textarea)
+        $textarea.focus()
+        listItem.save()
       }
     })
   }
@@ -270,8 +272,11 @@ export default class NoteListComponent extends Vue {
     listItem.selectVariant(variant)
   }
 
-  handleBlur (listItem: ListItemModel) {
+  async handleBlur (listItem: ListItemModel) {
     listItem.updateState({ focused: false, text: listItem.text })
+    if (!listItem.id) {
+      await listItem.save()
+    }
   }
 }
 </script>

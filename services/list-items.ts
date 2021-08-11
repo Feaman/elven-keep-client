@@ -15,15 +15,15 @@ export default class ListItemsService extends BaseService {
     return order + 1
   }
 
-  static filterAndSort (list: ListItemModel[]) {
+  static filterAndSort (list: ListItemModel[], completed = false) {
     return list
-      .filter(listItem => !listItem.completed && listItem.statusId === StatusesService.getActive().id)
-      .sort((previousItem, nextItem) => (previousItem.order || 0) < (nextItem.order || 0) ? -1 : 1)
+      .filter(listItem => (completed ? listItem.completed : !listItem.completed) && listItem.statusId === StatusesService.getActive().id)
       .sort((previousItem, nextItem) => {
         if (previousItem.checked === nextItem.checked) {
           return 0
         }
         return previousItem.checked ? 1 : -1
       })
+      .sort((previousItem, nextItem) => (previousItem.order || 0) < (nextItem.order || 0) ? -1 : 1)
   }
 }

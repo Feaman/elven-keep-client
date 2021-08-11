@@ -218,9 +218,7 @@ export default class NoteComponent extends Vue {
   }
 
   get completedListItems () {
-    return this.note.list
-      .filter(listItem => listItem.completed)
-      .sort((previousItem, nextItem) => (previousItem.order || 0) < (nextItem.order || 0) ? -1 : 1)
+    return ListItemsService.filterAndSort(this.note.list, true)
   }
 
   get mainListItems () {
@@ -257,7 +255,7 @@ export default class NoteComponent extends Vue {
   beforeDestroy () {
     BaseService.events.$off('keydown', this.handleKeyDown)
     NotesService.events.$off('NOTE_REMOVED', this.handleNoteRemoved)
-    if (this.note.id && !((this.note.list && this.note.list.length) || this.note.text || this.note.title)) {
+    if (this.note.checkIfClear()) {
       this.note.remove(false)
     }
   }
@@ -336,8 +334,8 @@ $active-row-color = #6A1B9A
     overflow auto
 
     .v-expansion-panel-header
+      width calc(100% + 6px)
       min-height 32px
-      margin 0 -4px
 
     .title-field
       max-height 32px

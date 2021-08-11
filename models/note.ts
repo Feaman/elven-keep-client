@@ -127,7 +127,7 @@ export default class NoteModel {
           NotesService.vuex.commit('addNote', this)
           return ApiService.addNote(this)
             .then(noteData => {
-              history.replaceState({}, '', `/notes/${noteData.id}`)
+              history.replaceState({}, '', `/note/${noteData.id}`)
               const newNoteData: INote = {
                 id: noteData.id,
                 userId: noteData.userId,
@@ -195,5 +195,19 @@ export default class NoteModel {
 
   setStatus (status: StatusModel) {
     this.updateState({ statusId: status.id, status })
+  }
+
+  checkIfClear () {
+    const isList = this.type?.name === TypeModel.TYPE_LIST
+    let listIsClear = true
+    if (isList) {
+      this.list.forEach(listItem => {
+        if (listItem.text) {
+          listIsClear = false
+        }
+      })
+    }
+
+    return this.id && !(this.title || this.text || (isList && !listIsClear))
   }
 }

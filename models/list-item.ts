@@ -61,7 +61,10 @@ export default class ListItemModel {
     this.status = StatusesService.findById(this.statusId)
   }
 
-  save () {
+  async save () {
+    if (!this?.note?.id) {
+      await this?.note?.save()
+    }
     if (!this.id) {
       return ApiService.addListItem(this)
         .then(data => BaseService.vuex.commit('updateListItem', {
@@ -76,11 +79,8 @@ export default class ListItemModel {
     }
   }
 
-  async update (data: IListItem) {
+  update (data: IListItem) {
     this.updateState(data)
-    if (!this?.note?.id) {
-      await this?.note?.save()
-    }
     this.save()
   }
 
@@ -94,7 +94,7 @@ export default class ListItemModel {
 
   complete (isCompleted: boolean) {
     if (this.text) {
-      this.update({ completed: !!isCompleted, checked: !!isCompleted, order: ListItemsService.generateMaxOrder(this) })
+      this.update({ completed: !!isCompleted, order: ListItemsService.generateMaxOrder(this) })
     }
   }
 
