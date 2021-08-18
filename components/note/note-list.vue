@@ -1,7 +1,7 @@
 <template lang="pug">
   .note-list
     .list(
-      :class="{ 'pb-3': this.isMain }"
+      :class="{ 'pb-3': this.isMain, focused: list.find(listItem => listItem.focused) }"
     )
       draggable(
         v-model="order"
@@ -10,7 +10,7 @@
         transition-group(
           name="vertical-list-effect"
         )
-          .px-3(
+          div(
             v-for="(listItem, index) in list"
             :key="listItem._id"
           )
@@ -22,28 +22,26 @@
 
               transition(name="scale-fade")
                 input.checkbox.complete-checkbox(
-                  v-if="listItem.text"
-                  @change="listItem.complete($event)"
-                  v-model="listItem.completed"
+                  @change="listItem.complete($event.target.checked)"
+                  :checked="listItem.completed"
                   type="checkbox"
                   color="secondary"
                 )
 
-              textarea.list-item__text.fill-width.mx-1.ml-8.mt-1(
-                  @input="updateText(listItem, $event)"
+              .list-item__text.d-flex.mx-1.ml-2
+                textarea.fill-width(
+                  @input="updateText(listItem)"
                   @keydown.enter="selectFocusedVariant($event)"
                   @focus="listItem.updateState({ focused: true })"
                   @blur="handleBlur(listItem)"
-                  :value="listItemText(listItem)"
-                  :rows="1"
-                  :ref="`textarea-${listItem.id || -index}`"
+                  :value="listItem.text"
+                  :ref="`textarea-${listItem.id || index}`"
                 )
 
               transition(name="scale-fade")
                 input.checkbox.mr-1(
-                  v-if="listItem.text"
-                  @change="listItem.check($event)"
-                  v-model="listItem.checked"
+                  @change="listItem.check($event.target.checked)"
+                  :checked="listItem.checked"
                   :class="{ 'ml-9': !listItem.text }"
                   type="checkbox"
                   color="secondary"
@@ -55,7 +53,7 @@
                 )
                   svg.grey--text.text--lighten-1(style="width:24px;height:24px" viewBox="0 0 24 24")
                     path(fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z")
-      .new-list-item-button.d-flex.align-center.cursor-text.mt-2.ml-8(
+      .new-list-item-button.d-flex.align-center.cursor-text.mt-2(
         v-if="this.isMain"
         @click="addNewListItem()"
       )
@@ -82,20 +80,21 @@
           :class="{ focused: variant.focused }"
         )
           v-list-item-title.d-flex.align-center.fill-width(
-            @click="selectVariant(listItem, variant)"
+            @click="selectVariant(variantsListItem, variant)"
           )
             .limit-width {{ variant.text }}
             .green--text.font-size-12.ml-2(v-if="variant.isExists") exists
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import draggable from 'vuedraggable'
 import NoteModel from '~/models/note'
 import ListItemModel, { Variant } from '~/models/list-item'
 import NotesService from '~/services/notes'
 import KeyboardEvents from '~/services/keyboard-events'
 import BaseService from '~/services/base'
+import ListItemsService from '~/services/list-items'
 
 @Component({
   components: {
@@ -107,24 +106,17 @@ export default class NoteListComponent extends Vue {
   variants: Variant[] = []
   variantsMenuX = 0
   variantsMenuY = 0
+  variantsListItem: ListItemModel | null = null
 
   @Prop() list!: ListItemModel[]
   @Prop() note!: NoteModel
   @Prop() isMain!: Boolean
 
-  get listItemText () {
-    return (listItem: ListItemModel) => {
-      let listItemText = listItem.text
-
-      if (listItemText && (typeof listItemText === 'string')) {
-        const isMultiLine = listItemText.split(/\r?\n/).length > 2
-        if (!listItem.focused && isMultiLine) {
-          listItemText = `${listItemText.split(/\r?\n/)[0]}\r\n...`
-        }
-      }
-
-      return listItemText
-    }
+  @Watch('list')
+  onListChanged () {
+    this.$nextTick(() => {
+      ListItemsService.handleTextAreaHeights(this.list, this.$refs as { [key: string]: HTMLTextAreaElement [] })
+    })
   }
 
   get order () {
@@ -134,12 +126,13 @@ export default class NoteListComponent extends Vue {
   set order (order) {
     order.forEach((listItemId, index) => {
       const listItem = this.list.find((listItem: ListItemModel) => listItem.id === listItemId)
-      if (listItem) {
-        listItem.updateState({ order: index + 1 })
+      if (!listItem) {
+        throw new Error(`List item ${listItemId} not found`)
       }
+      listItem.updateState({ order: index + 1 })
     })
     if (this.note.id) {
-      NotesService.setOrder(this.note, this.order)
+      NotesService.setOrder(this.note, order)
     }
   }
 
@@ -153,6 +146,10 @@ export default class NoteListComponent extends Vue {
     BaseService.events.$on('keydown', this.handleKeyDown)
     this.$el.querySelectorAll('.list-item textarea').forEach($textarea => {
       this.handleTextareaKeydown($textarea as HTMLTextAreaElement)
+    })
+
+    setTimeout(() => {
+      ListItemsService.handleTextAreaHeights(this.list, this.$refs as { [key: string]: HTMLTextAreaElement[] })
     })
   }
 
@@ -207,53 +204,64 @@ export default class NoteListComponent extends Vue {
     const nextListItem = this.list[index]
     nextListItem.updateState({ focused: true })
     setTimeout(() => {
-      const $textarea = this.getListItemTextarea(nextListItem)
+      const $textarea = ListItemsService.getListItemTextarea(this.list, nextListItem, this.$refs as { [key: string]: HTMLTextAreaElement[] })
       if ($textarea) {
         $textarea.focus()
       }
     })
   }
 
-  getListItemTextarea (listItem: ListItemModel) {
-    const textareaComponents = this.$refs[`textarea-${listItem.id}`] as HTMLTextAreaElement[]
-    if (textareaComponents.length) {
-      return textareaComponents[0]
-    }
-    return null
-  }
-
   handleKeyDown (event: KeyboardEvent) {
     switch (true) {
       case KeyboardEvents.is(event, KeyboardEvents.ARROW_UP):
-        // this.focusVariant('up')
+        this.focusVariant('up')
         break
       case KeyboardEvents.is(event, KeyboardEvents.ARROW_DOWN):
-        // this.focusVariant('down')
+        this.focusVariant('down')
         break
     }
   }
 
-  // selectFocusedVariant (event: KeyboardEvent) {
-  //   const focusedListItem = this.list.find(item => item.focused)
-  //   if (focusedListItem) {
-  //     focusedListItem.selectFocusedVariant()
-  //   }
-  //   event.stopPropagation()
-  // }
+  selectFocusedVariant (event: KeyboardEvent) {
+    if (this.variants.length) {
+      const focusedListItem = this.list.find(item => item.focused)
+      if (!focusedListItem) {
+        throw new Error(`Focused list item not found`)
+      }
+      const focusedVariant = this.variants.find(variant => variant.focused)
+      if (focusedVariant) {
+        this.selectVariant(focusedListItem, focusedVariant)
+        event.preventDefault()
+      }
+    }
+  }
 
-  // focusVariant (direction: string) {
-  //   const listItem = this.list.find(item => item.focused)
-  //   if (listItem) {
-  //     listItem.focusVariant(direction)
-  //   }
-  // }
+  focusVariant (direction: string) {
+    if (this.variants.length) {
+      const focusedVariant = this.variants.find(variant => variant.focused)
+      const variants = this.variants.map(variant => Object.assign({}, variant, { focused: false }))
+      let currentIndex = direction === 'down' ? 0 : variants.length - 1
+      if (focusedVariant) {
+        const adding = (direction === 'down' ? 1 : -1)
+        const currentVariantIndex = this.variants.indexOf(focusedVariant)
+        currentIndex = currentVariantIndex + adding
+        if (currentIndex < 0) {
+          currentIndex = variants.length - 1
+        } else if (currentIndex > this.variants.length - 1) {
+          currentIndex = 0
+        }
+      }
+      variants[currentIndex].focused = true
+      this.variants = variants
+    }
+  }
 
   addNewListItem () {
     const listItem = this.note.addListItem()
     setTimeout(() => {
-      const textareaComponents = this.$refs[`textarea-${listItem.id || -(this.list.indexOf(listItem))}`] as Vue[]
-      const $textarea = textareaComponents[textareaComponents.length - 1].$el.querySelector('textarea') as HTMLTextAreaElement
-      if ($textarea) {
+      const textareas = this.$refs[`textarea-${listItem.id || this.list.indexOf(listItem)}`] as HTMLTextAreaElement[]
+      if (textareas.length) {
+        const $textarea = textareas[0]
         this.handleTextareaKeydown($textarea)
         $textarea.focus()
         listItem.save()
@@ -261,77 +269,45 @@ export default class NoteListComponent extends Vue {
     })
   }
 
-  updateText (listItem: ListItemModel, event: Event) {
-    const $textarea = event.target as HTMLTextAreaElement
+  updateText (listItem: ListItemModel) {
+    const $textarea = ListItemsService.handleListItemTextAreaHeight(this.list, listItem, this.$refs as { [key: string]: HTMLTextAreaElement[] })
     const text = $textarea.value
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout)
     }
+    listItem.updateState({ text })
+    this.variants = NotesService.findListItemVariants(listItem, text)
+    if (this.variants.length) {
+      this.variantsListItem = listItem
+      const boundingBox = $textarea.getBoundingClientRect()
+      const menuHeight = this.variants.length * 32 + 16
+      const y = boundingBox.y + (boundingBox.y - 56 < menuHeight ? 32 : -menuHeight)
+      this.$nextTick(() => {
+        this.variantsMenuX = boundingBox.x
+        this.variantsMenuY = y
+      })
+    }
     this.saveTimeout = setTimeout(() => {
-      this.variants = NotesService.findListItemVariants(listItem, text)
-      if (this.variants.length) {
-        const boundingBox = $textarea.getBoundingClientRect()
-        const menuHeight = this.variants.length * 32 + 16
-        const y = boundingBox.y + (boundingBox.y - 56 < menuHeight ? 32 : -menuHeight)
-        this.$nextTick(() => {
-          this.variantsMenuX = boundingBox.x
-          this.variantsMenuY = y
-        })
-      }
       listItem.update({ text })
-    }, 300)
+      this.saveTimeout = null
+    }, 400)
   }
 
-  // selectVariant (listItem: ListItemModel, variant: Variant) {
-  // listItem.selectVariant(variant)
-  // }
+  selectVariant (listItem: ListItemModel, variant: Variant) {
+    listItem.selectVariant(variant)
+    this.variants = []
+  }
 
-  async handleBlur (listItem: ListItemModel) {
+  handleBlur (listItem: ListItemModel) {
     listItem.updateState({ focused: false, text: listItem.text })
-    if (!listItem.id) {
-      await listItem.save()
+    if (this.saveTimeout) {
+      listItem.save()
+    }
+    const $textArea = ListItemsService.getListItemTextarea(this.list, listItem, this.$refs as { [key: string]: HTMLTextAreaElement[] })
+    if ($textArea && $textArea.parentElement) {
+      $textArea.parentElement.scrollTop = 0
     }
   }
-
-  // selectVariant (variant: Variant) {
-  //   if (variant.noteId === this.noteId && variant.listItemId !== this.id) {
-  //     const existentListItem = this.note?.list.find((listItem: ListItemModel) => listItem.id === variant.listItemId)
-  //     if (existentListItem) {
-  //       existentListItem.update({ completed: false, checked: false, order: ListItemsService.generateMaxOrder(this) })
-  //       this.remove(false)
-  //     }
-  //   } else {
-  //     this.update({ text: variant.text })
-  //   }
-  // }
-
-  // selectFocusedVariant () {
-  //   const focusedVariant = this.variants.find(variant => variant.focused)
-  //   if (focusedVariant) {
-  //     this.selectVariant(focusedVariant)
-  //     setTimeout(() => this.update({ text: this.text }), 400)
-  //   }
-  // }
-
-  // focusVariant (direction: string) {
-  //   const focusedVariant = this.variants.find(variant => variant.focused)
-  //   const variants = this.variants.map(variant => Object.assign({}, variant, { focused: false }))
-  //   if (variants.length) {
-  //     let currentIndex = direction === 'down' ? 0 : variants.length - 1
-  //     if (focusedVariant) {
-  //       const adding = (direction === 'down' ? 1 : -1)
-  //       const currentVariantIndex = this.variants.indexOf(focusedVariant)
-  //       currentIndex = currentVariantIndex + adding
-  //       if (currentIndex < 0) {
-  //         currentIndex = variants.length - 1
-  //       } else if (currentIndex > this.variants.length - 1) {
-  //         currentIndex = 0
-  //       }
-  //     }
-  //     variants[currentIndex].focused = true
-  //     this.updateState({ variants })
-  //   }
-  // }
 }
 </script>
 
@@ -342,8 +318,6 @@ export default class NoteListComponent extends Vue {
 $inactive-row-color = #F5F5F5
 
 .note-list
-  margin 0 -12px
-
   .list
     position relative
 
@@ -356,76 +330,80 @@ $inactive-row-color = #F5F5F5
       z-index 20
 
     .checkbox
-      min-width 17px
-      min-height 17px
+      min-width 20px
+      min-height 20px
       color red
+      cursor pointer
+
+      &:note(:checked)
+        opacity 0.3
 
     .list-item
       position relative
-      border-top  1px solid $inactive-row-color
-      border-bottom  1px solid transparent
+      border-top 1px solid $inactive-row-color
+      border-bottom 1px solid transparent
       transition border-top 0.3s, border-bottom 0.3s
+      background-color #fff
 
       .list-item__text
         max-height 40px
+        position inherit
+        transition height 0.3s
+        flex 1
+        position relative
         overflow hidden
-        transition: max-height 0.3s
-        color rgba(0, 0, 0, 0.87)
-        outline none
-        resize none
 
-      .complete-checkbox
-        position absolute
-        left 22px
+        &.list-item__text--multi-line:after
+          content '...'
+          width 100%
+          height 20px
+          position absolute
+          top 18px
+          background #fff
+          line-height 20px
+          cursor text
+
+        textarea
+          border none
+          color rgba(0, 0, 0, 0.87)
+          line-height 20px
+          outline none
+          resize none
 
       &.first
         border-top  1px solid transparent
 
       &.checked
-        .list-item__text
+        .list-item__text textarea
           color $grey-lighten-2
           text-decoration line-through
 
       &.focused
-        border-top  1px solid $grey-lighten-1
-        border-bottom  1px solid $grey-lighten-1
+        border-top  1px solid $grey-lighten-2
+        border-bottom  1px solid $grey-lighten-2
 
         .list-item__text
-          max-height 1000px
+          max-height 178px
+          overflow auto
+
+          &:after
+            display none
 
       .handle
+        min-width 28px
+        min-height 24px
         position relative
         z-index 20
-        margin-left -4px
-
-      .v-input
-        ::v-deep .v-input--selection-controls__input
-          margin 0
-
-        ::v-deep .mdi-checkbox-blank-outline
-          &:before
-            color $grey-lighten-2
-
-        ::v-deep .v-input__slot
-          textarea
-            min-height 24px
-            border none
-            outline none
-            resize none
-            text-decoration none
-            line-height 20px
-
-          &:before, &:after
-            border none
-            border-color transparent
+        margin-left -8px
+        cursor pointer
 
       .remove-button
-        width 28px
-        height 28px
-        margin-right -8px
+        min-width 24px
+        height 24px
 
   .new-list-item-button
     height 24px
+    margin-left 18px
 
   .limit-width
     limit-width(100%)

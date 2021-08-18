@@ -26,4 +26,38 @@ export default class ListItemsService extends BaseService {
         return previousItem.checked ? 1 : -1
       })
   }
+
+  static handleTextAreaHeights (list: ListItemModel[], refs: { [key: string]: HTMLTextAreaElement[] }) {
+    list.forEach(listItem => {
+      this.handleListItemTextAreaHeight(list, listItem, refs)
+    })
+  }
+
+  static handleListItemTextAreaHeight (list: ListItemModel[], listItem: ListItemModel, refs: { [key: string]: HTMLTextAreaElement[] }) {
+    const $textArea = this.getListItemTextarea(list, listItem, refs)
+    let textAreaHeight = 0
+    if (!$textArea) {
+      throw new Error('Text area not found')
+    }
+
+    const $parent = $textArea.parentElement
+    $parent?.classList.remove('list-item__text--multi-line')
+    $textArea.style.height = '0'
+    textAreaHeight = $textArea.scrollHeight
+    $textArea.style.height = `${textAreaHeight}px`
+
+    if (textAreaHeight > 48) {
+      $parent?.classList.add('list-item__text--multi-line')
+    }
+
+    return $textArea
+  }
+
+  static getListItemTextarea (list: ListItemModel[], listItem: ListItemModel, refs: { [key: string]: HTMLTextAreaElement[] }) {
+    const textareaComponents = refs[`textarea-${listItem.id || list.indexOf(listItem)}`] as HTMLTextAreaElement[]
+    if (textareaComponents?.length) {
+      return textareaComponents[0]
+    }
+    return null
+  }
 }

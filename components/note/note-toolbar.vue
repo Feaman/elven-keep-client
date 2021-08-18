@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-toolbar.note-toolbar.fill-width(
+  v-toolbar.note-toolbar.d-flex.justify-center.fill-width(
     color="primary"
   )
     v-btn(
@@ -9,7 +9,6 @@
       v-icon mdi-home
     v-divider(vertical)
     v-tooltip(
-      v-if="isMyNote"
       bottom
     )
       template(
@@ -53,6 +52,8 @@ export default class NoteToolbar extends Vue {
   z-index 30
 
   ::v-deep .v-toolbar__content
+    max-width 900px
+    width 100%
     padding-left 12px
     padding-right 0px
 </style>

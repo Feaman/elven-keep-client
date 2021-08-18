@@ -49,8 +49,7 @@
           ref="noteList"
         )
         template(v-if="completedListItems.length")
-          v-divider(
-            :class="{ 'my-2': isNewButtonShown, 'my-2 mt-14px': !isNewButtonShown }"
+          v-divider.my-2(
             v-if="completedListItems.length"
           )
           v-expansion-panels.mt-2.mb-4(
@@ -61,7 +60,7 @@
               v-expansion-panel-header
                 template(v-slot:actions)
                   v-icon.icon $expand
-                .completed-list-header.green--text.d-flex.align-center.ml-2
+                .completed-list-header.green--text.d-flex.align-center
                   .font-weight-bold.font-size-16 {{ completedListItems.length }}
                   .ml-2 completed
               v-expansion-panel-content
@@ -69,20 +68,6 @@
                   :note="note"
                   :list="completedListItems"
                 )
-    .co-authors-list.fill-width.cursor-pointer.pa-4.pt-3(
-      v-if="note.coAuthors.length"
-      @click="coAuthorsDialogShown = true"
-    )
-      .co-authors-list__title.grey--text Co-authors
-      .co-authors-list__avatars.d-flex.mt-2
-        v-avatar(
-          v-for="(coAuthor, index) in note.coAuthors"
-          :key="coAuthor.id"
-          :class="{ 'ml-2': index > 0 }"
-          size="32"
-          color="secondary"
-        )
-          .white--text.font-size-12 {{ coAuthor.user.getInitials() }}
 
     v-dialog(
       v-if="noteUser"
@@ -224,7 +209,6 @@ export default class NoteComponent extends Vue {
   get mainListItems () {
     return ListItemsService
       .filterAndSort(this.note.list)
-      .sort((previousItem, nextItem) => previousItem.id && !nextItem.id ? -1 : 1)
   }
 
   get checkedListItems () {
@@ -330,7 +314,6 @@ $active-row-color = #6A1B9A
     overflow auto
 
     .v-expansion-panel-header
-      width calc(100% + 6px)
       min-height 32px
 
     .title-field
@@ -349,7 +332,6 @@ $active-row-color = #6A1B9A
     .complete-checked-button
       width 24px
       height 24px
-      margin 0 -5px 0 0
 
       &:not(.v-btn--disabled)
         box-shadow 0px 0px 5px 0 rgba(0, 0, 0, 0.2), 0px 0px 10px 0px rgba(0, 0, 0, 0.14), 0px 0px 16px 0px rgba(0, 0, 0, 0.14)

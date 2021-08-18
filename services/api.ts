@@ -22,7 +22,6 @@ export default class ApiService extends BaseService {
   static URL = 'https://api.notes.pavlo.ru/'
   static axios: NuxtAxiosInstance
   static redirect: Function
-  static noteSavingTimeout: ReturnType<typeof setTimeout> | null = null
 
   static initInterceptors () {
     this.axios.setBaseURL(this.URL)
@@ -37,18 +36,11 @@ export default class ApiService extends BaseService {
       // Set SSE salt
       config.headers['x-sse-salt'] = this.vuex.state.SSESalt
 
-      if (this.noteSavingTimeout) {
-        clearTimeout(this.noteSavingTimeout)
-      }
-      this.noteSavingTimeout = setTimeout(() => this.vuex.commit('setIsNoteSaving', true), 200)
+      this.vuex.commit('setIsNoteSaving', true)
       return config
     })
 
     this.axios.onResponse((response: AxiosResponse) => {
-      if (this.noteSavingTimeout) {
-        clearTimeout(this.noteSavingTimeout)
-      }
-
       this.vuex.commit('setIsNoteSaving', false)
       return response
     })

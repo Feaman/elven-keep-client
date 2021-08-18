@@ -1,18 +1,23 @@
 <template lang="pug">
 .saving
-  transition(name="scale-fade")
-    .block.d-flex.align-center(v-if="isNoteSaving")
-      .font-size-13.black--text.mr-2 Saving
-      v-progress-circular(
-        color="grey lighten-2"
-        size="24"
-        width="2"
-        indeterminate
-      )
-  transition(name="scale-fade")
-    .block.d-flex.align-center.black--text(v-if="!isNoteSaving")
-      .font-size-13.mr-2 Saved
-      v-icon(color="black") mdi-cloud-outline
+  .d-flex.align-center(v-if="isNoteSaving")
+    v-tooltip(bottom)
+      template(v-slot:activator="{ on, attrs }")
+        v-icon(
+          color="black"
+          v-bind="attrs"
+          v-on="on"
+        ) mdi-cloud-upload-outline
+      span Saving to cloud
+  .d-flex.align-center.black--text(v-if="!isNoteSaving")
+    v-tooltip(bottom)
+      template(v-slot:activator="{ on, attrs }")
+        v-icon(
+          color="black"
+          v-bind="attrs"
+          v-on="on"
+        ) mdi-cloud-check-outline
+      span Saved to cloud
 </template>
 
 <script lang="ts">
@@ -24,13 +29,3 @@ export default class NoteSavingComponent extends Vue {
   @State(state => state.isNoteSaving) isNoteSaving!: boolean
 }
 </script>
-
-<style lang="stylus" scoped>
-.saving
-  width 68px
-  height 24px
-  position relative
-
-  .block
-    position absolute
-</style>

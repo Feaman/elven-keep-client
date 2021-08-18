@@ -49,7 +49,7 @@ export default class NotesService extends BaseService {
     if (query.length > 1) {
       if (note.isList()) {
         note.list
-          .filter(_listItem => _listItem !== listItem)
+          .filter(_listItem => _listItem !== listItem && _listItem.statusId !== StatusesService.getInActive().id)
           .forEach((_listItem: ListItemModel) => {
             if (
               _listItem.text?.toLocaleLowerCase().indexOf(query.toLocaleLowerCase()) === 0 &&

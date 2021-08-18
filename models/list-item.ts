@@ -91,15 +91,11 @@ export default class ListItemModel {
   }
 
   complete (isCompleted: boolean) {
-    if (this.text) {
-      this.update({ completed: !!isCompleted, order: ListItemsService.generateMaxOrder(this) })
-    }
+    this.update({ completed: isCompleted, order: ListItemsService.generateMaxOrder(this) })
   }
 
   check (isChecked: boolean) {
-    if (this.text) {
-      this.update({ checked: !!isChecked })
-    }
+    this.update({ checked: isChecked })
   }
 
   remove (addRemovingNote = true) {
@@ -136,6 +132,18 @@ export default class ListItemModel {
   clearList () {
     if (this.note?.list) {
       this.note.list = this.note?.list.filter(listItem => listItem.statusId !== StatusesService.getInActive().id)
+    }
+  }
+
+  selectVariant (variant: Variant) {
+    if (variant.noteId === this.noteId && variant.listItemId !== this.id) {
+      const existentListItem = this.note?.list.find((listItem: ListItemModel) => listItem.id === variant.listItemId)
+      if (existentListItem) {
+        existentListItem.update({ completed: this.completed, checked: this.checked, order: this.order })
+        this.remove(false)
+      }
+    } else {
+      this.update({ text: variant.text })
     }
   }
 }

@@ -1,14 +1,14 @@
 <template lang="pug">
 v-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
   :id="note.id"
-  :class="{ 'with-completed': completedListItems.length }"
+  :class="{ 'with-completed': completedListItems.length, gradient: isGradient }"
   :ripple="false"
   tabindex="0"
 )
   .title.limit-width(v-if="note.title") {{ note.title }}
   template(v-if="note.type.name === NOTE_TYPE_LIST")
     .list(
-      :class="{ 'mt-2': note.title }"
+      :class="{ 'mt-1': note.title }"
     )
       .list-item.d-flex.align-center.mt-1(
         v-for="(listItem, i) in mainListItems"
@@ -32,8 +32,7 @@ v-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
     .completed-list-header.d-flex.align-center.grey--text.fill-width.mt-2.pl-5(
       v-if="completedListItems.length"
     )
-      div +
-      .green--text.font-weight-bold.ml-1 {{ completedListItems.length }}
+      .green--text.font-weight-bold {{ completedListItems.length }}
       .ml-1 completed
 
   .text.d-flex.flex-column(
@@ -68,6 +67,7 @@ import UserModel from '~/models/user'
 import BaseService from '~/services/base'
 import KeyboardEvents from '~/services/keyboard-events'
 import ListItemsService from '~/services/list-items'
+import StatusesService from '~/services/statuses'
 
 @Component
 export default class NotePreviewComponent extends Vue {
@@ -83,12 +83,17 @@ export default class NotePreviewComponent extends Vue {
   }
 
   get completedListItems () {
-    return this.note.list.filter(listItem => listItem.completed)
+    return this.note.list.filter(listItem => listItem.completed && listItem.statusId === StatusesService.getActive().id)
   }
 
   get mainListItems () {
     return ListItemsService
       .filterAndSort(this.note.list)
+  }
+
+  get isGradient () {
+    return this.note.type?.name === this.NOTE_TYPE_LIST &&
+      this.mainListItems.length > 7 + (this.note.title ? 0 : 1) + (this.completedListItems.length ? -1 : 0)
   }
 
   mounted () {
@@ -137,19 +142,19 @@ export default class NotePreviewComponent extends Vue {
   &:before
     background none
 
-  &:after
-    content ''
-    width 100%
-    height 90px
-    position absolute
-    bottom 0
-    left 0
-    z-index 20
-    background linear-gradient(transparent, #fff 65px)
+  &.gradient
+    &:after
+      content ''
+      width 100%
+      height 90px
+      position absolute
+      bottom 0
+      left 0
+      z-index 20
+      background linear-gradient(to top, #fff 24px, transparent)
 
-  &.with-completed:after
-    height 170px
-    background linear-gradient(transparent, #fff 120px)
+    &.with-completed:after
+      background linear-gradient(to top, #fff 48px, transparent)
 
   .co-authors-container
     position absolute
