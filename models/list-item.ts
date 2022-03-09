@@ -11,6 +11,7 @@ export type Variant = {
   text: string,
   isExists: boolean,
   focused: boolean,
+  duplicatesQuantity?: Number,
 }
 
 export interface IListItem {

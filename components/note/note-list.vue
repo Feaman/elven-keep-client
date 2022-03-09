@@ -55,6 +55,7 @@
                     path(fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z")
       .new-list-item-button.d-flex.align-center.cursor-text.mt-2(
         v-if="this.isMain"
+        :class="{ alone: !list.length }"
         @click="addNewListItem()"
       )
         v-icon(
@@ -84,6 +85,7 @@
           )
             .limit-width {{ variant.text }}
             .green--text.font-size-12.ml-2(v-if="variant.isExists") exists
+            .red--text.font-size-12.ml-2(v-if="variant.duplicatesQuantity") •&nbsp; {{ variant.duplicatesQuantity }}
 </template>
 
 <script lang="ts">
@@ -356,7 +358,7 @@ $inactive-row-color = #F5F5F5
         &.list-item__text--multi-line:after
           content '...'
           width 100%
-          height 20px
+          height 24px
           position absolute
           top 18px
           background #fff
@@ -364,6 +366,7 @@ $inactive-row-color = #F5F5F5
           cursor text
 
         textarea
+          height 20px
           border none
           color rgba(0, 0, 0, 0.87)
           line-height 20px
@@ -404,6 +407,9 @@ $inactive-row-color = #F5F5F5
   .new-list-item-button
     height 24px
     margin-left 18px
+
+    &.alone
+      margin-left 0
 
   .limit-width
     limit-width(100%)

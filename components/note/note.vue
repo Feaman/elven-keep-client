@@ -4,7 +4,7 @@
       :note="note"
       @co-authors-clicked="coAuthorsDialogShown = true"
     )
-    .content.d-flex.flex-column.fill-width.fill-height.pt-2.px-3
+    .content.d-flex.flex-column.fill-width.pt-2.px-3
       .d-flex.align-center
         v-text-field.title-field.mt-1.mb-2(
           @input="note.update({ title: $event })"
@@ -312,6 +312,7 @@ $active-row-color = #6A1B9A
   .content
     max-width 900px
     overflow auto
+    flex 1
 
     .v-expansion-panel-header
       min-height 32px
@@ -349,7 +350,7 @@ $active-row-color = #6A1B9A
       ::v-deep textarea
         height 100% !important
         overflow auto
-        margin-top 0
+        margin-top 0 !important
 
       ::v-deep fieldset
         border none

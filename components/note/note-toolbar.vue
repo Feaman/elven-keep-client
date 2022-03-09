@@ -49,6 +49,7 @@ export default class NoteToolbar extends Vue {
 </script>
 <style lang="stylus" scoped>
 .note-toolbar
+  max-height 64px
   z-index 30
 
   ::v-deep .v-toolbar__content
@@ -56,4 +57,8 @@ export default class NoteToolbar extends Vue {
     width 100%
     padding-left 12px
     padding-right 0px
+
+@media (max-width: 960px)
+  .note-toolbar
+    max-height 56px
 </style>

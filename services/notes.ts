@@ -17,7 +17,7 @@ export default class NotesService extends BaseService {
   }
 
   static findListItemVariants (listItem: ListItemModel, query: string) {
-    let variants: Variant[] = []
+    const variants: Variant[] = []
 
     if (query.length > 1) {
       this.vuex.state.notes.forEach((note: NoteModel) => {
@@ -36,37 +36,39 @@ export default class NotesService extends BaseService {
       }
     })
 
-    // Unique
-    variants = variants.filter((element, position) => {
-      const sameElement = variants.find((_element) => _element.text === element.text)
-      return sameElement ? variants.indexOf(sameElement) === position : false
+    // Duplicates and unique
+    const resultVariants: Variant[] = []
+    variants.forEach((variant) => {
+      if (!resultVariants.find(item => item.text.toLowerCase() === variant.text.toLowerCase())) {
+        const duplicates = variants.filter((_element) => {
+          return variant.listItemId !== _element.listItemId &&
+          _element.text.toLowerCase() === variant.text.toLowerCase()
+        })
+        variant.duplicatesQuantity = duplicates.length
+        resultVariants.push(variant)
+      }
     })
-
-    return variants
+    return resultVariants
   }
 
   static findNoteListItemVariants (note: NoteModel, variants: Variant[], listItem: ListItemModel, query: string) {
-    if (query.length > 1) {
-      if (note.isList()) {
-        note.list
-          .filter(_listItem => _listItem !== listItem && _listItem.statusId !== StatusesService.getInActive().id)
-          .forEach((_listItem: ListItemModel) => {
-            if (
-              _listItem.text?.toLocaleLowerCase().indexOf(query.toLocaleLowerCase()) === 0 &&
-              !variants.find(variant => variant.listItemId === _listItem.id)
-            ) {
-              const isExists = listItem.noteId === note.id && !_listItem.completed
-              variants.push({
-                noteId: Number(_listItem.noteId),
-                listItemId: Number(_listItem.id),
-                text: _listItem.text,
-                isExists,
-                focused: false,
-              })
-            }
+    note.list
+      .filter(_listItem => _listItem !== listItem && _listItem.statusId !== StatusesService.getInActive().id)
+      .forEach((_listItem: ListItemModel) => {
+        if (
+          _listItem.text?.toLowerCase().indexOf(query.toLowerCase()) === 0 &&
+          !variants.find(variant => variant.listItemId === _listItem.id)
+        ) {
+          const isExists = listItem.noteId === note.id && !_listItem.completed
+          variants.push({
+            noteId: Number(_listItem.noteId),
+            listItemId: Number(_listItem.id),
+            text: _listItem.text,
+            isExists,
+            focused: false,
           })
-      }
-    }
+        }
+      })
   }
 
   static addCoAuthor (note: NoteModel, email: string) {
