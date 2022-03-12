@@ -14,6 +14,8 @@ export default (context: Context) => {
   ApiService.axios = context.app.$axios
   ApiService.redirect = context.redirect
 
+  Vue.prototype.$eventBus = new Vue()
+
   // Generate SSE salt
   const salt = `_${Math.random().toString(36).substr(2, 9)}_${(new Date()).getMilliseconds()}`
   BaseService.vuex.commit('setSSESalt', salt)

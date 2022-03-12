@@ -1,5 +1,5 @@
 <template lang="pug">
-  .note-list
+  .note-list(:class="{ fullscreen }")
     .list(
       :class="{ 'pb-3': this.isMain, focused: list.find(listItem => listItem.focused) }"
     )
@@ -14,13 +14,22 @@
             v-for="(listItem, index) in list"
             :key="listItem._id"
           )
-            .list-item.d-flex.align-center.py-1(
-              :class="{ first: index === 0, focused: listItem.focused, checked: listItem.checked, completed: listItem.completed }"
+            .list-item.d-flex.align-center(
+              :class="{ first: index === 0, focused: listItem.focused, checked: listItem.checked, completed: listItem.completed, 'py-1': !fullscreen, 'py-2': fullscreen }"
             )
-              svg.handle.grey--text(style="width:28px;height:24px;" viewBox="0 0 24 24")
+              transition(v-if="fullscreen" name="scale-fade")
+                input.checkbox.mr-1(
+                  @change="listItem.check($event.target.checked)"
+                  :checked="listItem.checked"
+                  :class="{ 'ml-9': !listItem.text }"
+                  type="checkbox"
+                  color="secondary"
+                )
+
+              svg.handle.grey--text(v-if="!fullscreen" style="width:28px;height:24px;" viewBox="0 0 24 24")
                 path(fill="currentColor" d="M7,19V17H9V19H7M11,19V17H13V19H11M15,19V17H17V19H15M7,15V13H9V15H7M11,15V13H13V15H11M15,15V13H17V15H15M7,11V9H9V11H7M11,11V9H13V11H11M15,11V9H17V11H15M7,7V5H9V7H7M11,7V5H13V7H11M15,7V5H17V7H15Z")
 
-              transition(name="scale-fade")
+              transition(v-if="!fullscreen" name="scale-fade")
                 input.checkbox.complete-checkbox(
                   @change="listItem.complete($event.target.checked)"
                   :checked="listItem.completed"
@@ -38,7 +47,7 @@
                   :ref="`textarea-${listItem.id || index}`"
                 )
 
-              transition(name="scale-fade")
+              transition(v-if="!fullscreen" name="scale-fade")
                 input.checkbox.mr-1(
                   @change="listItem.check($event.target.checked)"
                   :checked="listItem.checked"
@@ -46,7 +55,7 @@
                   type="checkbox"
                   color="secondary"
                 )
-              transition(name="slide-fade")
+              transition(v-if="!fullscreen" name="slide-fade")
                 button.remove-button(
                   @click="listItem.remove()"
                   color="grey"
@@ -54,7 +63,7 @@
                   svg.grey--text.text--lighten-1(style="width:24px;height:24px" viewBox="0 0 24 24")
                     path(fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z")
       .new-list-item-button.d-flex.align-center.cursor-text.mt-2(
-        v-if="this.isMain"
+        v-if="this.isMain && !fullscreen"
         :class="{ alone: !list.length }"
         @click="addNewListItem()"
       )
@@ -113,6 +122,7 @@ export default class NoteListComponent extends Vue {
   @Prop() list!: ListItemModel[]
   @Prop() note!: NoteModel
   @Prop() isMain!: Boolean
+  @Prop() fullscreen!: Boolean
 
   @Watch('list')
   onListChanged () {
@@ -320,6 +330,9 @@ export default class NoteListComponent extends Vue {
 $inactive-row-color = #F5F5F5
 
 .note-list
+  &.fullscreen .list-item__text
+    font-size 18px
+
   .list
     position relative
 
@@ -347,8 +360,11 @@ $inactive-row-color = #F5F5F5
       transition border-top 0.3s, border-bottom 0.3s
       background-color #fff
 
+      ::v-deep textarea
+        overflow hidden
+
       .list-item__text
-        max-height 40px
+        max-height 60px
         position inherit
         transition height 0.3s
         flex 1
@@ -358,11 +374,11 @@ $inactive-row-color = #F5F5F5
         &.list-item__text--multi-line:after
           content '...'
           width 100%
-          height 24px
+          height 20px
+          line-height 18px
           position absolute
-          top 18px
+          top 38px
           background #fff
-          line-height 20px
           cursor text
 
         textarea

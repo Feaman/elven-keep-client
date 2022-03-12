@@ -46,7 +46,7 @@ export default class ListItemsService extends BaseService {
     textAreaHeight = $textArea.scrollHeight
     $textArea.style.height = `${textAreaHeight}px`
 
-    if (textAreaHeight > 48) {
+    if (textAreaHeight > 62) {
       $parent?.classList.add('list-item__text--multi-line')
     }
 

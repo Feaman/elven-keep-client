@@ -26,6 +26,12 @@
     toolbar-tools
     v-divider(vertical)
     v-spacer
+    v-btn(
+        v-if="note.isList()"
+      @click="$eventBus.$emit('fullscreen', note)"
+      icon
+    )
+      v-icon mdi-fullscreen
     saving(v-if="note.id")
     v-divider.ml-4(vertical)
     user-menu

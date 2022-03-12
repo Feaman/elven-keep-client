@@ -69,6 +69,13 @@
                   :list="completedListItems"
                 )
 
+    fullscreen(
+      v-if="isFullscreen"
+      @close="isFullscreen = false"
+     :note="note"
+     :show="isFullscreen"
+    )
+
     v-dialog(
       v-if="noteUser"
       v-model="coAuthorsDialogShown"
@@ -159,6 +166,7 @@ import ListItemsService from '~/services/list-items'
 export default class NoteComponent extends Vue {
   noteUser: UserModel | null = null
   renderCompletedList = false
+  isFullscreen = false
 
   @Prop(NoteModel) note!: NoteModel
 
@@ -220,6 +228,9 @@ export default class NoteComponent extends Vue {
     if (this.note.user) {
       this.noteUser = this.note.user
     }
+    this.$eventBus.$on('fullscreen', () => {
+      this.isFullscreen = true
+    })
   }
 
   handleNoteRemoved (note: NoteModel) {
