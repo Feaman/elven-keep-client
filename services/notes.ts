@@ -48,6 +48,7 @@ export default class NotesService extends BaseService {
         resultVariants.push(variant)
       }
     })
+
     return resultVariants
   }
 

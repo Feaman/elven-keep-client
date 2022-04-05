@@ -106,7 +106,7 @@ const RULE_155_LENGTH = 155
 const RULE_1024_LENGTH = 1024
 
 @Component
-export default class SearchComponent extends Vue {
+export default class LoginComponent extends Vue {
   @State user!: string
 
   RULE_155_LENGTH = RULE_155_LENGTH
@@ -135,7 +135,7 @@ export default class SearchComponent extends Vue {
     try {
       await UserService.login(this.email, this.password)
       this.$router.push('/')
-    } catch (error) {
+    } catch (error: any) {
       this.errors = error.response?.data?.message || 'Unexpected error'
       this.isLoading = false
     }
@@ -146,7 +146,7 @@ export default class SearchComponent extends Vue {
     try {
       await UserService.register(this.email, this.password, this.firstName, this.secondName)
       this.$router.push('/')
-    } catch (error) {
+    } catch (error: any) {
       this.errors = error.response.data.message
       this.isLoading = false
     }
