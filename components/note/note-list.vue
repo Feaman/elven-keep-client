@@ -73,11 +73,12 @@
         .grey--text.ml-2 Add item
 
     v-menu(
+      @input="handleMenuInput($event)"
       :value="variants.length"
       :position-x="variantsMenuX"
       :position-y="variantsMenuY"
       transition="slide-fade"
-      max-width="300px"
+      max-width="350px"
       content-class="hint-menu"
       absolute
     )
@@ -85,14 +86,14 @@
         ref="variants"
       )
         v-list-item.variant.cursor-pointer(
-          v-for="(variant, index) in variants.slice(0, 4)"
+          v-for="(variant, index) in variants.slice(0, 10)"
           :key="index"
           :class="{ focused: variant.focused }"
         )
           v-list-item-title.d-flex.align-center.fill-width(
             @click="selectVariant(variantsListItem, variant)"
           )
-            .limit-width {{ variant.text }}
+            .limit-width(v-html="variant.text")
             .green--text.font-size-12.ml-2(v-if="variant.isExists") exists
             .red--text.font-size-12.ml-2(v-if="variant.duplicatesQuantity") •&nbsp; {{ variant.duplicatesQuantity }}
 </template>
@@ -221,6 +222,12 @@ export default class NoteListComponent extends Vue {
         $textarea.focus()
       }
     })
+  }
+
+  handleMenuInput (isMenuOpened: boolean) {
+    if (!isMenuOpened) {
+      this.variants = []
+    }
   }
 
   handleKeyDown (event: KeyboardEvent) {

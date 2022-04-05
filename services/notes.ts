@@ -18,6 +18,7 @@ export default class NotesService extends BaseService {
 
   static findListItemVariants (listItem: ListItemModel, query: string) {
     const variants: Variant[] = []
+    query = query.toLocaleLowerCase()
 
     if (query.length > 1) {
       this.vuex.state.notes.forEach((note: NoteModel) => {
@@ -38,6 +39,7 @@ export default class NotesService extends BaseService {
 
     // Duplicates and unique
     const resultVariants: Variant[] = []
+    const regexp = new RegExp(query, 'i')
     variants.forEach((variant) => {
       if (!resultVariants.find(item => item.text.toLowerCase() === variant.text.toLowerCase())) {
         const duplicates = variants.filter((_element) => {
@@ -49,6 +51,11 @@ export default class NotesService extends BaseService {
       }
     })
 
+    // Highlight
+    variants.forEach((variant) => {
+      variant.text = variant.text.replace(regexp, text => `<span class="green--text">${text}</span>`)
+    })
+
     return resultVariants
   }
 
@@ -57,14 +64,14 @@ export default class NotesService extends BaseService {
       .filter(_listItem => _listItem !== listItem && _listItem.statusId !== StatusesService.getInActive().id)
       .forEach((_listItem: ListItemModel) => {
         if (
-          _listItem.text?.toLowerCase().indexOf(query.toLowerCase()) === 0 &&
+          _listItem.text?.toLowerCase().includes(query) &&
           !variants.find(variant => variant.listItemId === _listItem.id)
         ) {
           const isExists = listItem.noteId === note.id && !_listItem.completed
           variants.push({
             noteId: Number(_listItem.noteId),
             listItemId: Number(_listItem.id),
-            text: _listItem.text,
+            text: _listItem.text.trim(),
             isExists,
             focused: false,
           })
