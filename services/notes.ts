@@ -53,7 +53,7 @@ export default class NotesService extends BaseService {
 
     // Highlight
     variants.forEach((variant) => {
-      variant.text = variant.text.replace(regexp, text => `<span class="green--text">${text}</span>`)
+      variant.highlightedText = variant.text.replace(regexp, text => `<span class="green--text">${text}</span>`)
     })
 
     return resultVariants
@@ -68,10 +68,12 @@ export default class NotesService extends BaseService {
           !variants.find(variant => variant.listItemId === _listItem.id)
         ) {
           const isExists = listItem.noteId === note.id && !_listItem.completed
+          const text = _listItem.text.trim()
           variants.push({
             noteId: Number(_listItem.noteId),
             listItemId: Number(_listItem.id),
-            text: _listItem.text.trim(),
+            text,
+            highlightedText: text,
             isExists,
             focused: false,
           })

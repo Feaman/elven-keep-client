@@ -9,6 +9,7 @@ export type Variant = {
   noteId: number,
   listItemId: number,
   text: string,
+  highlightedText: string,
   isExists: boolean,
   focused: boolean,
   duplicatesQuantity?: Number,

@@ -78,8 +78,9 @@
       :position-x="variantsMenuX"
       :position-y="variantsMenuY"
       transition="slide-fade"
-      max-width="350px"
+      max-width="340px"
       content-class="hint-menu"
+      z-index="30"
       absolute
     )
       v-list.variants(
@@ -93,7 +94,7 @@
           v-list-item-title.d-flex.align-center.fill-width(
             @click="selectVariant(variantsListItem, variant)"
           )
-            .limit-width(v-html="variant.text")
+            .limit-width(v-html="variant.highlightedText")
             .green--text.font-size-12.ml-2(v-if="variant.isExists") exists
             .red--text.font-size-12.ml-2(v-if="variant.duplicatesQuantity") •&nbsp; {{ variant.duplicatesQuantity }}
 </template>
