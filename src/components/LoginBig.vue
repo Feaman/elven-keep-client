@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <p>asdf</p>
-  </div>
+  <div>safasf</div>
 </template>
 
 <script setup lang="ts">

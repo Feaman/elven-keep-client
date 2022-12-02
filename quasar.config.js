@@ -1,4 +1,5 @@
 /* eslint-env node */
+const path = require('path');
 
 /*
  * This file runs in a Node context (it's NOT transpiled by Babel), so use only
@@ -30,13 +31,13 @@ module.exports = configure((/* ctx */) => ({
   // --> boot files are part of "main.js"
   // https://v2.quasar.dev/quasar-cli-vite/boot-files
   boot: [
-
+    'init',
     'axios',
   ],
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
   css: [
-    'app.styl',
+    'app.scss',
   ],
 
   // https://github.com/quasarframework/quasar/tree/dev/extras
@@ -59,8 +60,11 @@ module.exports = configure((/* ctx */) => ({
       browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
       node: 'node16',
     },
+    alias: {
+      '~': path.join(__dirname, './src/'),
+    },
 
-    vueRouterMode: 'hash', // available values: 'hash', 'history'
+    vueRouterMode: 'history', // available values: 'hash', 'history'
     // vueRouterBase,
     // vueDevtools,
     // vueOptionsAPI: false,
@@ -87,13 +91,12 @@ module.exports = configure((/* ctx */) => ({
   // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
   devServer: {
     // https: true
-    open: true, // opens browser window automatically
+    open: false, // opens browser window automatically
   },
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
   framework: {
     config: {},
-
     // iconSet: 'material-icons', // Quasar icon set
     // lang: 'en-US', // Quasar language pack
 
