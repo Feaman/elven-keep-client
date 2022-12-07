@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router';
+import { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -7,9 +7,14 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('src/pages/Index.vue') }],
   },
   {
-    path: '/login',
+    path: '/sign',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/pages/LoginPage.vue') }],
+    children: [{ path: '', component: () => import('src/pages/Sign.vue') }],
+  },
+  {
+    path: '/error',
+    component: () => import('layouts/ErrorLayout.vue'),
+    children: [{ path: '', component: () => import('~/pages/Error.vue') }],
   },
 
   // Always leave this as last one,
@@ -18,6 +23,6 @@ const routes: RouteRecordRaw[] = [
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-];
+]
 
-export default routes;
+export default routes

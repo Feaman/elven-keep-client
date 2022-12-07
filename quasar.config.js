@@ -1,5 +1,5 @@
 /* eslint-env node */
-const path = require('path');
+const path = require('path')
 
 /*
  * This file runs in a Node context (it's NOT transpiled by Babel), so use only
@@ -12,7 +12,7 @@ const path = require('path');
 /* eslint func-names: 0 */
 /* eslint global-require: 0 */
 
-const { configure } = require('quasar/wrappers');
+const { configure } = require('quasar/wrappers')
 
 module.exports = configure((/* ctx */) => ({
   eslint: {
@@ -31,8 +31,8 @@ module.exports = configure((/* ctx */) => ({
   // --> boot files are part of "main.js"
   // https://v2.quasar.dev/quasar-cli-vite/boot-files
   boot: [
+    'api',
     'init',
-    'axios',
   ],
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -108,12 +108,14 @@ module.exports = configure((/* ctx */) => ({
     // directives: [],
 
     // Quasar plugins
-    plugins: [],
+    plugins: [
+      'LocalStorage',
+    ],
   },
 
   // animations: 'all', // --- includes all animations
   // https://v2.quasar.dev/options/animations
-  animations: [],
+  animations: 'all',
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#sourcefiles
   // sourceFiles: {
@@ -210,4 +212,4 @@ module.exports = configure((/* ctx */) => ({
     // extendBexScriptsConf (esbuildConf) {}
     // extendBexManifestJson (json) {}
   },
-}));
+}))
