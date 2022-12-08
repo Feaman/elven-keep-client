@@ -1,10 +1,10 @@
+import { CoAuthorModel, ICoAuthor } from '~/composables/models/co-author'
+import { IListItem, ListItemModel } from '~/composables/models/list-item'
+import { INote, NoteModel } from '~/composables/models/note'
+import { IStatus } from '~/composables/models/status'
+import { IType } from '~/composables/models/type'
+import { IUser } from '~/composables/models/user'
 import BaseService from '../base'
-import { NoteModel, INote } from '~/stores/models/note'
-import { ListItemModel, IListItem } from '~/stores/models/list-item'
-import { IType } from '~/stores/models/type'
-import { IUser } from '~/stores/models/user'
-import { IStatus } from '~/stores/models/status'
-import { CoAuthorModel, ICoAuthor } from '~/stores/models/co-author'
 import IApi from './interface'
 
 export interface ConfigObject {

@@ -44,10 +44,9 @@
 import { AxiosError } from 'axios'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUsersStore } from '~/stores/users'
+import suersService from '~/composables/services/users'
 
 const router = useRouter()
-const usersStore = useUsersStore()
 
 const isSignIn = ref(true)
 const email = ref('')
@@ -58,7 +57,7 @@ const errorText = ref('')
 async function login() {
   isLoading.value = true
   try {
-    await usersStore.login(email.value, password.value)
+    await suersService.login(email.value, password.value)
     router.push('/')
   } catch (error) {
     errorText.value = (error as AxiosError).response?.data?.message || 'Unexpected error'

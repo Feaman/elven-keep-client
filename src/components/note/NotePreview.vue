@@ -1,17 +1,17 @@
 <template lang="pug">
-q-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
+q-card.note-preview.cursor-pointer.full-height.q-pa-xs.q-pt-sm(
   :id="note.id"
-  :class="{ 'with-completed': note.completedListItems.length, gradient: note.isGradient }"
+  :class="{ 'with-completed': completedListItems.length, gradient: note.isGradient }"
   :ripple="false"
   tabindex="0"
 )
   .title.limit-width(v-if="note.title") {{ note.title }}
-  template(v-if="note.type?.name === NOTE_TYPE_LIST")
+  template(v-if="note.type.value?.name === NOTE_TYPE_LIST")
     .list(
       :class="{ 'mt-1': note.title }"
     )
       .list-item.row.align-center.mt-1(
-        v-for="(listItem, i) in note.mainListItems"
+        v-for="(listItem, i) in mainListItems"
         :key="i"
         :class="{ checked: listItem.checked }"
       )
@@ -21,7 +21,7 @@ q-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
       .co-authors-container.d-flex.justify-end.fill-width
         .co-authors.d-flex.justify-end
           q-avatar(
-            v-for="(coAuthor, index) in note.coAuthors"
+            v-for="(coAuthor, index) in coAuthors"
             :key="coAuthor.id"
             :class="{ 'ml-2': index > 0 }"
             size="20"
@@ -30,9 +30,9 @@ q-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
             .white--text.font-size-10 {{ coAuthor.user.getInitials() }}
 
     .completed-list-header.d-flex.align-center.grey--text.fill-width.mt-2.pl-5(
-      v-if="note.completedListItems.length"
+      v-if="completedListItems.length"
     )
-      .green--text.font-weight-bold {{ note.completedListItems.length }}
+      .green--text.font-weight-bold {{ completedListItems.length }}
       .ml-1 completed
 
   .text.d-flex.flex-column(
@@ -42,7 +42,7 @@ q-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
     .co-authors-container.d-flex.justify-end.fill-width
       .co-authors.d-flex.justify-end
         q-avatar(
-          v-for="(coAuthor, index) in note.coAuthors"
+          v-for="(coAuthor, index) in coAuthors"
           :key="coAuthor.id"
           :class="{ 'ml-2': index > 0 }"
           size="20"
@@ -58,17 +58,18 @@ q-card.note-preview.cursor-pointer.fill-height.pa-4.pt-3(
 </template>
 
 <script setup lang="ts">
-import { useListItemsStore } from '~/stores/list-items'
-import useNoteStore from '~/stores/models/note'
-import { TYPE_LIST } from '~/stores/models/type'
+import { ref } from 'vue'
+import noteModel from '~/composables/models/note'
+import { TYPE_LIST } from '~/composables/models/type'
 
 const props = defineProps<{
-  note: ReturnType<typeof useNoteStore>
+  note: ReturnType<typeof noteModel>
 }>()
 
-const listItemsStore = useListItemsStore()
-const completedListItems = listItemsStore.filterCompleted(props.note)
 const NOTE_TYPE_LIST = TYPE_LIST
+const completedListItems = ref(props.note.completedListItems)
+const mainListItems = ref(props.note.mainListItems)
+const coAuthors = ref(props.note.coAuthors)
 </script>
 
 <style lang="scss" scoped>

@@ -1,11 +1,11 @@
-import { boot } from 'quasar/wrappers'
 import axios, { AxiosInstance } from 'axios'
-import BaseService from '~/services/base'
+import { boot } from 'quasar/wrappers'
+import usersService from '~/composables/services/users'
 import ApiService from '~/services/api/api'
 import AxiosApi from '~/services/api/axios-api'
+import BaseService from '~/services/base'
 import StorageService from '~/services/storage'
 import { useGlobalStore } from '~/stores/global'
-import { useUsersStore } from '~/stores/users'
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -23,11 +23,10 @@ const axiosInstance = axios.create({ baseURL: 'https://api.notes.pavlo.ru/' })
 
 export default boot(({ app }) => {
   const globalStore = useGlobalStore()
-  const usersStore = useUsersStore()
   const axiosApi = new AxiosApi(axiosInstance)
   axiosApi.setRequestInterceptor((config) => {
     // Auth token
-    const token = StorageService.get(usersStore.AUTH_TOKEN_NAME)
+    const token = StorageService.get(usersService.AUTH_TOKEN_NAME)
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }

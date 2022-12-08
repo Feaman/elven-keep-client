@@ -1,7 +1,7 @@
-import { boot } from 'quasar/wrappers'
-import mitt from 'mitt'
 import { AxiosError } from 'axios'
-import BaseService, { TEvents } from '~/services/base'
+import mitt from 'mitt'
+import { boot } from 'quasar/wrappers'
+import BaseService, { TEvents, TGlobalError } from '~/services/base'
 import InitService from '~/services/init'
 import { useGlobalStore } from '~/stores/global'
 
@@ -9,8 +9,14 @@ export default boot(async ({ app }) => {
   const store = useGlobalStore()
 
   BaseService.eventBus = mitt<TEvents>()
-  BaseService.showError = (error) => {
-    BaseService.eventBus.emit('showGlobalError', error)
+  BaseService.showError = (error: Error | TGlobalError) => {
+    let resultError: TGlobalError | Error = error
+    if ((error as AxiosError).response) {
+      resultError = BaseService.parseAxiosError(error as AxiosError)
+    } else if (error instanceof Error) {
+      resultError = { statusCode: 500, message: error.message }
+    }
+    BaseService.eventBus.emit('showGlobalError', resultError as TGlobalError)
   }
 
   // Register all the components
@@ -22,13 +28,11 @@ export default boot(async ({ app }) => {
     }
   })
 
-  app.config.errorHandler = (error) => {
-    BaseService.showError({ statusCode: 500, message: (error as Error).message })
-  }
+  app.config.errorHandler = (error) => BaseService.showError(error as Error)
 
   try {
     await InitService.initApplication()
   } catch (error) {
-    store.initError = { statusCode: Number((error as AxiosError)?.code) || undefined, message: (error as AxiosError).message }
+    store.initError = BaseService.parseAxiosError(error as AxiosError)
   }
 })

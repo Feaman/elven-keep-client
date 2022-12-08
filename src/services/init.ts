@@ -1,9 +1,9 @@
-import BaseService from './base'
-import { ConfigObject } from './api/api'
-import { useTypesStore } from '~/stores/types'
-import { useStatusesStore } from '~/stores/statuses'
+import notesService from '~/composables/services/notes'
+import statusesService from '~/composables/services/statuses'
+import typesService from '~/composables/services/types'
 import { useGlobalStore } from '~/stores/global'
-import { useNotesStore } from '~/stores/notes'
+import { ConfigObject } from './api/api'
+import BaseService from './base'
 
 export default class InitService {
   static async initApplication(data: ConfigObject | undefined = undefined): Promise<void> {
@@ -11,14 +11,9 @@ export default class InitService {
       data = await BaseService.api.getConfig()
     }
 
-    const typesStore = useTypesStore()
-    typesStore.generateTypes(data.types)
-
-    const statusesStore = useStatusesStore()
-    statusesStore.generateStatuses(data.statuses)
-
-    const notesStore = useNotesStore()
-    notesStore.generateNotes(data.notes)
+    typesService.generateTypes(data.types)
+    statusesService.generateStatuses(data.statuses)
+    notesService.generateNotes(data.notes)
 
     const globalStore = useGlobalStore()
     globalStore.setUser(data.user)

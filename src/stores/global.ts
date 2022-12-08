@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia'
 import { Ref, ref } from 'vue'
 import { TGlobalError } from '~/services/base'
-import { ListItemModel } from './models/list-item'
-import { NoteModel } from './models/note'
-import useUserStore, { IUser, UserModel } from './models/user'
+import useUserStore, { IUser, UserModel } from '../composables/models/user'
 
 export const useGlobalStore = defineStore('global', () => {
   const initError = ref<TGlobalError | undefined>(undefined)
