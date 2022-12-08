@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import ListItemModel from '~/models/list-item'
-import { NoteModel } from './note'
+import { ListItemModel } from '~/stores/models/list-item'
+import { NoteModel } from '~/stores/models/note'
 import { useStatusesStore } from './statuses'
 
 export const useListItemsStore = defineStore('listItems', () => {

@@ -37,18 +37,17 @@
         )
   .row
     NotePreview(
-      v-for="note in notesStore.notes"
+      v-for="note in notes"
       :key="note.id"
       :note="note"
     )
       q-card-section {{ note.title }}
-
 </template>
 
 <script setup lang="ts">
 import { useNotesStore } from '~/stores/notes'
 
-const notesStore = useNotesStore()
+const { notes } = useNotesStore()
 </script>
 
 <style lang="scss" scoped>

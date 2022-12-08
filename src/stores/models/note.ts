@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { Ref, ref } from 'vue'
+import { computed, Ref, ref } from 'vue'
 import { CoAuthorModel, ICoAuthor, useCoAuthorStore } from '~/stores/models/co-author'
 import useListItemStore, { ListItemModel, IListItem } from '~/stores/models/list-item'
 import { useStatusesStore } from '~/stores/statuses'
@@ -7,6 +7,7 @@ import { TypeModel, TYPE_LIST } from '~/stores/models/type'
 import { useTypesStore } from '~/stores/types'
 import useUserStore, { IUser } from './user'
 import { StatusModel } from './status'
+import { useGlobalStore } from '../global'
 
 export interface INote {
   id: number
@@ -187,8 +188,38 @@ export default function useNoteStore(noteData: INote) {
     //   return this.id && !(this.title || this.text || (isList && !listIsClear))
     // }
 
+    const globalStore = useGlobalStore()
+    const isMyNote = computed(() => globalStore.user?.id === userId.value)
+
+    function filterAndSort(completed = false) {
+      return list.value
+        .filter((listItem) => (completed ? listItem.completed : !listItem.completed) && listItem.statusId === statusesStore.getActive().id)
+        .sort((previousItem, nextItem) => ((previousItem.order || 0) < (nextItem.order || 0) ? -1 : 1))
+        .sort((previousItem, nextItem) => {
+          if (previousItem.checked === nextItem.checked) {
+            return 0
+          }
+          return previousItem.checked ? 1 : -1
+        })
+    }
+
+    const completedListItems = computed(
+      () => list.value.filter((listItem) => listItem.completed && listItem.statusId === statusesStore.getActive().id),
+    )
+
+    const mainListItems = computed(
+      () => filterAndSort(),
+    )
+
+    const isGradient = computed(() => type.value?.name === TYPE_LIST
+      && mainListItems.value.length > 7 + (title.value ? 0 : 1) + (completedListItems.value.length ? -1 : 0))
+
     function addCoAuthor(coAuthor: CoAuthorModel) {
       coAuthors.value.push(coAuthor)
+    }
+
+    function removeItem(item) {
+      list.value = list.value.filter((_item) => _item.id !== item.id)
     }
 
     handleList(noteData.list)
@@ -208,14 +239,15 @@ export default function useNoteStore(noteData: INote) {
       status,
       isCompletedListExpanded,
       coAuthors,
+      completedListItems,
+      mainListItems,
+      isMyNote,
+      removeItem,
       addCoAuthor,
       isList,
       handleList,
       handleCoAuthors,
-      // isText,
-      // addListItem,
-      // handleType,
-      // save,
+      isGradient,
     }
   })()
 }

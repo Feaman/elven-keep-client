@@ -14,11 +14,10 @@ export const useGlobalStore = defineStore('global', () => {
   const searchQuery = ''
   const isNoteSaving = false
   const isInitInfoLoading = true
-  const listItems = ref<ListItemModel[]>([])
-  const removingEntities = ref({
-    notes: [] as NoteModel[],
-    listItems: [] as ListItemModel[],
-  })
+  // const removingEntities = ref({
+  //   notes: [] as NoteModel[],
+  //   listItems: [] as ListItemModel[],
+  // })
 
   // function updateNoteListSortedBy(_state: RootState, note: NoteModel) {
   // note.list.sort((previousItem, nextItem) => ((previousItem.updated || 0) < (nextItem.updated || 0) ? -1 : 1))
@@ -78,8 +77,7 @@ export const useGlobalStore = defineStore('global', () => {
     searchQuery,
     isNoteSaving,
     isInitInfoLoading,
-    listItems,
-    removingEntities,
+    // removingEntities,
     setUser,
   }
 })
