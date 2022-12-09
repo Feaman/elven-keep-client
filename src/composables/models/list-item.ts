@@ -1,6 +1,6 @@
 import { ref, UnwrapRef } from 'vue'
 import { NoteModel } from '~/composables/models/note'
-import { StatusModel } from '~/composables/models/status'
+import { TStatusModel } from '~/composables/models/status'
 import statusesService from '~/composables/services/statuses'
 
 export type Variant = {
@@ -23,7 +23,7 @@ export interface IListItem {
   checked?: boolean
   completed?: boolean
   statusId?: number
-  status?: StatusModel
+  status?: TStatusModel
   created?: string
   updated?: string
 }

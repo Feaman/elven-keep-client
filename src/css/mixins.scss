@@ -1,0 +1,6 @@
+@mixin limit-width($maxWidth) {
+  max-width: $maxWidth;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

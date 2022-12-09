@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 import { boot } from 'quasar/wrappers'
-import usersService from '~/composables/services/users'
+import UsersService from '~/composables/services/users'
 import ApiService from '~/services/api/api'
 import AxiosApi from '~/services/api/axios-api'
 import BaseService from '~/services/base'
@@ -26,7 +26,7 @@ export default boot(({ app }) => {
   const axiosApi = new AxiosApi(axiosInstance)
   axiosApi.setRequestInterceptor((config) => {
     // Auth token
-    const token = StorageService.get(usersService.AUTH_TOKEN_NAME)
+    const token = StorageService.get(UsersService.AUTH_TOKEN_NAME)
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }

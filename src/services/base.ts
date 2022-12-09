@@ -6,6 +6,7 @@ export type TGlobalError = { statusCode: number | undefined, message: string }
 
 export type TEvents = {
   showGlobalError: TGlobalError
+  keydown: KeyboardEvent
 }
 
 export default class BaseService {
@@ -15,11 +16,7 @@ export default class BaseService {
 
   static eventBus: Emitter<TEvents>
 
-  // static showAxiosError(error: AxiosError) {
-  // BaseService.showError({ statusCode: Number(error.code) || undefined, message: error.message })
-  // }
-
   static parseAxiosError(error: AxiosError): TGlobalError {
-    return { statusCode: Number(error.code) || undefined, message: error.message }
+    return { statusCode: Number(error.code) || error?.response?.status || undefined, message: error.message }
   }
 }

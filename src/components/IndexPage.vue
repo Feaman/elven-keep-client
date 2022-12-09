@@ -1,11 +1,11 @@
 <template lang="pug">
-.index-page.q-ma-lg.full-height
-  notes-toolbar.full-width
-  transition-group.row.wrap.q-pr-xs.q-pb-xs.q-mt-sm(
+.index-page.full-height(ref="rootElement")
+  NotesToolbar.full-width
+  transition-group.row.pr-4.pb-4.mt-2(
     name="horizontal-list-effect"
     tag="div"
   )
-    .note.q-ml-xs.q-mt-xs.q-pa-xs(
+    .note.ml-4.mt-4.pa-1(
       v-for="note in filtered"
       :key="note.id"
     )
@@ -14,24 +14,37 @@
         @remove="NotesService.removeNote(note)"
         :note="note"
       )
-
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import NotesService from '~/composables/services/notes'
 import type { NoteModel } from '~/composables/models/note'
+import { useGlobalStore } from '~/stores/global'
 
 const { filtered } = NotesService
+const rootElement = ref<HTMLElement | null>(null)
+const globalStore = useGlobalStore()
+const router = useRouter()
+let scrollTimeout: ReturnType<typeof setTimeout> | null = null
 
 function openNote(note: NoteModel) {
-  useRouter().push(`/note/${note.id}`)
+  router.push(`/note/${note.id}`)
+}
+
+function setMainListScroll() {
+  if (scrollTimeout) {
+    clearTimeout(scrollTimeout)
+  }
+  scrollTimeout = setTimeout(() => {
+    globalStore.mainListScrollTop = rootElement.value ? rootElement.value.scrollTop : 0
+  }, 100)
 }
 
 onMounted(() => {
-  // this.$el.addEventListener('scroll', this.setMainListScroll)
-  // this.$el.scrollTo({ top: this.$store.state.mainListScrollTop })
+  rootElement.value?.addEventListener('scroll', setMainListScroll)
+  rootElement.value?.scrollTo({ top: globalStore.mainListScrollTop })
 })
 </script>
 

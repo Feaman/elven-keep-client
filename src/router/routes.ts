@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/error',
     component: () => import('layouts/ErrorLayout.vue'),
-    children: [{ path: '', component: () => import('~/pages/Error.vue') }],
+    children: [{ path: '', component: () => import('~/components/ErrorPage.vue') }],
   },
 
   // Always leave this as last one,

@@ -4,9 +4,10 @@ import { ListItemModel, Variant } from '~/composables/models/list-item'
 import noteModel, { INote, NoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 import BaseService from '~/services/base'
+import { useGlobalStore } from '~/stores/global'
 
 const notes: Ref<NoteModel[]> = ref([])
-const searchQuery = ref('')
+const globalStore = useGlobalStore()
 const { api } = BaseService
 
 function generateNotes(notesData: INote[]) {
@@ -22,12 +23,12 @@ const filtered = computed(() => {
 
   resultNotes.sort((previousItem, nextItem) => ((previousItem.id || 0) < (nextItem.id || 0) ? 1 : -1))
 
-  if (!searchQuery.value) {
+  if (!globalStore.searchQuery) {
     return resultNotes
   }
 
   return resultNotes.filter((note: NoteModel) => {
-    const regExp = new RegExp(searchQuery.value, 'i')
+    const regExp = new RegExp(globalStore.searchQuery, 'i')
     let foundInLisListItems = false
     note.list.forEach((listItem) => {
       if (regExp.test(listItem.text || '')) {

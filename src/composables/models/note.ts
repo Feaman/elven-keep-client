@@ -1,7 +1,7 @@
-import { computed, ref, UnwrapRef } from 'vue'
+import { computed, Ref, ref, UnwrapRef } from 'vue'
 import coAuthorModel, { CoAuthorModel, ICoAuthor } from '~/composables/models/co-author'
 import listItemModel, { IListItem, ListItemModel } from '~/composables/models/list-item'
-import { StatusModel } from '~/composables/models/status'
+import { TStatusModel } from '~/composables/models/status'
 import { TypeModel, TYPE_LIST } from '~/composables/models/type'
 import StatusesService from '~/composables/services/statuses'
 import typesService from '~/composables/services/types'
@@ -15,7 +15,7 @@ export interface INote {
   type: TypeModel
   typeId: number
   statusId: number
-  status: StatusModel
+  status: TStatusModel
   userId: number
   user: IUser
   isCompletedListExpanded: boolean
@@ -193,14 +193,11 @@ export default function noteModel(noteData: INote) {
 
   const completedListItems = computed(
     () => list.value.filter((listItem) => listItem.completed && listItem.statusId === StatusesService.active.value.id),
-  )
+  ) as Ref<ListItemModel[]>
 
   const mainListItems = computed(
     () => filterAndSort(),
-  )
-
-  const isGradient = computed(() => type.value?.name === TYPE_LIST
-    && mainListItems.value.length > 7 + (title.value ? 0 : 1) + (completedListItems.value.length ? -1 : 0))
+  ) as Ref<ListItemModel[]>
 
   function addCoAuthor(coAuthor: CoAuthorModel) {
     coAuthors.value.push(coAuthor)
@@ -231,7 +228,6 @@ export default function noteModel(noteData: INote) {
     completedListItems,
     mainListItems,
     isMyNote,
-    isGradient,
     hide,
     removeItem,
     addCoAuthor,

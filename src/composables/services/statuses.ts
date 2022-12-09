@@ -1,16 +1,16 @@
 import { computed, ref } from 'vue'
-import statusModel, { IStatus, StatusModel, STATUS_ACTIVE, STATUS_INACTIVE } from '~/composables/models/status'
+import statusModel, { IStatus, STATUS_ACTIVE, STATUS_INACTIVE, TStatusModel } from '~/composables/models/status'
 
-export const statuses = ref<StatusModel[]>([])
+export const statuses = ref<TStatusModel[]>([])
 
 export function generateStatuses(statusesData: IStatus[]) {
   statusesData.forEach((statusData: IStatus) => {
-    statuses.value.push(statusModel(statusData) as unknown as StatusModel)
+    statuses.value.push(statusModel(statusData) as unknown as TStatusModel)
   })
 }
 
 export const active = computed(() => {
-  const activeStatus = statuses.value.find((status: StatusModel) => status.name === STATUS_ACTIVE)
+  const activeStatus = statuses.value.find((status: TStatusModel) => status.name === STATUS_ACTIVE)
   if (!activeStatus) {
     throw new Error('Active status not found')
   }
@@ -19,7 +19,7 @@ export const active = computed(() => {
 })
 
 export const inactive = computed(() => {
-  const inactiveStatus = statuses.value.find((status: StatusModel) => status.name === STATUS_INACTIVE)
+  const inactiveStatus = statuses.value.find((status: TStatusModel) => status.name === STATUS_INACTIVE)
   if (!inactiveStatus) {
     throw new Error('Inactive status not found')
   }
@@ -28,7 +28,7 @@ export const inactive = computed(() => {
 })
 
 export function findByName(name: string) {
-  const status = statuses.value.find((status: StatusModel) => status.name === name)
+  const status = statuses.value.find((status: TStatusModel) => status.name === name)
   if (!status) {
     throw new Error(`Status '${name}' not found`)
   }
@@ -37,7 +37,7 @@ export function findByName(name: string) {
 }
 
 export function findById(statusId: number) {
-  const status = statuses.value.find((_status: StatusModel) => _status.id === statusId)
+  const status = statuses.value.find((_status: TStatusModel) => _status.id === statusId)
   if (!status) {
     throw new Error(`Status with id '${statusId}' not found`)
   }

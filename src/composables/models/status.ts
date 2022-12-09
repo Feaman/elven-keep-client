@@ -19,4 +19,4 @@ export default function statusModel(statusData: IStatus) {
   }
 }
 
-export type StatusModel = UnwrapRef<ReturnType<typeof statusModel>>
+export type TStatusModel = UnwrapRef<ReturnType<typeof statusModel>>

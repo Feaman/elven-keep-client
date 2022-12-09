@@ -29,7 +29,7 @@
         ) {{ errorText }}
 
       q-btn.q-mt-lg(
-        @click="login"
+        @click="signIn"
         label="Sign In"
         color="primary"
       )
@@ -54,10 +54,10 @@ const password = ref('')
 const isLoading = ref(false)
 const errorText = ref('')
 
-async function login() {
+async function signIn() {
   isLoading.value = true
   try {
-    await suersService.login(email.value, password.value)
+    await suersService.signIn(email.value, password.value)
     router.push('/')
   } catch (error) {
     errorText.value = (error as AxiosError).response?.data?.message || 'Unexpected error'

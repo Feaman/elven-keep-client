@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia'
-import { Ref, ref } from 'vue'
+import { ref } from 'vue'
 import { TGlobalError } from '~/services/base'
 import useUserStore, { IUser, UserModel } from '../composables/models/user'
 
 export const useGlobalStore = defineStore('global', () => {
   const initError = ref<TGlobalError | undefined>(undefined)
   const isLoading = ref(false)
-  const user: Ref<UserModel | null> = ref(null)
-  const mainListScrollTop = 0
+  const user = ref<UserModel | null>(null)
+  const mainListScrollTop = ref(0)
   const SSESalt = ''
-  const searchQuery = ''
+  const searchQuery = ref('')
   const isNoteSaving = false
   const isInitInfoLoading = true
   // const removingEntities = ref({
@@ -62,8 +62,8 @@ export const useGlobalStore = defineStore('global', () => {
   //   removingEntities.value.notes = []
   //   removingEntities.value.listItems = []
   // }
-  function setUser(data: IUser) {
-    user.value = useUserStore(data)
+  function setUser(userData: IUser) {
+    user.value = useUserStore(userData) as unknown as UserModel
   }
 
   return {

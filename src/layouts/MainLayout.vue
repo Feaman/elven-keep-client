@@ -3,19 +3,8 @@ q-layout(
   view="hHh Lpr fFf"
 )
   q-page-container(v-if="isErrorShown")
-    q-banner.text-white.bg-red(
-      inline-actions
-    ) {{ error?.message }}
-      template(v-if="error?.statusCode" v-slot:action)
-        q-btn(
-          :label="error?.statusCode"
-          color="white"
-          flat
-    )
-    q-btn(
-      @click="$router.push('/')"
-    ) Go to the main page
-  q-page-container(v-else)
+    ErrorPage(:error="{statusCode: error?.statusCode, message: error?.message}")
+  q-page-container.page(v-else)
     router-view
 </template>
 
@@ -45,3 +34,9 @@ BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
   isErrorShown.value = true
 })
 </script>
+
+<style lang="scss" scoped>
+.page {
+  height: 100vh;
+}
+</style>

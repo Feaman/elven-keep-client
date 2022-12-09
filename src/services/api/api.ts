@@ -103,12 +103,12 @@ export default class ApiService extends BaseService {
     return data
   }
 
-  async login(email: string, password: string): Promise<ConfigObject> {
+  async signIn(email: string, password: string): Promise<ConfigObject> {
     const { data } = await this.api.post('login', { email, password })
     return data as ConfigObject
   }
 
-  async register(email: string, password: string, firstName: string, secondName: string): Promise<ConfigObject> {
+  async signUp(email: string, password: string, firstName: string, secondName: string): Promise<ConfigObject> {
     const { data } = await this.api.post('users', {
       email, password, firstName, secondName,
     })
