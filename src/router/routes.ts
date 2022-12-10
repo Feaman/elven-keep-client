@@ -4,12 +4,21 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/pages/Index.vue') }],
+    children: [{ path: '', component: () => import('~/pages/IndexPage.vue') }],
   },
   {
     path: '/sign',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/pages/Sign.vue') }],
+    children: [{ path: '', component: () => import('~/pages/SignPage.vue') }],
+  },
+  {
+    path: '/note/:id',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{
+      path: '',
+      component: () => import('~/pages/NotePage.vue'),
+      props: (route) => ({ id: Number(route.params.id) }),
+    }],
   },
   {
     path: '/error',
@@ -21,7 +30,7 @@ const routes: RouteRecordRaw[] = [
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue'),
+    component: () => import('~/pages/ErrorNotFoundPage.vue'),
   },
 ]
 

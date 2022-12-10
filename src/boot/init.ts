@@ -20,11 +20,6 @@ export default boot(async ({ app }) => {
     BaseService.eventBus.emit('showGlobalError', resultError as TGlobalError)
   }
 
-  // Keydown events
-  document.onkeydown = (event: KeyboardEvent) => {
-    BaseService.eventBus.emit('keydown', event)
-  }
-
   // Register all the components
   const componentsFolderFiles: { [index: string]: { default: object } } = import.meta.globEager('../components/**/*.vue')
   Object.keys(componentsFolderFiles).forEach((key: string) => {

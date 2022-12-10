@@ -28,8 +28,6 @@ export default function userModel(userData: IUser) {
 
   function signOut() {
     StorageService.set({ [UsersService.AUTH_TOKEN_NAME]: null })
-    console.log(router)
-    debugger
     router.push('/sign')
   }
 

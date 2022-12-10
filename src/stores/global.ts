@@ -9,7 +9,6 @@ export const useGlobalStore = defineStore('global', () => {
   const user = ref<UserModel | null>(null)
   const mainListScrollTop = ref(0)
   const SSESalt = ''
-  const searchQuery = ref('')
   const isNoteSaving = false
   const isInitInfoLoading = true
   // const removingEntities = ref({
@@ -72,7 +71,6 @@ export const useGlobalStore = defineStore('global', () => {
     isLoading,
     mainListScrollTop,
     SSESalt,
-    searchQuery,
     isNoteSaving,
     isInitInfoLoading,
     // removingEntities,

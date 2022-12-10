@@ -1,7 +1,7 @@
 <template lang="pug">
 .search
   q-input(
-    v-model="globalStore.searchQuery"
+    v-model="NotesService.searchQuery"
     placeholder="Поиск..."
     color="grey-7"
     outlined
@@ -11,24 +11,21 @@
 
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue'
-import BaseService from '~/services/base'
+import NotesService from '~/composables/services/notes'
 import KeyboardEvents from '~/helpers/keyboard-events'
-import { useGlobalStore } from '~/stores/global'
-
-const globalStore = useGlobalStore()
 
 function handleEscapeButton(event: KeyboardEvent) {
   if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
-    globalStore.searchQuery = ''
+    NotesService.searchQuery.value = ''
   }
 }
 
 onMounted(() => {
-  BaseService.eventBus.on('keydown', handleEscapeButton)
+  document.onkeydown = handleEscapeButton
 })
 
 onBeforeUnmount(() => {
-  BaseService.eventBus.off('keydown', handleEscapeButton)
+  document.onkeydown = null
 })
 </script>
 

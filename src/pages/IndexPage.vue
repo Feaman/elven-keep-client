@@ -14,7 +14,7 @@
         @remove="NotesService.removeNote(note)"
         :note="note"
       )
-</template>
+  </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'

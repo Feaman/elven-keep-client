@@ -4,11 +4,10 @@ import { ListItemModel, Variant } from '~/composables/models/list-item'
 import noteModel, { INote, NoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 import BaseService from '~/services/base'
-import { useGlobalStore } from '~/stores/global'
 
 const notes: Ref<NoteModel[]> = ref([])
-const globalStore = useGlobalStore()
 const { api } = BaseService
+const searchQuery = ref('')
 
 function generateNotes(notesData: INote[]) {
   notesData.forEach((noteData: INote) => {
@@ -23,12 +22,12 @@ const filtered = computed(() => {
 
   resultNotes.sort((previousItem, nextItem) => ((previousItem.id || 0) < (nextItem.id || 0) ? 1 : -1))
 
-  if (!globalStore.searchQuery) {
+  if (!searchQuery.value) {
     return resultNotes
   }
 
   return resultNotes.filter((note: NoteModel) => {
-    const regExp = new RegExp(globalStore.searchQuery, 'i')
+    const regExp = new RegExp(searchQuery.value, 'i')
     let foundInLisListItems = false
     note.list.forEach((listItem) => {
       if (regExp.test(listItem.text || '')) {
@@ -107,7 +106,7 @@ function addNoteCoAuthor(note: NoteModel, coAuthor: CoAuthorModel) {
 
 async function addCoAuthor(note: NoteModel, email: string) {
   const noteCoAuthorData = await api.addNoteCoAuthor(note, email)
-  addNoteCoAuthor(note, coAuthorModel(noteCoAuthorData))
+  addNoteCoAuthor(note, coAuthorModel(noteCoAuthorData) as unknown as CoAuthorModel)
 }
 
 function setOrder(note: NoteModel, order: number[]) {
@@ -135,6 +134,7 @@ async function removeNote(note: NoteModel, addRemovingNote = true) {
 export default {
   notes,
   filtered,
+  searchQuery,
   generateNotes,
   findNoteListItemVariants,
   clear,
