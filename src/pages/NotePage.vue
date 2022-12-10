@@ -1,34 +1,43 @@
 <template lang="pug">
-div sadf
+.note-page
+  NoteToolbar(
+    :note="note"
+  ).full-width
+  div {{note.list.length}}
 </template>
 
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+import noteModel, { type NoteModel } from '~/composables/models/note'
+import { TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
+import TypesService from '~/composables/services/types'
+
+const route = useRoute()
+let note: NoteModel
 
 const props = defineProps<{
   id: number,
 }>()
-const note = NotesService.fi
-switch ($route.path) {
+
+function handleNote() {
+  const foundNote = NotesService.notes.value.find((note: NoteModel) => note.id === Number(props.id))
+  if (!foundNote) {
+    throw new Error(`Note width id "${props.id}" not found`)
+  }
+  note = foundNote
+}
+
+switch (route.path) {
   case '/new/list':
-    note = vew NoteModel({})
-    note.addListItem()
+    note = noteModel({}) as unknown as NoteModel
     break
   case '/new/text':
-    note = new NoteModel({ typeId: TypesService.findByName(TypeModel.TYPE_TEXT).id })
+    note = noteModel({ typeId: TypesService.findByName(TYPE_TEXT).id }) as unknown as NoteModel
     break
   default:
     handleNote()
     break
-}
-function handleNote() {
-  // Find note
-  const noteId = $route.params.id
-  const note = $store.state.notes.find((note: NoteModel) => note.id === Number(noteId))
-  if (!note) {
-    return BaseService.error({ statusCode: 404, message: `Note width id "${noteId}" not found` })
-  }
-  note = note
 }
 </script>
 

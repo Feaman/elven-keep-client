@@ -41,9 +41,9 @@ q-card.note-preview.cursor-pointer.gradient.full-height.pa-4.pt-2(
 
 <script setup lang="ts">
 import { mdiCheckboxBlankOutline } from '@quasar/extras/mdi-v6'
-import type { NoteModel } from '~/composables/models/note'
 import { TYPE_LIST } from '~/composables/models/type'
 import NoteCoAuthors from './NoteCoAuthors.vue'
+import { type NoteModel } from '~/composables/models/note'
 
 defineProps<{
   note: NoteModel,

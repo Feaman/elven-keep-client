@@ -8,7 +8,7 @@
         NotesSearch
         .toolbar-tools.d-flex
           q-btn.ml-2(
-            @click="goToPage('/new/list')"
+            @click="router.push('/new/list')"
             :icon="mdiFormatListBulletedSquare"
             color="black"
             flat
@@ -16,7 +16,7 @@
           )
             ToolTip Create list note
           q-btn(
-            @click="goToPage('/new/text')"
+            @click="router.push('/new/text')"
             :icon="mdiTextBoxOutline"
             color="black"
             flat
@@ -31,10 +31,10 @@
 import { mdiFormatListBulletedSquare, mdiTextBoxOutline } from '@quasar/extras/mdi-v6'
 import { useRouter } from 'vue-router'
 
-function goToPage(page: string) {
-  const router = useRouter()
-  router.push(page)
-}
+const router = useRouter()
+// function goToPage(page: string) {
+// router.push(page)
+// }
 </script>
 
 <style lang="stylus" scoped>

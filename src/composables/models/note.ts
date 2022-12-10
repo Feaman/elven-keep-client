@@ -9,25 +9,25 @@ import { useGlobalStore } from '~/stores/global'
 import { IUser } from './user'
 
 export interface INote {
-  id: number
-  title: string | ''
-  text: string | ''
-  type: TypeModel
-  typeId: number
-  statusId: number
-  status: TStatusModel
-  userId: number
-  user: IUser
-  isCompletedListExpanded: boolean
-  saveTimeout: ReturnType<typeof setTimeout> | null
-  list: IListItem[]
-  coAuthors: ICoAuthor[]
-  created: string
-  updated: string
+  id?: number
+  title?: string | ''
+  text?: string | ''
+  type?: TypeModel
+  typeId?: number
+  statusId?: number
+  status?: TStatusModel
+  userId?: number
+  user?: IUser
+  isCompletedListExpanded?: boolean
+  list?: IListItem[]
+  coAuthors?: ICoAuthor[]
+  created?: string
+  updated?: string
 }
 
 export default function noteModel(noteData: INote) {
   const id = ref(noteData.id)
+  const isSaving = ref(false)
   const title = ref(noteData.title || '')
   const userId = ref(noteData.userId)
   const text = ref(noteData.text || '')
@@ -228,6 +228,7 @@ export default function noteModel(noteData: INote) {
     completedListItems,
     mainListItems,
     isMyNote,
+    isSaving,
     hide,
     removeItem,
     addCoAuthor,
