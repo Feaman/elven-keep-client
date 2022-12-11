@@ -1,6 +1,6 @@
-import { CoAuthorModel, ICoAuthor } from '~/composables/models/co-author'
-import { IListItem, ListItemModel } from '~/composables/models/list-item'
-import { INote, NoteModel } from '~/composables/models/note'
+import { TCoAuthorModel, ICoAuthor } from '~/composables/models/co-author'
+import { IListItem, TListItemModel } from '~/composables/models/list-item'
+import { INote, TNoteModel } from '~/composables/models/note'
 import { IStatus } from '~/composables/models/status'
 import { IType } from '~/composables/models/type'
 import { IUser } from '~/composables/models/user'
@@ -28,7 +28,7 @@ export default class ApiService extends BaseService {
     return data as ConfigObject
   }
 
-  async addNote(note: NoteModel): Promise<INote> {
+  async addNote(note: TNoteModel): Promise<INote> {
     const noteData = {
       title: note.title,
       text: note.text,
@@ -37,7 +37,7 @@ export default class ApiService extends BaseService {
       isCompletedListExpanded: note.isCompletedListExpanded,
     }
 
-    note.list.forEach((listItem: ListItemModel) => noteData.list.push({
+    note.list.forEach((listItem: TListItemModel) => noteData.list.push({
       text: listItem.text,
       noteId: listItem.note?.id,
       checked: listItem.checked,
@@ -49,7 +49,7 @@ export default class ApiService extends BaseService {
     return data as INote
   }
 
-  async updateNote(note: NoteModel): Promise<INote> {
+  async updateNote(note: TNoteModel): Promise<INote> {
     const noteData = {
       title: note.title,
       text: note.text,
@@ -60,17 +60,17 @@ export default class ApiService extends BaseService {
     return data as INote
   }
 
-  async removeNote(note: NoteModel) {
+  async removeNote(note: TNoteModel) {
     const { data } = await this.api.delete(`notes/${note.id}`)
     return data
   }
 
-  async restoreNote(note: NoteModel) {
+  async restoreNote(note: TNoteModel) {
     const { data } = await this.api.put(`notes/restore/${note.id}`)
     return data
   }
 
-  async updateListItem(listItem: ListItemModel): Promise<IListItem> {
+  async updateListItem(listItem: TListItemModel): Promise<IListItem> {
     const listItemData = {
       text: listItem.text,
       checked: listItem.checked,
@@ -81,7 +81,7 @@ export default class ApiService extends BaseService {
     return data as IListItem
   }
 
-  async addListItem(listItem: ListItemModel): Promise<IListItem> {
+  async addListItem(listItem: TListItemModel): Promise<IListItem> {
     const listItemData = {
       text: listItem.text,
       noteId: listItem.note?.id,
@@ -93,12 +93,12 @@ export default class ApiService extends BaseService {
     return data as IListItem
   }
 
-  async removeListItem(listItem: ListItemModel) {
+  async removeListItem(listItem: TListItemModel) {
     const { data } = await this.api.delete(`list-items/${listItem.id}`)
     return data
   }
 
-  async restoreListItem(listItem: ListItemModel) {
+  async restoreListItem(listItem: TListItemModel) {
     const { data } = await this.api.put(`list-items/restore/${listItem.id}`)
     return data
   }
@@ -115,17 +115,17 @@ export default class ApiService extends BaseService {
     return data as ConfigObject
   }
 
-  async addNoteCoAuthor(note: NoteModel, email: string): Promise<ICoAuthor> {
+  async addNoteCoAuthor(note: TNoteModel, email: string): Promise<ICoAuthor> {
     const { data } = await this.api.post(`notes/${note.id}/co-author`, { email })
     return data as ICoAuthor
   }
 
-  async removeNoteCoAuthor(coAuthor: CoAuthorModel) {
+  async removeNoteCoAuthor(coAuthor: TCoAuthorModel) {
     const { data } = await this.api.delete(`notes/co-author/${coAuthor.id}`)
-    return data as CoAuthorModel
+    return data as TCoAuthorModel
   }
 
-  async setOrder(note: NoteModel, order: number[]) {
+  async setOrder(note: TNoteModel, order: number[]) {
     const { data } = await this.api.put(`notes/${note.id}/set-order`, { order })
     return data
   }

@@ -1,11 +1,11 @@
 import { computed, ref, Ref } from 'vue'
-import coAuthorModel, { CoAuthorModel } from '~/composables/models/co-author'
-import { ListItemModel, Variant } from '~/composables/models/list-item'
-import noteModel, { INote, NoteModel } from '~/composables/models/note'
+import coAuthorModel, { TCoAuthorModel } from '~/composables/models/co-author'
+import { TListItemModel, Variant } from '~/composables/models/list-item'
+import noteModel, { INote, TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 import BaseService from '~/services/base'
 
-const notes: Ref<NoteModel[]> = ref([])
+const notes: Ref<TNoteModel[]> = ref([])
 const { api } = BaseService
 const searchQuery = ref('')
 
@@ -13,7 +13,7 @@ function generateNotes(notesData: INote[]) {
   notesData.forEach((noteData: INote) => {
     const note = noteModel(noteData)
     // note.setNoteToListItems()
-    notes.value.push(note as unknown as NoteModel)
+    notes.value.push(note as unknown as TNoteModel)
   })
 }
 
@@ -26,7 +26,7 @@ const filtered = computed(() => {
     return resultNotes
   }
 
-  return resultNotes.filter((note: NoteModel) => {
+  return resultNotes.filter((note: TNoteModel) => {
     const regExp = new RegExp(searchQuery.value, 'i')
     let foundInLisListItems = false
     note.list.forEach((listItem) => {
@@ -38,7 +38,7 @@ const filtered = computed(() => {
   })
 })
 
-function findNoteListItemVariants(note: NoteModel, variants: Variant[], listItem: ListItemModel, query: string) {
+function findNoteListItemVariants(note: TNoteModel, variants: Variant[], listItem: TListItemModel, query: string) {
   note.list
     .filter((_listItem) => _listItem !== listItem && _listItem.statusId !== StatusesService.active.value.id)
     .forEach((_listItem) => {
@@ -60,7 +60,7 @@ function findNoteListItemVariants(note: NoteModel, variants: Variant[], listItem
     })
 }
 
-function findListItemVariants(listItem: ListItemModel, query: string) {
+function findListItemVariants(listItem: TListItemModel, query: string) {
   const variants: Variant[] = []
   query = query.toLocaleLowerCase()
 
@@ -100,21 +100,21 @@ function findListItemVariants(listItem: ListItemModel, query: string) {
   return resultVariants
 }
 
-function addNoteCoAuthor(note: NoteModel, coAuthor: CoAuthorModel) {
+function addNoteCoAuthor(note: TNoteModel, coAuthor: TCoAuthorModel) {
   note.addCoAuthor(coAuthor)
 }
 
-async function addCoAuthor(note: NoteModel, email: string) {
+async function addCoAuthor(note: TNoteModel, email: string) {
   const noteCoAuthorData = await api.addNoteCoAuthor(note, email)
-  addNoteCoAuthor(note, coAuthorModel(noteCoAuthorData) as unknown as CoAuthorModel)
+  addNoteCoAuthor(note, coAuthorModel(noteCoAuthorData) as unknown as TCoAuthorModel)
 }
 
-function setOrder(note: NoteModel, order: number[]) {
+function setOrder(note: TNoteModel, order: number[]) {
   api.setOrder(note, order)
 }
 
 function clear() {
-  notes.value.forEach((note: NoteModel) => {
+  notes.value.forEach((note: TNoteModel) => {
     note.list.forEach((listItem) => {
       if (listItem.statusId === StatusesService.inactive.value.id) {
         // listItem.removeFromState()
@@ -126,7 +126,16 @@ function clear() {
   })
 }
 
-async function removeNote(note: NoteModel, addRemovingNote = true) {
+function find(noteId: number) {
+  const note = notes.value.find((note) => note.id === noteId)
+  if (!note) {
+    throw new Error(`Note with id "${noteId}" not found`)
+  }
+
+  return note
+}
+
+async function removeNote(note: TNoteModel, addRemovingNote = true) {
   note.hide(addRemovingNote)
   // await BaseService.api.removeNote(note)
 }
@@ -135,6 +144,7 @@ export default {
   notes,
   filtered,
   searchQuery,
+  find,
   generateNotes,
   findNoteListItemVariants,
   clear,

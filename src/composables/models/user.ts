@@ -36,4 +36,4 @@ export default function userModel(userData: IUser) {
   }
 }
 
-export type UserModel = UnwrapRef<ReturnType<typeof userModel>>
+export type TUserModel = UnwrapRef<ReturnType<typeof userModel>>

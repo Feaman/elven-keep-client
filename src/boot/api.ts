@@ -42,19 +42,6 @@ export default boot(({ app }) => {
     return response
   })
   BaseService.api = new ApiService(axiosApi)
-  // api.onError((error: AxiosError) => {
-  //   if (error.response) {
-  //     if (error.response.status === 401) {
-  //       if (this.route.name !== 'login') {
-  //         // this.redirect('/login')
-  //       }
-  //     } else if (error.response.status !== 400) {
-  //       // this.error({ statusCode: error.response.status, message: error.response.data.message })
-  //     }
-  //   } else {
-  //     // this.error({ statusCode: 500, message: 'Something goes wrong' })
-  //   }
-  // })
   app.config.globalProperties.$axios = axios
   app.config.globalProperties.$api = BaseService.api
 })

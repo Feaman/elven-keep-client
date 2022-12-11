@@ -16,3 +16,13 @@ q-btn(
 )
   ToolTip Create text note
 </template>
+
+<script setup lang="ts">
+import {
+  mdiFormatListBulletedSquare,
+  mdiTextBoxOutline,
+} from '@quasar/extras/mdi-v6'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+</script>

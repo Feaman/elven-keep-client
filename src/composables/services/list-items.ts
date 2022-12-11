@@ -1,23 +1,24 @@
-import { ListItemModel } from '~/composables/models/list-item'
-import { NoteModel } from '~/composables/models/note'
-import statusesService from '~/composables/services/statuses'
+import { TListItemModel } from '~/composables/models/list-item'
+import { type TNoteModel } from '~/composables/models/note'
+import StatusesService from '~/composables/services/statuses'
+import NotesService from '~/composables/services/notes'
 
-function generateMaxOrder(listItem: ListItemModel) {
-  console.log(listItem)
-  // let order = 0
-  // if (listItem.note?.list.length) {
-  // order = Math.max.apply(
-  //   Math,
-  //   listItem.note.list.filter((_listItem) => _listItem.id !== listItem.id).map((listItem) => listItem.order),
-  // )
-  // }
+function generateMaxOrder(listItemId: number, noteId: number) {
+  let order = 0
+  const note = NotesService.find(Number(noteId))
+  if (note.list.length) {
+    const numbers = note.list
+      .filter((_listItem) => _listItem.id !== listItemId)
+      .map((listItem) => listItem.order)
+    order = Math.max(...numbers)
+  }
 
-  // return order + 1
+  return order + 1
 }
 
-function filterAndSort(list: ListItemModel[], completed = false) {
+function filterAndSort(list: TListItemModel[], completed = false) {
   return list
-    .filter((listItem) => (completed ? listItem.completed : !listItem.completed) && listItem.statusId.value === statusesService.active.value.id)
+    .filter((listItem) => (completed ? listItem.completed : !listItem.completed) && listItem.statusId === StatusesService.active.value.id)
     .sort((previousItem, nextItem) => ((previousItem.order || 0) < (nextItem.order || 0) ? -1 : 1))
     .sort((previousItem, nextItem) => {
       if (previousItem.checked === nextItem.checked) {
@@ -27,7 +28,7 @@ function filterAndSort(list: ListItemModel[], completed = false) {
     })
 }
 
-function getListItemTextarea(list: ListItemModel[], listItem: ListItemModel, refs: { [key: string]: HTMLTextAreaElement[] }) {
+function getListItemTextarea(list: TListItemModel[], listItem: TListItemModel, refs: { [key: string]: HTMLTextAreaElement[] }) {
   const textareaComponents = refs[`textarea-${listItem.id || list.indexOf(listItem)}`] as HTMLTextAreaElement[]
   if (textareaComponents?.length) {
     return textareaComponents[0]
@@ -35,7 +36,7 @@ function getListItemTextarea(list: ListItemModel[], listItem: ListItemModel, ref
   return null
 }
 
-function handleListItemTextAreaHeight(list: ListItemModel[], listItem: ListItemModel, refs: { [key: string]: HTMLTextAreaElement[] }) {
+function handleListItemTextAreaHeight(list: TListItemModel[], listItem: TListItemModel, refs: { [key: string]: HTMLTextAreaElement[] }) {
   const $textArea = getListItemTextarea(list, listItem, refs)
   let textAreaHeight = 0
   if (!$textArea) {
@@ -55,17 +56,17 @@ function handleListItemTextAreaHeight(list: ListItemModel[], listItem: ListItemM
   return $textArea
 }
 
-function handleTextAreaHeights(list: ListItemModel[], refs: { [key: string]: HTMLTextAreaElement[] }) {
+function handleTextAreaHeights(list: TListItemModel[], refs: { [key: string]: HTMLTextAreaElement[] }) {
   list.forEach((listItem) => {
     handleListItemTextAreaHeight(list, listItem, refs)
   })
 }
 
-function filterCompleted(note: NoteModel) {
-  return note.list.value.filter((listItem) => listItem.completed && listItem.statusId.value === statusesService.active.value.id)
+function filterCompleted(note: TNoteModel) {
+  return note.list.filter((listItem) => listItem.completed && listItem.statusId === StatusesService.active.value.id)
 }
 
-// function isGradient(note: NoteModel) {
+// function isGradient(note: TNoteModel) {
 // return note.type?.name === TypeModel.TYPE_LIST
 // && mainListItems.length > 7 + (note.title ? 0 : 1) + (completedListItems.length ? -1 : 0)
 // }

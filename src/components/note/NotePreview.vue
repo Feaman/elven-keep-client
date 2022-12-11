@@ -43,10 +43,10 @@ q-card.note-preview.cursor-pointer.gradient.full-height.pa-4.pt-2(
 import { mdiCheckboxBlankOutline } from '@quasar/extras/mdi-v6'
 import { TYPE_LIST } from '~/composables/models/type'
 import NoteCoAuthors from './NoteCoAuthors.vue'
-import { type NoteModel } from '~/composables/models/note'
+import { type TNoteModel } from '~/composables/models/note'
 
 defineProps<{
-  note: NoteModel,
+  note: TNoteModel,
 }>()
 
 const NOTE_TYPE_LIST = TYPE_LIST

@@ -51,17 +51,15 @@ import {
   mdiCloudUploadOutline,
   mdiCloudCheckOutline,
   mdiHome,
-  mdiTextBoxOutline,
   mdiAccountGroup,
   mdiFullscreen,
-  mdiFormatListBulletedSquare,
 } from '@quasar/extras/mdi-v6'
-import { type NoteModel } from '~/composables/models/note'
+import { type TNoteModel } from '~/composables/models/note'
 
 const router = useRouter()
 
 defineProps<{
-  note: NoteModel,
+  note: TNoteModel,
 }>()
 </script>
 
@@ -77,3 +75,4 @@ defineProps<{
   }
 }
 </style>
+TNoteModelTNoteModelTNoteModelTNoteModelTNoteModel

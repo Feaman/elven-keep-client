@@ -20,7 +20,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import NotesService from '~/composables/services/notes'
-import type { NoteModel } from '~/composables/models/note'
+import { type TNoteModel } from '~/composables/models/note'
 import { useGlobalStore } from '~/stores/global'
 
 const { filtered } = NotesService
@@ -29,7 +29,7 @@ const globalStore = useGlobalStore()
 const router = useRouter()
 let scrollTimeout: ReturnType<typeof setTimeout> | null = null
 
-function openNote(note: NoteModel) {
+function openNote(note: TNoteModel) {
   router.push(`/note/${note.id}`)
 }
 

@@ -1,7 +1,8 @@
 import { ref, UnwrapRef } from 'vue'
-import { NoteModel } from '~/composables/models/note'
+import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
-import statusesService from '~/composables/services/statuses'
+import StatusesService from '~/composables/services/statuses'
+import ListItemsService from '../services/list-items'
 
 export type Variant = {
   noteId: number,
@@ -18,7 +19,7 @@ export interface IListItem {
   noteId?: number
   order?: number
   text?: string | ''
-  note?: NoteModel | undefined
+  note?: TNoteModel | undefined
   focused?: boolean
   checked?: boolean
   completed?: boolean
@@ -33,17 +34,16 @@ export default function listItemModel(listItemData: IListItem) {
   const uniqueId = ref(`${(new Date()).getMilliseconds()}-${id.value}`)
   const text = ref(listItemData.text || '')
   const noteId = ref(listItemData.noteId)
-  // const note = ref(listItemData.note)
   const order = ref(listItemData.order || 0)
   const focused = ref(listItemData.focused || false)
   const checked = ref(!!listItemData.checked || false)
   const completed = ref(listItemData.completed || false)
   const created = ref(listItemData.created ? new Date(listItemData.created) : null)
   const updated = ref(listItemData.updated ? new Date(listItemData.updated) : null)
-  const statusId = ref(listItemData.statusId || statusesService.active.value.id)
-  const status = ref(statusesService.findById(statusId.value))
+  const statusId = ref(listItemData.statusId || StatusesService.active.value.id)
+  const status = ref(StatusesService.findById(statusId.value))
 
-  // async save() {
+  // async function save() {
   //   if (!this?.note?.id) {
   //     await this?.note?.save()
   //   }
@@ -73,9 +73,11 @@ export default function listItemModel(listItemData: IListItem) {
   //   BaseService.vuex.commit('removeListItem', this)
   // }
 
-  // complete(isCompleted: boolean) {
-  //   this.update({ completed: isCompleted, order: ListItemsService.generateMaxOrder(this) })
-  // }
+  function complete(isCompleted: boolean) {
+    completed.value = isCompleted
+    order.value = ListItemsService.generateMaxOrder(Number(id.value), noteId.value)
+    // save()
+  }
 
   // check(isChecked: boolean) {
   //   this.update({ checked: isChecked })
@@ -129,8 +131,8 @@ export default function listItemModel(listItemData: IListItem) {
   // }
 
   return {
-    id, uniqueId, text, noteId, order, focused, checked, completed, created, updated, statusId, status,
+    id, uniqueId, text, noteId, order, focused, checked, completed, created, updated, statusId, status, complete,
   }
 }
 
-export type ListItemModel = UnwrapRef<ReturnType<typeof listItemModel>>
+export type TListItemModel = UnwrapRef<ReturnType<typeof listItemModel>>

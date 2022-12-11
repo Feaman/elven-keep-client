@@ -1,8 +1,8 @@
 import { computed, Ref, ref, UnwrapRef } from 'vue'
-import coAuthorModel, { CoAuthorModel, ICoAuthor } from '~/composables/models/co-author'
-import listItemModel, { IListItem, ListItemModel } from '~/composables/models/list-item'
+import coAuthorModel, { TCoAuthorModel, ICoAuthor } from '~/composables/models/co-author'
+import listItemModel, { IListItem, TListItemModel } from '~/composables/models/list-item'
 import { TStatusModel } from '~/composables/models/status'
-import { TypeModel, TYPE_LIST } from '~/composables/models/type'
+import { TTypeModel, TYPE_LIST } from '~/composables/models/type'
 import StatusesService from '~/composables/services/statuses'
 import typesService from '~/composables/services/types'
 import { useGlobalStore } from '~/stores/global'
@@ -12,7 +12,7 @@ export interface INote {
   id?: number
   title?: string | ''
   text?: string | ''
-  type?: TypeModel
+  type?: TTypeModel
   typeId?: number
   statusId?: number
   status?: TStatusModel
@@ -32,13 +32,13 @@ export default function noteModel(noteData: INote) {
   const userId = ref(noteData.userId)
   const text = ref(noteData.text || '')
   const typeId = ref(noteData.typeId || typesService.list.value.id)
-  const type = ref<TypeModel | null>(null)
+  const type = ref<TTypeModel | null>(null)
   const created = ref(noteData.created ? new Date(noteData.created) : null)
   const updated = ref(noteData.updated ? new Date(noteData.updated) : null)
   const statusId = ref(noteData.statusId || StatusesService.active.value.id)
   const status = computed(() => StatusesService.findById(statusId.value))
-  const list = ref<ListItemModel[]>([])
-  const coAuthors = ref<CoAuthorModel[]>([])
+  const list: Ref<TListItemModel[]> = ref([])
+  const coAuthors = ref<TCoAuthorModel[]>([])
   const isCompletedListExpanded = ref(!!noteData.isCompletedListExpanded)
 
   // if (noteData.user) {
@@ -46,11 +46,11 @@ export default function noteModel(noteData: INote) {
   // }
 
   function handleList(listData: IListItem[] = []) {
-    listData.forEach((listItemData) => list.value.push(listItemModel(listItemData) as unknown as ListItemModel))
+    listData.forEach((listItemData) => list.value.push(listItemModel(listItemData) as unknown as TListItemModel))
   }
 
   function handleCoAuthors(coAuthorsData: ICoAuthor[] = []) {
-    coAuthorsData.forEach((coAuthorData) => coAuthors.value.push(coAuthorModel(coAuthorData) as unknown as CoAuthorModel))
+    coAuthorsData.forEach((coAuthorData) => coAuthors.value.push(coAuthorModel(coAuthorData) as unknown as TCoAuthorModel))
   }
 
   function handleType() {
@@ -193,17 +193,23 @@ export default function noteModel(noteData: INote) {
 
   const completedListItems = computed(
     () => list.value.filter((listItem) => listItem.completed && listItem.statusId === StatusesService.active.value.id),
-  ) as Ref<ListItemModel[]>
+  ) as Ref<TListItemModel[]>
+
+  const checkedListItems = computed(
+    () => list.value.filter((listItem) => listItem.checked
+      && !listItem.completed
+      && listItem.statusId === StatusesService.active.value.id),
+  ) as Ref<TListItemModel[]>
 
   const mainListItems = computed(
     () => filterAndSort(),
-  ) as Ref<ListItemModel[]>
+  ) as Ref<TListItemModel[]>
 
-  function addCoAuthor(coAuthor: CoAuthorModel) {
+  function addCoAuthor(coAuthor: TCoAuthorModel) {
     coAuthors.value.push(coAuthor)
   }
 
-  function removeItem(item: ListItemModel) {
+  function removeItem(item: TListItemModel) {
     list.value = list.value.filter((_item) => _item.id !== item.id)
   }
 
@@ -229,6 +235,7 @@ export default function noteModel(noteData: INote) {
     mainListItems,
     isMyNote,
     isSaving,
+    checkedListItems,
     hide,
     removeItem,
     addCoAuthor,
@@ -238,4 +245,4 @@ export default function noteModel(noteData: INote) {
   }
 }
 
-export type NoteModel = UnwrapRef<ReturnType<typeof noteModel>>
+export type TNoteModel = UnwrapRef<ReturnType<typeof noteModel>>

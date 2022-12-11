@@ -18,4 +18,4 @@ export default function typeModel(typeData: IType) {
   }
 }
 
-export type TypeModel = UnwrapRef<ReturnType<typeof typeModel>>
+export type TTypeModel = UnwrapRef<ReturnType<typeof typeModel>>
