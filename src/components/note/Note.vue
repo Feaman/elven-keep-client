@@ -243,7 +243,7 @@ const props = defineProps<{
 //   }
 function completeChecked() {
   props.note.checkedListItems.forEach((listItem) => {
-    listItem.complete(true)
+    listItem.complete(true, props.note)
   })
 }
 //   handleKeyDown(event: KeyboardEvent) {

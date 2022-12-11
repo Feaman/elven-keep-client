@@ -135,6 +135,18 @@ function find(noteId: number) {
   return note
 }
 
+function generateMaxOrder(listItemId: number, note: TNoteModel) {
+  let order = 0
+  if (note.list.length) {
+    const numbers = note.list
+      .filter((_listItem) => _listItem.id !== listItemId)
+      .map((listItem) => listItem.order)
+    order = Math.max(...numbers)
+  }
+
+  return order + 1
+}
+
 async function removeNote(note: TNoteModel, addRemovingNote = true) {
   note.hide(addRemovingNote)
   // await BaseService.api.removeNote(note)
@@ -144,6 +156,7 @@ export default {
   notes,
   filtered,
   searchQuery,
+  generateMaxOrder,
   find,
   generateNotes,
   findNoteListItemVariants,

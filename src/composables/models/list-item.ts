@@ -2,7 +2,7 @@ import { ref, UnwrapRef } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
-import ListItemsService from '../services/list-items'
+import NotesService from '~/composables/services/notes'
 
 export type Variant = {
   noteId: number,
@@ -73,9 +73,10 @@ export default function listItemModel(listItemData: IListItem) {
   //   BaseService.vuex.commit('removeListItem', this)
   // }
 
-  function complete(isCompleted: boolean) {
+  function complete(isCompleted: boolean, note: TNoteModel) {
+    const newOrder = NotesService.generateMaxOrder(Number(id.value), note)
     completed.value = isCompleted
-    order.value = ListItemsService.generateMaxOrder(Number(id.value), noteId.value)
+    order.value = newOrder
     // save()
   }
 
