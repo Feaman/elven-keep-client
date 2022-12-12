@@ -1,10 +1,12 @@
 import { computed, Ref, ref, UnwrapRef } from 'vue'
-import coAuthorModel, { TCoAuthorModel, ICoAuthor } from '~/composables/models/co-author'
+import coAuthorModel, { ICoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
 import listItemModel, { IListItem, TListItemModel } from '~/composables/models/list-item'
 import { TStatusModel } from '~/composables/models/status'
 import { TTypeModel, TYPE_LIST } from '~/composables/models/type'
+import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
-import typesService from '~/composables/services/types'
+import TypesService from '~/composables/services/types'
+import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
 import { IUser } from './user'
 
@@ -31,7 +33,7 @@ export default function noteModel(noteData: INote) {
   const title = ref(noteData.title || '')
   const userId = ref(noteData.userId)
   const text = ref(noteData.text || '')
-  const typeId = ref(noteData.typeId || typesService.list.value.id)
+  const typeId = ref(noteData.typeId || TypesService.list.value.id)
   const type = ref<TTypeModel | null>(null)
   const created = ref(noteData.created ? new Date(noteData.created) : null)
   const updated = ref(noteData.updated ? new Date(noteData.updated) : null)
@@ -55,7 +57,7 @@ export default function noteModel(noteData: INote) {
 
   function handleType() {
     // @ts-ignore
-    const foundType = typesService.types.value.find((_type) => _type.id === typeId.value)
+    const foundType = TypesService.types.value.find((_type) => _type.id === typeId.value)
     if (!foundType) {
       throw new Error(`Type '${typeId.value}' not found`)
     } else {
@@ -89,36 +91,34 @@ export default function noteModel(noteData: INote) {
   //   // return listItem
   // }
 
-  // function save(savingText = false): Promise<INote> {
-  //   console.log(savingText, this)
-  //   // NotesService.vuex.commit('clearNoteTimeout', this)
-  //   return new Promise((resolve) => {
-  //     //   const saveTimeout = setTimeout(() => {
-  //     //     if (this.id) {
-  //     //       ApiService.updateNote(this)
-  //     //         .then((data) => resolve(data))
-  //     //         .catch((error) => NotesService.error(error))
-  //     //     } else {
-  //     //       NotesService.vuex.commit('addNote', this)
-  //     //       return ApiService.addNote(this)
-  //     //         .then((noteData) => {
-  //     //           history.replaceState({}, '', `/note/${noteData.id}`)
-  //     //           const newNoteData: INote = {
-  //     //             id: noteData.id,
-  //     //             userId: noteData.userId,
-  //     //           }
-  //     //           if (noteData.user) {
-  //     //             newNoteData.user = new UserModel(noteData.user)
-  //     //           }
-  //     //           this.updateState(newNoteData)
-  //     //           resolve(newNoteData)
-  //     //         })
-  //     //         .catch((error) => NotesService.error(error))
-  //     //     }
-  //     //   }, savingText ? 400 : 0)
-  //     // this.updateState({ saveTimeout })
-  //   })
-  // }
+  async function save(savingText = false) {
+    console.log('Note saved')
+    // NotesService.vuex.commit('clearNoteTimeout', this)
+    //   const saveTimeout = setTimeout(() => {
+    //     if (this.id) {
+    //       ApiService.updateNote(this)
+    //         .then((data) => resolve(data))
+    //         .catch((error) => NotesService.error(error))
+    //     } else {
+    //       NotesService.vuex.commit('addNote', this)
+    //       return ApiService.addNote(this)
+    //         .then((noteData) => {
+    //           history.replaceState({}, '', `/note/${noteData.id}`)
+    //           const newNoteData: INote = {
+    //             id: noteData.id,
+    //             userId: noteData.userId,
+    //           }
+    //           if (noteData.user) {
+    //             newNoteData.user = new UserModel(noteData.user)
+    //           }
+    //           this.updateState(newNoteData)
+    //           resolve(newNoteData)
+    //         })
+    //         .catch((error) => NotesService.error(error))
+    //     }
+    //   }, savingText ? 400 : 0)
+    // this.updateState({ saveTimeout })
+  }
 
   // update(data: INote) {
   //   NotesService.vuex.commit('updateNote', { note: this, data })
@@ -213,6 +213,37 @@ export default function noteModel(noteData: INote) {
     list.value = list.value.filter((_item) => _item.id !== item.id)
   }
 
+  async function saveListItem(listItem: TListItemModel) {
+    if (!list.value.includes(listItem)) {
+      throw new Error(`List item with id "${listItem.id}" doesn't exists in note's with id "${id.value}" list`)
+    }
+    if (!id.value) {
+      await save()
+    }
+    if (!listItem.id) {
+      const data = await BaseService.api.addListItem(listItem)
+      listItem.id = data.id
+      listItem.created = new Date(data.created || '')
+      listItem.updated = new Date(data.updated || '')
+    } else {
+      const data = await BaseService.api.updateListItem(listItem)
+      listItem.updated = new Date(data.updated || '')
+    }
+  }
+
+  function completeListItem(isCompleted: boolean, listItem: TListItemModel) {
+    const newOrder = NotesService.generateMaxOrder(Number(id.value), list.value)
+    listItem.completed = isCompleted
+    listItem.order = newOrder
+    saveListItem(listItem)
+  }
+
+  async function completeAllChecked() {
+    checkedListItems.value.forEach((listItem) => {
+      completeListItem(true, listItem)
+    })
+  }
+
   handleList(noteData.list)
   handleCoAuthors(noteData.coAuthors)
   handleType()
@@ -236,12 +267,15 @@ export default function noteModel(noteData: INote) {
     isMyNote,
     isSaving,
     checkedListItems,
+    completeListItem,
     hide,
     removeItem,
     addCoAuthor,
     isList,
     handleList,
     handleCoAuthors,
+    completeAllChecked,
+    saveListItem,
   }
 }
 

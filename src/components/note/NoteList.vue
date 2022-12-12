@@ -1,5 +1,8 @@
 <template lang="pug">
-.note-list(:class="{ fullscreen }")
+.note-list(
+  :class="{ fullscreen }"
+  ref="rootElement"
+)
   .note-list__list(
     :class="{ 'pb-3': isMain }"
   )
@@ -12,7 +15,7 @@
       )
         div(
           v-for="(listItem, index) in list"
-          :key="listItem._id"
+          :key="listItem.generatedId"
         )
           .list-item.q-flex.items-center(
             :class="listItemClasses(listItem, index)"
@@ -20,7 +23,7 @@
             transition( name="scale-fade")
               input.checkbox.mr-1(
                 v-if="fullscreen"
-                @change="listItem.check($event.target.checked)"
+                @change="check($event, listItem)"
                 :checked="listItem.checked"
                 :class="{ 'ml-9': !listItem.text }"
                 type="checkbox"
@@ -35,7 +38,7 @@
             transition(name="scale-fade")
               input.checkbox.complete-checkbox(
                 v-if="!fullscreen"
-                @change="listItem.complete($event.target.checked)"
+                @change="complete($event, listItem)"
                 :checked="listItem.completed"
                 type="checkbox"
                 color="secondary"
@@ -45,10 +48,10 @@
               textarea.full-width(
                 @input="updateText(listItem)"
                 @keydown.enter="selectFocusedVariant($event)"
-                @focus="listItem.updateState({ focused: true })"
+                @focus="emit('focus', listItem)"
                 @blur="handleBlur(listItem)"
                 :value="listItem.text"
-                :ref="`textarea-${listItem.id || index}`"
+                :id="generateTextareaRefName(listItem)"
               )
 
 //-             transition( name="scale-fade")
@@ -108,25 +111,41 @@
 
 <script setup lang="ts">
 import { mdiDrag } from '@quasar/extras/mdi-v6'
-import { computed } from 'vue'
-import { IListItem, type TListItemModel } from '~/composables/models/list-item'
+import { ref, computed, onMounted } from 'vue'
+import { type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   fullscreen: boolean,
   isMain: boolean,
   note: TNoteModel,
   list: TListItemModel[],
-}>()
+}>(), {
+  fullscreen: false,
+})
 
 // eslint-disable-next-line
 const emit = defineEmits<{
-  (event: 'update', value: IListItem): void
+  (event: 'focus', listItem: TListItemModel): void
+  (event: 'blur', listItem: TListItemModel): void
+  (event: 'update-text', value: { listItem: TListItemModel, text: string }): void
+  (event: 'update-order', value: { listItem: TListItemModel, order: number }): void
+  (event: 'save', listItem: TListItemModel): void
+  (event: 'check', listItem: TListItemModel): void
+  (event: 'uncheck', listItem: TListItemModel): void
+  (event: 'complete', listItem: TListItemModel): void
+  (event: 'activate', listItem: TListItemModel): void
 }>()
 
-const saveTimeout: ReturnType<typeof setTimeout> | null = null
+let saveTimeout: ReturnType<typeof setTimeout> | null = null
+const rootElement = ref<HTMLElement | null>(null)
+let $root: HTMLElement | null
+
+onMounted(() => {
+  $root = rootElement.value
+})
 
 const order = computed({
   get() {
@@ -138,13 +157,17 @@ const order = computed({
       if (!listItem) {
         throw new Error(`List item ${listItemId} not found`)
       }
-      listItem.updateState({ order: index + 1 })
+      emit('update-order', { listItem, order: index + 1 })
     })
     if (props.note.id) {
       NotesService.setOrder(props.note, order)
     }
   },
 })
+
+function generateTextareaRefName(listItem: TListItemModel) {
+  return `textarea-${listItem.generatedId}`
+}
 
 function listItemClasses(listItem: TListItemModel, index: number) {
   return {
@@ -328,29 +351,53 @@ function listItemClasses(listItem: TListItemModel, index: number) {
 //     })
 //   }
 
-//   updateText (listItem: ListItemModel) {
-//     const $textarea = ListItemsService.handleListItemTextAreaHeight(this.list, listItem, this.$refs as { [key: string]: HTMLTextAreaElement[] })
-//     const text = $textarea.value
-//     if (this.saveTimeout) {
-//       clearTimeout(this.saveTimeout)
-//     }
-//     listItem.updateState({ text })
-//     this.variants = NotesService.findListItemVariants(listItem, text)
-//     if (this.variants.length) {
-//       this.variantsListItem = listItem
-//       const boundingBox = $textarea.getBoundingClientRect()
-//       const menuHeight = this.variants.length * 32 + 16
-//       const y = boundingBox.y + (boundingBox.y - 56 < menuHeight ? 32 : -menuHeight)
-//       this.$nextTick(() => {
-//         this.variantsMenuX = boundingBox.x
-//         this.variantsMenuY = y
-//       })
-//     }
-//     this.saveTimeout = setTimeout(() => {
-//       listItem.update({ text })
-//       this.saveTimeout = null
-//     }, 400)
-//   }
+function getListItemTextarea(listItem: TListItemModel) {
+  return $root?.querySelector(`textarea[id="${generateTextareaRefName(listItem)}"]`) as HTMLTextAreaElement
+}
+
+function check(event: Event, listItem: TListItemModel) {
+  if ((event.target as HTMLInputElement).checked) {
+    emit('check', listItem)
+  } else {
+    emit('uncheck', listItem)
+  }
+}
+
+function complete(event: Event, listItem: TListItemModel) {
+  if ((event.target as HTMLInputElement).checked) {
+    emit('complete', listItem)
+  } else {
+    emit('activate', listItem)
+  }
+}
+
+function selectFocusedVariant(event: Event) {
+  console.log(event)
+}
+
+function updateText(listItem: TListItemModel) {
+  const $textarea = getListItemTextarea(listItem)
+  const text = $textarea.value
+  if (saveTimeout) {
+    clearTimeout(saveTimeout)
+  }
+  emit('update-text', { listItem, text })
+  // this.variants = NotesService.findListItemVariants(listItem, text)
+  // if (this.variants.length) {
+  //   this.variantsListItem = listItem
+  //   const boundingBox = $textarea.getBoundingClientRect()
+  //   const menuHeight = this.variants.length * 32 + 16
+  //   const y = boundingBox.y + (boundingBox.y - 56 < menuHeight ? 32 : -menuHeight)
+  //   this.$nextTick(() => {
+  //     this.variantsMenuX = boundingBox.x
+  //     this.variantsMenuY = y
+  //   })
+  // }
+  saveTimeout = setTimeout(() => {
+    emit('save', listItem)
+    saveTimeout = null
+  }, 400)
+}
 
 //   selectVariant (listItem: ListItemModel, variant: Variant) {
 //     listItem.selectVariant(variant)
@@ -358,11 +405,8 @@ function listItemClasses(listItem: TListItemModel, index: number) {
 //   }
 
 function handleBlur(listItem: TListItemModel) {
-  listItem.updateState({ focused: false, text: listItem.text })
-  if (saveTimeout) {
-    listItem.save()
-  }
-  const $textArea = ListItemsService.getListItemTextarea(props.list, listItem, this.$refs as { [key: string]: HTMLTextAreaElement[] })
+  emit('blur', listItem)
+  const $textArea = getListItemTextarea(listItem)
   if ($textArea && $textArea.parentElement) {
     $textArea.parentElement.scrollTop = 0
   }
@@ -451,8 +495,8 @@ $inactive-row-color: #F5F5F5;
       }
 
       &.list-item--focused {
-        border-top: 1px solid $grey-2;
-        border-bottom: 1px solid $grey-2;
+        border-top: 1px solid $grey-4;
+        border-bottom: 1px solid $grey-4;
       }
 
       &.list-item--focused .list-item__text {

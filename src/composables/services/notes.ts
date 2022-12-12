@@ -135,10 +135,10 @@ function find(noteId: number) {
   return note
 }
 
-function generateMaxOrder(listItemId: number, note: TNoteModel) {
+function generateMaxOrder(listItemId: number, list: TListItemModel[]) {
   let order = 0
-  if (note.list.length) {
-    const numbers = note.list
+  if (list.length) {
+    const numbers = list
       .filter((_listItem) => _listItem.id !== listItemId)
       .map((listItem) => listItem.order)
     order = Math.max(...numbers)

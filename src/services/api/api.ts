@@ -1,4 +1,4 @@
-import { TCoAuthorModel, ICoAuthor } from '~/composables/models/co-author'
+import { ICoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
 import { IListItem, TListItemModel } from '~/composables/models/list-item'
 import { INote, TNoteModel } from '~/composables/models/note'
 import { IStatus } from '~/composables/models/status'
@@ -39,7 +39,7 @@ export default class ApiService extends BaseService {
 
     note.list.forEach((listItem: TListItemModel) => noteData.list.push({
       text: listItem.text,
-      noteId: listItem.note?.id,
+      noteId: listItem.noteId,
       checked: listItem.checked,
       order: listItem.order,
       completed: listItem.completed,
@@ -84,7 +84,7 @@ export default class ApiService extends BaseService {
   async addListItem(listItem: TListItemModel): Promise<IListItem> {
     const listItemData = {
       text: listItem.text,
-      noteId: listItem.note?.id,
+      noteId: listItem.noteId,
       checked: listItem.checked,
       order: listItem.order,
       completed: listItem.completed,

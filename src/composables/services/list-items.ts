@@ -1,30 +1,8 @@
 import { TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
-import NotesService from '~/composables/services/notes'
 
-function filterAndSort(list: TListItemModel[], completed = false) {
-  return list
-    .filter((listItem) => (completed ? listItem.completed : !listItem.completed) && listItem.statusId === StatusesService.active.value.id)
-    .sort((previousItem, nextItem) => ((previousItem.order || 0) < (nextItem.order || 0) ? -1 : 1))
-    .sort((previousItem, nextItem) => {
-      if (previousItem.checked === nextItem.checked) {
-        return 0
-      }
-      return previousItem.checked ? 1 : -1
-    })
-}
-
-function getListItemTextarea(list: TListItemModel[], listItem: TListItemModel, refs: { [key: string]: HTMLTextAreaElement[] }) {
-  const textareaComponents = refs[`textarea-${listItem.id || list.indexOf(listItem)}`] as HTMLTextAreaElement[]
-  if (textareaComponents?.length) {
-    return textareaComponents[0]
-  }
-  return null
-}
-
-function handleListItemTextAreaHeight(list: TListItemModel[], listItem: TListItemModel, refs: { [key: string]: HTMLTextAreaElement[] }) {
-  const $textArea = getListItemTextarea(list, listItem, refs)
+function handleListItemTextAreaHeight($textArea: HTMLTextAreaElement) {
   let textAreaHeight = 0
   if (!$textArea) {
     throw new Error('Text area not found')
@@ -54,8 +32,6 @@ function filterCompleted(note: TNoteModel) {
 }
 
 export default {
-  filterAndSort,
-  getListItemTextarea,
   handleTextAreaHeights,
   handleListItemTextAreaHeight,
   filterCompleted,

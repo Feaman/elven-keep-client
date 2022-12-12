@@ -2,7 +2,6 @@ import { ref, UnwrapRef } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
-import NotesService from '~/composables/services/notes'
 
 export type Variant = {
   noteId: number,
@@ -31,7 +30,7 @@ export interface IListItem {
 
 export default function listItemModel(listItemData: IListItem) {
   const id = ref(listItemData.id)
-  const uniqueId = ref(`${(new Date()).getMilliseconds()}-${id.value}`)
+  const generatedId = `${(new Date()).getMilliseconds()}-${id.value}`
   const text = ref(listItemData.text || '')
   const noteId = ref(listItemData.noteId)
   const order = ref(listItemData.order || 0)
@@ -42,23 +41,6 @@ export default function listItemModel(listItemData: IListItem) {
   const updated = ref(listItemData.updated ? new Date(listItemData.updated) : null)
   const statusId = ref(listItemData.statusId || StatusesService.active.value.id)
   const status = ref(StatusesService.findById(statusId.value))
-
-  // async function save() {
-  //   if (!this?.note?.id) {
-  //     await this?.note?.save()
-  //   }
-  //   if (!this.id) {
-  //     return ApiService.addListItem(this)
-  //       .then((data) => BaseService.vuex.commit('updateListItem', {
-  //         listItem: this,
-  //         data: { id: data.id, created: data.created, updated: new Date(data.updated || '') },
-  //       }))
-  //       .catch((error) => BaseService.error(error))
-  //   }
-  //   return ApiService.updateListItem(this)
-  //     .then((data) => BaseService.vuex.commit('updateListItem', { listItem: this, data: { updated: new Date(data.updated || '') } }))
-  //     .catch((error) => BaseService.error(error))
-  // }
 
   // update(data: IListItem) {
   //   this.updateState(data)
@@ -72,13 +54,6 @@ export default function listItemModel(listItemData: IListItem) {
   // removeFromState() {
   //   BaseService.vuex.commit('removeListItem', this)
   // }
-
-  function complete(isCompleted: boolean, note: TNoteModel) {
-    const newOrder = NotesService.generateMaxOrder(Number(id.value), note)
-    completed.value = isCompleted
-    order.value = newOrder
-    // save()
-  }
 
   // check(isChecked: boolean) {
   //   this.update({ checked: isChecked })
@@ -132,7 +107,7 @@ export default function listItemModel(listItemData: IListItem) {
   // }
 
   return {
-    id, uniqueId, text, noteId, order, focused, checked, completed, created, updated, statusId, status, complete,
+    id, generatedId, text, noteId, order, focused, checked, completed, created, updated, statusId, status,
   }
 }
 

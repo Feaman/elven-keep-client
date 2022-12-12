@@ -27,6 +27,15 @@
     )
     template(v-if="note.type?.name === NOTE_TYPE_LIST")
       note-list(
+        @focus="emit('list-item-focus', $event)"
+        @blur="emit('list-item-blur', $event)"
+        @update-text="emit('list-item-update-text', $event)"
+        @update-order="emit('list-item-update-order', $event)"
+        @save="emit('list-item-save', $event)"
+        @check="emit('list-item-check', $event)"
+        @uncheck="emit('list-item-uncheck', $event)"
+        @complete="emit('list-item-complete', $event)"
+        @activate="emit('list-item-activate', $event)"
         :note="note"
         :list="note.mainListItems"
         :is-main="true"
@@ -136,6 +145,7 @@
 
 <script setup lang="ts">
 import { mdiCheckAll } from '@quasar/extras/mdi-v6'
+import { type IListItem, type TListItemModel } from '~/composables/models/list-item'
 import { type INote, type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 
@@ -150,6 +160,15 @@ const props = defineProps<{
 // eslint-disable-next-line
 const emit = defineEmits<{
   (event: 'update', value: INote): void
+  (event: 'list-item-focus', listItem: TListItemModel): void
+  (event: 'list-item-blur', listItem: TListItemModel): void
+  (event: 'list-item-check', listItem: TListItemModel): void
+  (event: 'list-item-uncheck', listItem: TListItemModel): void
+  (event: 'list-item-complete', listItem: TListItemModel): void
+  (event: 'list-item-activate', listItem: TListItemModel): void
+  (event: 'list-item-update-text', value: { listItem: TListItemModel, text: string }): void
+  (event: 'list-item-update-order', value: { listItem: TListItemModel, order: string }): void
+  (event: 'list-item-save', value: { listItem: TListItemModel, text: string }): void
 }>()
 
 // import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
@@ -232,9 +251,7 @@ const emit = defineEmits<{
 //     }
 //   }
 function completeChecked() {
-  props.note.checkedListItems.forEach((listItem) => {
-    listItem.complete(true, props.note)
-  })
+  props.note.completeAllChecked()
 }
 //   handleKeyDown(event: KeyboardEvent) {
 //     switch (true) {
