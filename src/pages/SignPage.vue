@@ -1,5 +1,5 @@
 <template lang="pug">
-.sign-page.full-width(
+.sign-page.full-width.full-height(
   v-if="!isTokenExists"
   ref="rootElement"
 )
@@ -8,7 +8,7 @@
   )
     q-toolbar
       h6.text-black.text-weight-bold.text-grey-9.q-ma-none.q-pl-sm ELVEN NOTES
-  .row.flex-center.full-width
+  .row.flex-center.full-width.full-height
     .sign-page__container.column.flex-center.full-width.q-px-lg
       h5.full-width.text-left.q-ma-none Sign {{ isSignIn ? 'In' : 'Up' }}
       .full-width(
@@ -22,11 +22,17 @@
               v-model="email"
               label="Email"
               type="email"
+              :maxlength="RULE_1024_LENGTH"
+              counter
+              clearable
               outlined
             )
             q-input.q-mt-lg(
               v-model="password"
               label="Password"
+              :maxlength="RULE_155_LENGTH"
+              counter
+              clearable
               outlined
             )
         transition(name="slide-fade")
@@ -37,24 +43,36 @@
               v-model="email"
               label="Email"
               type="email"
+              :maxlength="RULE_155_LENGTH"
+              counter
+              clearable
               dense
               outlined
             )
             q-input.q-mt-lg(
               v-model="password"
               label="Password"
+              :maxlength="RULE_155_LENGTH"
+              counter
+              clearable
               dense
               outlined
             )
             q-input.q-mt-lg(
               v-model="firstName"
               label="First Name"
+              :maxlength="RULE_155_LENGTH"
+              counter
+              clearable
               dense
               outlined
             )
             q-input.q-mt-lg(
               v-model="secondName"
               label="Second Name"
+              :maxlength="RULE_155_LENGTH"
+              counter
+              clearable
               dense
               outlined
             )
@@ -164,7 +182,7 @@ onMounted(() => {
     }
 
     .sign-page__sign-up-form {
-      height: 256px;
+      height: 336px;
     }
 
     .sign-page__form {

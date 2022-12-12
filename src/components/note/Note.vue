@@ -1,57 +1,37 @@
 <template lang="pug">
-.note.q-flex.column.align-center.full-height
-  .content.q-flex.column.full-width.pt-2.px-3
-    .q-flex.align-center
-      q-input.title-field.mt-1.mb-2(
-        @update:model-value="$emit('update', { title: $event })"
+.note.q-flex.column.items-center.full-height
+  .note__content.q-flex.column.full-width.full-height.pt-2.px-3
+    .q-flex.items-center
+      q-input.note__title-field.mt-1.mb-2(
+        @update:model-value="emit('update', { title: String($event) })"
         :model-value="note.title"
         placeholder="Title"
         dense
       )
-      q-btn.complete-checked-button(
-        v-if="note.type.name === TYPE_LIST"
+      q-btn.note__complete-checked-button(
+        v-if="note.type?.name === NOTE_TYPE_LIST"
         @click="completeChecked()"
         :disabled="!note.checkedListItems.length"
+        :icon="mdiCheckAll"
+        size="xs"
         color="primary"
-        fab
-        x-small
+        round
       )
         ToolTip Complete checked items
-  //-     v-tooltip(
-  //-       v-if="note.type.name === NOTE_TYPE_LIST"
-  //-       bottom
-  //-     )
-  //-       template(
-  //-         v-slot:activator="{ on, attrs }"
-  //-       )
-  //-         v-btn.complete-checked-button(
-  //-           @click="completeChecked()"
-  //-           :disabled="!note.checkedListItems.length"
-  //-           v-bind="attrs"
-  //-           v-on="on"
-  //-           color="primary"
-  //-           fab
-  //-           x-small
-  //-         )
-  //-           v-icon mdi-check
-  //-       span Complete checked items
-  //-   v-textarea.text(
-  //-     v-if="note.type.name === NOTE_TYPE_TEXT"
-  //-     @input="note.update({ text: $event })"
-  //-     :value="note.text"
-  //-     height="100%"
-  //-     placeholder="Text"
-  //-     hide-details
-  //-     outlined
-  //-     auto-grow
-  //-   )
-  //-   template(v-if="note.type.name === NOTE_TYPE_LIST")
-  //-     note-list(
-  //-       :note="note"
-  //-       :list="mainListItems"
-  //-       :is-main="true"
-  //-       ref="noteList"
-  //-     )
+    q-input.note__text(
+      v-if="note.type?.name === NOTE_TYPE_TEXT"
+      @update:model-value="emit('update', {text: String($event)})"
+      :model-value="note.text"
+      type="textarea"
+      placeholder="Text"
+    )
+    template(v-if="note.type?.name === NOTE_TYPE_LIST")
+      note-list(
+        :note="note"
+        :list="note.mainListItems"
+        :is-main="true"
+        ref="noteList"
+      )
   //-     template(v-if="completedListItems.length")
   //-       v-divider.my-2(
   //-         v-if="completedListItems.length"
@@ -155,11 +135,21 @@
 </template>
 
 <script setup lang="ts">
-import { type TNoteModel } from '~/composables/models/note'
-import { TYPE_LIST } from '~/composables/models/type'
+import { mdiCheckAll } from '@quasar/extras/mdi-v6'
+import { type INote, type TNoteModel } from '~/composables/models/note'
+import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
+
+const NOTE_TYPE_LIST = TYPE_LIST
+const NOTE_TYPE_TEXT = TYPE_TEXT
 
 const props = defineProps<{
   note: TNoteModel
+  fullscreen: boolean
+}>()
+
+// eslint-disable-next-line
+const emit = defineEmits<{
+  (event: 'update', value: INote): void
 }>()
 
 // import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
@@ -296,75 +286,112 @@ function completeChecked() {
 // }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="scss" scoped>
 // @import '~assets/css/variables'
 // $active-row-color = #6A1B9A
-// .note
-//   .mt-14px
-//     margin-top 14px !important
-//   .content
-//     max-width 900px
-//     overflow auto
-//     flex 1
-//     .v-expansion-panel-header
-//       min-height 32px
-//     .title-field
-//       max-height 32px
-//       position relative
-//       &:after
-//         content ''
-//         width 50px
-//         height 100%
-//         position absolute
-//         top 0
-//         right 0
-//         background linear-gradient(to left, #fff 20%, transparent)
-//     .complete-checked-button
-//       width 24px
-//       height 24px
-//       &:not(.v-btn--disabled)
-//         box-shadow 0px 0px 5px 0 rgba(0, 0, 0, 0.2), 0px 0px 10px 0px rgba(0, 0, 0, 0.14), 0px 0px 16px 0px rgba(0, 0, 0, 0.14)
-//     .text
-//       ::v-deep
-//         .v-input__control, .v-input__slot
-//           height 100%
-//     .v-input
-//       ::v-deep input
-//         font-weight bold
-//         font-size 24px
-//       ::v-deep textarea
-//         height 100% !important
-//         overflow auto
-//         margin-top 0 !important
-//       ::v-deep fieldset
-//         border none
-//       ::v-deep .v-input__slot
-//         padding 0 !important
-//         &:before
-//           border none
-//     .v-expansion-panel
-//       &:before
-//         box-shadow none
-//       ::v-deep .v-expansion-panel-content__wrap, .v-expansion-panel-header
-//         padding 0
-//   .co-authors-list
-//     box-shadow 0 0 5px rgba(0, 0, 0, 0.5)
-//     z-index 20
-// @media (max-width: 700px)
-//   .note
-//     .co-authors-list
-//       height 64px
-//       padding 4px 16px 16px 16px !important
-//       .co-authors-list__title
-//         font-size 14px
-//       .co-authors-list__avatars
-//         margin-top 4px !important
-//         .v-avatar
-//           min-width 24px !important
-//           width 24px !important
-//           height 24px !important
-// .co-authors
-//   max-height 250px
-//   overflow-x hidden
-//   overflow-y auto
+.note {
+  .note__content {
+    max-width: 900px;
+    overflow: auto;
+    flex: 1;
+
+    //     .v-expansion-panel-header {
+    //       min-height: 32px;
+    //     }
+
+    .note__title-field {
+      width: 100%;
+      max-height: 32px;
+      position: relative;
+
+      &:after {
+        content: '';
+        width: 50px;
+        height: 40px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: linear-gradient(to left, #fff 20%, transparent);
+      }
+
+      :deep(input) {
+        font-weight: bold;
+        font-size: 24px;
+      }
+
+      :deep(*):before {
+        border: none;
+      }
+    }
+
+    .note__complete-checked-button {
+      width: 24px;
+      height: 24px;
+    }
+
+    .note__text {
+      height: calc(100% - 45px) !important;
+
+      &:deep(*) {
+        height: 100% !important;
+      }
+
+      :deep(*):before {
+        border: none;
+      }
+
+      &:deep(textarea) {
+        overflow: auto;
+        margin-top: 0 !important;
+        resize: none;
+        font-size: 16px;
+        line-height: 26px;
+        padding: 0;
+      }
+    }
+
+    //     .v-expansion-panel:before {
+    //       box-shadow: none;
+    //     }
+
+    //     .v-expansion-panel ::v-deep .v-expansion-panel-content__wrap,
+    //     .v-expansion-panel .v-expansion-panel-header {
+    //       padding: 0;
+    //     }
+    //   }
+
+    //   .co-authors-list {
+    //     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    //     z-index: 20;
+    //   }
+  }
+
+  // @media (max-width: 700px) {
+  //   .note {
+  //     .note .co-authors-list {
+  //       height: 64px;
+  //       padding: 4px 16px 16px 16px !important;
+  //     }
+
+  //     .co-authors-list .co-authors-list__title {
+  //       font-size: 14px;
+  //     }
+
+  //     .co-authors-list .co-authors-list__avatars {
+  //       margin-top: 4px !important;
+  //     }
+
+  //     .co-authors-list .co-authors-list__avatars .v-avatar {
+  //       min-width: 24px !important;
+  //       width: 24px !important;
+  //       height: 24px !important;
+  //     }
+  //   }
+}
+
+// .co-authors {
+// max-height: 250px;
+// overflow-x: hidden;
+// overflow-y: auto;
+// }
 </style>

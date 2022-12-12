@@ -33,6 +33,7 @@ BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
   error.value = errorObject
   isErrorShown.value = true
 })
+
 </script>
 
 <style lang="scss" scoped>

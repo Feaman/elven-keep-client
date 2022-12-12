@@ -1,9 +1,10 @@
 <template lang="pug">
 .search
   q-input(
-    v-model="NotesService.searchQuery"
+    v-model="searchQuery"
     placeholder="Поиск..."
     color="grey-7"
+    clearable
     outlined
     dense
   )
@@ -11,12 +12,12 @@
 
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue'
-import NotesService from '~/composables/services/notes'
+import { searchQuery } from '~/composables/services/notes'
 import KeyboardEvents from '~/helpers/keyboard-events'
 
 function handleEscapeButton(event: KeyboardEvent) {
   if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
-    NotesService.searchQuery.value = ''
+    searchQuery.value = ''
   }
 }
 

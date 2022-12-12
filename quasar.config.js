@@ -15,6 +15,9 @@ const path = require('path')
 const { configure } = require('quasar/wrappers')
 
 module.exports = configure((/* ctx */) => ({
+  htmlVariables: {
+    title: 'test name',
+  },
   eslint: {
     // fix: true,
     // include = [],

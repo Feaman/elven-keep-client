@@ -1,9 +1,7 @@
 import { ref, UnwrapRef } from 'vue'
-import { useRouter } from 'vue-router'
 import UsersService from '~/composables/services/users'
+import BaseService from '~/services/base'
 import StorageService from '~/services/storage'
-
-const router = useRouter()
 
 export interface IUser {
   id: number,
@@ -28,7 +26,7 @@ export default function userModel(userData: IUser) {
 
   function signOut() {
     StorageService.set({ [UsersService.AUTH_TOKEN_NAME]: null })
-    router.push('/sign')
+    BaseService.router.push('/sign')
   }
 
   return {

@@ -1,5 +1,6 @@
 import { AxiosError } from 'axios'
 import { Emitter } from 'mitt'
+import { Router } from 'vue-router'
 import ApiService from '~/services/api/api'
 
 export type TGlobalError = { statusCode: number | undefined, message: string }
@@ -15,6 +16,8 @@ export default class BaseService {
   static showError: (error: Error | TGlobalError) => void
 
   static eventBus: Emitter<TEvents>
+
+  static router: Router
 
   static parseAxiosError(error: AxiosError): TGlobalError {
     return { statusCode: Number(error.code) || error?.response?.status || undefined, message: error.message }

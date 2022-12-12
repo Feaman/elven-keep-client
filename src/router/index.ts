@@ -5,6 +5,7 @@ import {
   createWebHashHistory,
   createWebHistory,
 } from 'vue-router'
+import BaseService from '~/services/base'
 
 import routes from './routes'
 
@@ -31,6 +32,8 @@ export default route((/* { store, ssrContext } */) => {
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
   })
+
+  BaseService.router = Router
 
   return Router
 })

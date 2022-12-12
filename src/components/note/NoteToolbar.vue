@@ -1,9 +1,9 @@
 <template lang="pug">
 .note-toolbar
-  q-header(
+  q-header.q-flex.flex-center(
     elevated
   )
-    q-toolbar.full-width.pa-0
+    q-toolbar.note-toolbar__toolbar.full-width.pa-0
       .q-flex.align-center.full-width
         q-btn(
           @click="router.push('/')"
@@ -42,6 +42,7 @@
           ToolTip {{ note.isSaving ? 'Saving to cloud' : 'Saved to cloud' }}
             q-separator(vertical)
             q-space
+        q-separator(vertical)
         UserMenu
 </template>
 
@@ -64,15 +65,7 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-.note-toolbar {
-  max-height: 64px;
-  z-index: 30;
-}
-
-@media (max-width: 960px) {
-  .note-toolbar {
-    max-height: 56px;
-  }
+.note-toolbar__toolbar {
+  max-width: 900px;
 }
 </style>
-TNoteModelTNoteModelTNoteModelTNoteModelTNoteModel

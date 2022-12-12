@@ -1,15 +1,18 @@
 <template lang="pug">
-.note-page
+.note-page.full-height
   NoteToolbar(
+    @fullscreen="fullscreen = $event"
     :note="note"
   ).full-width
   Note(
     @update="Object.assign(note, $event)"
     :note="note"
+    :fullscreen="fullscreen"
   )
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import noteModel, { type TNoteModel } from '~/composables/models/note'
 import { TYPE_TEXT } from '~/composables/models/type'
@@ -17,6 +20,7 @@ import NotesService from '~/composables/services/notes'
 import TypesService from '~/composables/services/types'
 
 const route = useRoute()
+const fullscreen = ref(false)
 let note: TNoteModel
 
 const props = defineProps<{

@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios'
 import mitt from 'mitt'
-import { useMeta } from 'quasar'
+import draggable from 'vuedraggable'
 import { boot } from 'quasar/wrappers'
 import BaseService, { TGlobalError, type TEvents } from '~/services/base'
 import InitService from '~/services/init'
@@ -31,16 +31,7 @@ export default boot(async ({ app }) => {
 
   app.config.errorHandler = (error) => BaseService.showError(error as Error)
 
-  useMeta(() => ({
-    title: 'Удобные заметки',
-    link: {
-      roboto: {
-        rel: 'stylesheet',
-        // eslint-disable-next-line
-        href: 'https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap',
-      },
-    },
-  }))
+  app.component('Draggable', draggable)
 
   try {
     await InitService.initApplication()

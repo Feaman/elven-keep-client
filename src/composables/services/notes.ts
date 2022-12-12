@@ -7,7 +7,7 @@ import BaseService from '~/services/base'
 
 const notes: Ref<TNoteModel[]> = ref([])
 const { api } = BaseService
-const searchQuery = ref('')
+export const searchQuery = ref('')
 
 function generateNotes(notesData: INote[]) {
   notesData.forEach((noteData: INote) => {
