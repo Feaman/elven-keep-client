@@ -71,6 +71,7 @@ module.exports = {
     'max-classes-per-file': 'off',
 
     'no-shadow': 'off',
+    'no-return-assign': 'off',
     '@typescript-eslint/no-shadow': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
 

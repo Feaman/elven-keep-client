@@ -41,32 +41,7 @@ export default function listItemModel(listItemData: IListItem) {
   const updated = ref(listItemData.updated ? new Date(listItemData.updated) : null)
   const statusId = ref(listItemData.statusId || StatusesService.active.value.id)
   const status = ref(StatusesService.findById(statusId.value))
-
-  // update(data: IListItem) {
-  //   this.updateState(data)
-  //   this.save()
-  // }
-
-  // updateState(data: IListItem) {
-  //   BaseService.vuex.commit('updateListItem', { listItem: this, data })
-  // }
-
-  // removeFromState() {
-  //   BaseService.vuex.commit('removeListItem', this)
-  // }
-
-  // check(isChecked: boolean) {
-  //   this.update({ checked: isChecked })
-  // }
-
-  // remove(addRemovingNote = true) {
-  //   if (this.id) {
-  //     this.hide(addRemovingNote)
-  //     return ApiService.removeListItem(this)
-  //       .catch((error) => BaseService.error(error))
-  //   }
-  //   return Promise.resolve()
-  // }
+  const $textarea: HTMLTextAreaElement | null = null
 
   // restore() {
   //   if (this.id) {
@@ -75,17 +50,6 @@ export default function listItemModel(listItemData: IListItem) {
   //       .catch((error) => BaseService.error(error))
   //   }
   //   return Promise.resolve()
-  // }
-
-  // hide(addRemovingNote = true) {
-  //   this.setStatus(StatusesService.getInActive())
-  //   if (addRemovingNote) {
-  //     BaseService.vuex.commit('addRemovingListItem', this)
-  //   }
-  // }
-
-  // setStatus(status: StatusModel) {
-  //   this.updateState({ statusId: status.id, status })
   // }
 
   // clearList() {
@@ -107,7 +71,20 @@ export default function listItemModel(listItemData: IListItem) {
   // }
 
   return {
-    id, generatedId, text, noteId, order, focused, checked, completed, created, updated, statusId, status,
+    id,
+    $textarea,
+    generatedId,
+    text,
+    noteId,
+    order,
+    focused,
+    checked,
+    completed,
+    created,
+    updated,
+    statusId,
+    status,
+
   }
 }
 

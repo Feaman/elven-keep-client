@@ -11,10 +11,6 @@ export const useGlobalStore = defineStore('global', () => {
   const SSESalt = ''
   const isNoteSaving = false
   const isInitInfoLoading = true
-  // const removingEntities = ref({
-  //   notes: [] as NoteModel[],
-  //   listItems: [] as ListItemModel[],
-  // })
 
   // function updateNoteListSortedBy(_state: RootState, note: NoteModel) {
   // note.list.sort((previousItem, nextItem) => ((previousItem.updated || 0) < (nextItem.updated || 0) ? -1 : 1))

@@ -6,9 +6,8 @@
   .note-list__list(
     :class="{ 'pb-3': isMain }"
   )
-    Draggabled(
-      v-model="order"
-      handle=".handle"
+    div(
+      handle=".list-item__handle"
     )
       transition-group(
         name="vertical-list-effect"
@@ -21,7 +20,7 @@
             :class="listItemClasses(listItem, index)"
           )
             transition( name="scale-fade")
-              input.checkbox.mr-1(
+              input.list-item__checkbox.mr-1(
                 v-if="fullscreen"
                 @change="check($event, listItem)"
                 :checked="listItem.checked"
@@ -30,18 +29,18 @@
                 color="secondary"
               )
 
-            q-icon(
+            q-icon.text-grey-6(
               v-if="!fullscreen"
               :name="mdiDrag"
+              size="sm"
             )
 
             transition(name="scale-fade")
-              input.checkbox.complete-checkbox(
+              input.list-item__checkbox.complete-checkbox(
                 v-if="!fullscreen"
                 @change="complete($event, listItem)"
                 :checked="listItem.completed"
                 type="checkbox"
-                color="secondary"
               )
 
             .list-item__text.q-flex.mx-1.ml-2
@@ -54,33 +53,36 @@
                 :id="generateTextareaRefName(listItem)"
               )
 
-//-             transition( name="scale-fade")
-//-               input.checkbox.mr-1(
-//-                 v-if="!fullscreen"
-//-                 @change="listItem.check($event.target.checked)"
-//-                 :checked="listItem.checked"
-//-                 :class="{ 'ml-9': !listItem.text }"
-//-                 type="checkbox"
-//-                 color="secondary"
-//-               )
-//-             transition( name="slide-fade")
-//-               button.remove-button(
-//-                 v-if="!fullscreen"
-//-                 @click="listItem.remove()"
-//-                 color="grey"
-//-               )
-//-                 svg.grey--text.text--lighten-1(style="width:24px;height:24px" viewBox="0 0 24 24")
-// eslint-disable-next-line
-//-                   //- path(fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z")
-//-     .new-list-item-button.d-flex.align-center.cursor-text.mt-2(
-//-       v-if="this.isMain && !fullscreen"
-//-       :class="{ alone: !list.length }"
-//-       @click="addNewListItem()"
-//-     )
-//-       v-icon(
-//-         color="grey"
-//-       ) mdi-plus
-//-       .grey--text.ml-2 Add item
+            transition( name="scale-fade")
+              input.list-item__checkbox.mr-1(
+                v-if="!fullscreen"
+                @change="check($event, listItem)"
+                :checked="listItem.checked"
+                :class="{ 'ml-9': !listItem.text }"
+                type="checkbox"
+                color="secondary"
+              )
+            transition( name="slide-fade")
+              q-btn.list-item__remove-button(
+                v-if="!fullscreen"
+                @click="emit('remove', listItem)"
+                :icon="mdiClose"
+                color="grey-5"
+                flat
+                round
+              )
+
+    .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
+      v-if="isMain && !fullscreen"
+      :class="{ 'note-list__create-button--alone': !list.length }"
+      @click="add"
+    )
+      q-icon(
+        color="grey"
+        :name="mdiPlus"
+        size="sm"
+      )
+      .text-grey.ml-2 Add item
 
 //-   v-menu(
 //-     @input="handleMenuInput($event)"
@@ -110,24 +112,22 @@
 </template>
 
 <script setup lang="ts">
-import { mdiDrag } from '@quasar/extras/mdi-v6'
-import { ref, computed, onMounted } from 'vue'
+import { mdiDrag, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
-import ListItemsService from '~/composables/services/list-items'
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   fullscreen: boolean,
   isMain: boolean,
   note: TNoteModel,
   list: TListItemModel[],
-}>(), {
-  fullscreen: false,
-})
+}>()
 
 // eslint-disable-next-line
 const emit = defineEmits<{
+  (event: 'add'): void
   (event: 'focus', listItem: TListItemModel): void
   (event: 'blur', listItem: TListItemModel): void
   (event: 'update-text', value: { listItem: TListItemModel, text: string }): void
@@ -137,15 +137,24 @@ const emit = defineEmits<{
   (event: 'uncheck', listItem: TListItemModel): void
   (event: 'complete', listItem: TListItemModel): void
   (event: 'activate', listItem: TListItemModel): void
+  (event: 'remove', listItem: TListItemModel): void
 }>()
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null
 const rootElement = ref<HTMLElement | null>(null)
 let $root: HTMLElement | null
 
-onMounted(() => {
-  $root = rootElement.value
-})
+function generateTextareaRefName(listItem: TListItemModel) {
+  return `textarea-${listItem.generatedId}`
+}
+
+function getListItemTextarea(listItem: TListItemModel) {
+  return $root?.querySelector(`textarea[id="${generateTextareaRefName(listItem)}"]`) as HTMLTextAreaElement
+}
+
+function assignTextAreas() {
+  props.list.forEach((listItem) => listItem.$textarea = getListItemTextarea(listItem))
+}
 
 const order = computed({
   get() {
@@ -165,10 +174,6 @@ const order = computed({
   },
 })
 
-function generateTextareaRefName(listItem: TListItemModel) {
-  return `textarea-${listItem.generatedId}`
-}
-
 function listItemClasses(listItem: TListItemModel, index: number) {
   return {
     'list-item--first': index === 0,
@@ -179,31 +184,22 @@ function listItemClasses(listItem: TListItemModel, index: number) {
     'py-2': props.fullscreen,
   }
 }
-// import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
-// import draggable from 'vuedraggable'
-// import NoteModel from '~/models/note'
-// import ListItemModel, { Variant } from '~/models/list-item'
-// import NotesService from '~/services/notes'
-// import KeyboardEvents from '~/services/keyboard-events'
-// import BaseService from '~/services/base'
-// import ListItemsService from '~/services/list-items'
 
-// @Component({
-//   components: {
-//     draggable,
-//   },
-// })
-// export default class NoteListComponent extends Vue {
-//   saveTimeout: ReturnType<typeof setTimeout> | null = null
+// function handleTextareaKeydown($textarea: HTMLTextAreaElement) {
+//   $textarea.onkeydown = (event: KeyboardEvent) => {
+//     if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, true)) {
+//       this.focusNextItem(event)
+//     }
+//     if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, false, true)) {
+//       this.focusNextItem(event)
+//     }
+//   }
+// }
+
 //   variants: Variant[] = []
 //   variantsMenuX = 0
 //   variantsMenuY = 0
 //   variantsListItem: ListItemModel | null = null
-
-//   @Prop() list!: ListItemModel[]
-//   @Prop() note!: NoteModel
-//   @Prop() isMain!: Boolean
-//   @Prop() fullscreen!: Boolean
 
 //   @Watch('list')
 //   onListChanged () {
@@ -233,48 +229,37 @@ function listItemClasses(listItem: TListItemModel, index: number) {
 //     BaseService.events.$off('keydown', this.handleKeyDown)
 //   }
 
-//   handleTextareaKeydown ($textarea: HTMLTextAreaElement) {
-//     $textarea.onkeydown = (event: KeyboardEvent) => {
-//       if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, true)) {
-//         this.focusNextItem(event)
-//       }
-//       if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, false, true)) {
-//         this.focusNextItem(event)
-//       }
-//     }
-//   }
-
 //   showVariants (event: MouseEvent) {
 //     event.preventDefault()
 //     this.variantsMenuX = event.clientX
 //     this.variantsMenuY = event.clientY
 //   }
 
-//   focusNextItem (event: KeyboardEvent) {
-//     const focusedListItem = this.list.find(item => item.focused)
-//     if (focusedListItem) {
-//       const focusedItemIndex = this.list.indexOf(focusedListItem)
-//       if (focusedItemIndex === this.list.length - 1) {
-//         if (this.isMain && focusedListItem.text) {
-//           this.addNewListItem()
-//         } else if (this.isMain && !focusedListItem.id) {
-//           const $textarea = this.$el.querySelector('.list .px-3:last-child .list-item textarea') as HTMLTextAreaElement
-//           if ($textarea && $textarea.value) {
-//             setTimeout(() => {
-//               this.addNewListItem()
-//             }, 400)
-//           } else if ($textarea && !$textarea.value) {
-//             this.focusListItem(0)
-//           }
-//         } else {
+// focusNextItem (event: KeyboardEvent) {
+//   const focusedListItem = this.list.find(item => item.focused)
+//   if (focusedListItem) {
+//     const focusedItemIndex = this.list.indexOf(focusedListItem)
+//     if (focusedItemIndex === this.list.length - 1) {
+//       if (this.isMain && focusedListItem.text) {
+//         this.addNewListItem()
+//       } else if (this.isMain && !focusedListItem.id) {
+//         const $textarea = this.$el.querySelector('.list .px-3:last-child .list-item textarea') as HTMLTextAreaElement
+//         if ($textarea && $textarea.value) {
+//           setTimeout(() => {
+//             this.addNewListItem()
+//           }, 400)
+//         } else if ($textarea && !$textarea.value) {
 //           this.focusListItem(0)
 //         }
 //       } else {
-//         this.focusListItem(focusedItemIndex + 1)
+//         this.focusListItem(0)
 //       }
+//     } else {
+//       this.focusListItem(focusedItemIndex + 1)
 //     }
-//     event.preventDefault()
 //   }
+//   event.preventDefault()
+// }
 
 //   focusListItem (index: number) {
 //     const nextListItem = this.list[index]
@@ -338,21 +323,14 @@ function listItemClasses(listItem: TListItemModel, index: number) {
 //     }
 //   }
 
-//   addNewListItem () {
-//     const listItem = this.note.addListItem()
-//     setTimeout(() => {
-//       const textareas = this.$refs[`textarea-${listItem.id || this.list.indexOf(listItem)}`] as HTMLTextAreaElement[]
-//       if (textareas.length) {
-//         const $textarea = textareas[0]
-//         this.handleTextareaKeydown($textarea)
-//         $textarea.focus()
-//         listItem.save()
-//       }
-//     })
-//   }
-
-function getListItemTextarea(listItem: TListItemModel) {
-  return $root?.querySelector(`textarea[id="${generateTextareaRefName(listItem)}"]`) as HTMLTextAreaElement
+async function add() {
+  emit('add')
+  await nextTick()
+  const listItem = props.list[props.list.length - 1]
+  const $textarea = getListItemTextarea(listItem)
+  listItem.$textarea = $textarea
+  // handleTextareaKeydown($textarea)
+  $textarea.focus()
 }
 
 function check(event: Event, listItem: TListItemModel) {
@@ -376,8 +354,7 @@ function selectFocusedVariant(event: Event) {
 }
 
 function updateText(listItem: TListItemModel) {
-  const $textarea = getListItemTextarea(listItem)
-  const text = $textarea.value
+  const text = listItem.$textarea?.value
   if (saveTimeout) {
     clearTimeout(saveTimeout)
   }
@@ -412,11 +389,14 @@ function handleBlur(listItem: TListItemModel) {
   }
 }
 // }
+
+onMounted(() => {
+  $root = rootElement.value
+  assignTextAreas()
+})
 </script>
 
 <style lang="scss" scoped>
-$inactive-row-color: #F5F5F5;
-
 .note-list {
   &.fullscreen .list-item__text {
     font-size: 18px;
@@ -434,23 +414,23 @@ $inactive-row-color: #F5F5F5;
     //   z-index: 20;
     // }
 
-    // .checkbox {
-    //   min-width: 20px;
-    //   min-height: 20px;
-    //   color: #f00;
-    //   cursor: pointer;
-    // }
-
-    // .checkbox:note(:checked) {
-    //   opacity: 0.3;
-    // }
-
     .list-item {
       position: relative;
-      border-top: 1px solid $inactive-row-color;
+      border-top: 1px solid $grey-4;
       border-bottom: 1px solid transparent;
       transition: border-top 0.3s, border-bottom 0.3s;
       background-color: #fff;
+
+      .list-item__checkbox {
+        min-width: 20px;
+        min-height: 20px;
+        color: #f00;
+        cursor: pointer;
+      }
+
+      .list-item__checkbox:not(:checked) {
+        opacity: 0.3;
+      }
 
       textarea {
         overflow: hidden;
@@ -483,6 +463,7 @@ $inactive-row-color: #F5F5F5;
         line-height: 20px;
         outline: none;
         resize: none;
+        transition: color 0.2s;
       }
 
       &.list-item--first {
@@ -490,8 +471,9 @@ $inactive-row-color: #F5F5F5;
       }
 
       &.list-item--checked .list-item__text textarea {
-        color: $grey-2;
+        color: $grey-4;
         text-decoration: line-through;
+        transition: color 0.2s;
       }
 
       &.list-item--focused {
@@ -508,31 +490,31 @@ $inactive-row-color: #F5F5F5;
         display: none;
       }
 
-      // .handle {
-      //   min-width: 28px;
-      //   min-height: 24px;
-      //   position: relative;
-      //   z-index: 20;
-      //   margin-left: -8px;
-      //   cursor: pointer;
-      // }
+      .list-item__handle {
+        min-width: 28px;
+        min-height: 24px;
+        position: relative;
+        z-index: 20;
+        margin-left: -8px;
+        cursor: pointer;
+      }
 
-      // .remove-button {
-      //   min-width: 24px;
-      //   height: 24px;
-      // }
+      .list-item__remove-button {
+        min-width: 24px;
+        min-height: 24px;
+      }
     }
 
   }
 
-  // .new-list-item-button {
-  //   height: 24px;
-  //   margin-left: 18px;
-  // }
+  .note-list__create-button {
+    height: 24px;
+    margin-left: 24px;
 
-  // .new-list-item-button.alone {
-  //   margin-left: 0;
-  // }
+    &.note-list__create-button--alone {
+      margin-left: 0;
+    }
+  }
 
 }
 

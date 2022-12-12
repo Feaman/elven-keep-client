@@ -20,6 +20,8 @@ export default class BaseService {
   static router: Router
 
   static parseAxiosError(error: AxiosError): TGlobalError {
-    return { statusCode: Number(error.code) || error?.response?.status || undefined, message: error.message }
+    return {
+      statusCode: Number(error.code) || error?.response?.status || undefined,
+      message: error?.response?.data.message || error.message }
   }
 }

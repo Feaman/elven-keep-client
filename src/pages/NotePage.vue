@@ -15,6 +15,8 @@
     @list-item-uncheck="uncheckListItem"
     @list-item-complete="completeListItem"
     @list-item-activate="activateListItem"
+    @list-item-remove="removeListItem"
+    @list-item-add="addListItem"
     :note="note"
     :fullscreen="fullscreen"
   )
@@ -46,15 +48,21 @@ function handleNote() {
 }
 
 function checkListItem(listItem: TListItemModel) {
-  console.log('HEREJjkh')
+  listItem.checked = true
+  note.saveListItem(listItem)
 }
 
 function uncheckListItem(listItem: TListItemModel) {
-  console.log('HEREJjkh')
+  listItem.checked = false
+  note.saveListItem(listItem)
 }
 
 function completeListItem(listItem: TListItemModel) {
   note.completeListItem(true, listItem)
+}
+
+async function removeListItem(listItem: TListItemModel) {
+  await note.removeListItem(listItem)
 }
 
 function activateListItem(listItem: TListItemModel) {
@@ -76,6 +84,10 @@ function updateListItemOrder({ listItem, order }: { listItem: TListItemModel, or
 function blurListItem(listItem: TListItemModel) {
   listItem.focused = false
   note.saveListItem(listItem)
+}
+
+function addListItem() {
+  note.addListItem()
 }
 
 switch (route.path) {

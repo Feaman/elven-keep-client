@@ -42,6 +42,9 @@ export default function noteModel(noteData: INote) {
   const list: Ref<TListItemModel[]> = ref([])
   const coAuthors = ref<TCoAuthorModel[]>([])
   const isCompletedListExpanded = ref(!!noteData.isCompletedListExpanded)
+  const removingItemLists = ref<TListItemModel[]>([])
+
+  const globalStore = useGlobalStore()
 
   // if (noteData.user) {
   // user.value = useUserStore(noteData.user)
@@ -74,22 +77,18 @@ export default function noteModel(noteData: INote) {
   //   return this.type?.name === TypeModel.TYPE_TEXT
   // }
 
-  // function addListItem(listItemData: IListItem | null = null) {
-  //   console.log(listItemData, this)
-  //   // const order = this.list.length ? Math.max.apply(Math, this.list.map((listItem) => listItem.order)) + 1 : 1
-  //   // const listItem = new ListItemModel(
-  //   // {
-  //   // noteId: this.id,
-  //   // updated: new Date(),
-  //   // order,
-  //   // ...listItemData || { text: '' },
-  //   // note: this,
-  //   // },
-  //   // )
-  //   // NotesService.vuex.commit('addListItem', listItem)
-  //   //
-  //   // return listItem
-  // }
+  function addListItem(listItemData: IListItem | null = null) {
+    const order = list.value.length ? Math.max(...list.value.map((listItem) => listItem.order)) + 1 : 1
+    const listItem = listItemModel(
+      {
+        noteId: id.value,
+        updated: String(new Date()),
+        order,
+        ...listItemData || { text: '' },
+      },
+    )
+    list.value.push(listItem as unknown as TListItemModel)
+  }
 
   async function save(savingText = false) {
     console.log('Note saved')
@@ -176,7 +175,6 @@ export default function noteModel(noteData: INote) {
   //   return this.id && !(this.title || this.text || (isList && !listIsClear))
   // }
 
-  const globalStore = useGlobalStore()
   const isMyNote = computed(() => globalStore.user?.id === userId.value)
 
   function filterAndSort(completed = false) {
@@ -230,6 +228,15 @@ export default function noteModel(noteData: INote) {
       listItem.updated = new Date(data.updated || '')
     }
   }
+  async function removeListItem(listItem: TListItemModel, addToRestore = true) {
+    if (listItem.id) {
+      listItem.statusId = StatusesService.inactive.value.id
+      if (addToRestore) {
+        removingItemLists.value.push(listItem as unknown as TListItemModel)
+      }
+      await BaseService.api.removeListItem(listItem)
+    }
+  }
 
   function completeListItem(isCompleted: boolean, listItem: TListItemModel) {
     const newOrder = NotesService.generateMaxOrder(Number(id.value), list.value)
@@ -276,6 +283,8 @@ export default function noteModel(noteData: INote) {
     handleCoAuthors,
     completeAllChecked,
     saveListItem,
+    removeListItem,
+    addListItem,
   }
 }
 

@@ -1,6 +1,6 @@
 <template lang="pug">
 .note.q-flex.column.items-center.full-height
-  .note__content.q-flex.column.full-width.full-height.pt-2.px-3
+  .note__content.column.no-wrap.full-width.full-height.pt-2.px-3
     .q-flex.items-center
       q-input.note__title-field.mt-1.mb-2(
         @update:model-value="emit('update', { title: String($event) })"
@@ -8,7 +8,7 @@
         placeholder="Title"
         dense
       )
-      q-btn.note__complete-checked-button(
+      q-btn.note__complete-checked-button.text-black(
         v-if="note.type?.name === NOTE_TYPE_LIST"
         @click="completeChecked()"
         :disabled="!note.checkedListItems.length"
@@ -27,6 +27,7 @@
     )
     template(v-if="note.type?.name === NOTE_TYPE_LIST")
       note-list(
+        @add="emit('list-item-add')"
         @focus="emit('list-item-focus', $event)"
         @blur="emit('list-item-blur', $event)"
         @update-text="emit('list-item-update-text', $event)"
@@ -36,6 +37,8 @@
         @uncheck="emit('list-item-uncheck', $event)"
         @complete="emit('list-item-complete', $event)"
         @activate="emit('list-item-activate', $event)"
+        @remove="emit('list-item-remove', $event)"
+        :fullscreen="fullscreen"
         :note="note"
         :list="note.mainListItems"
         :is-main="true"
