@@ -1,9 +1,9 @@
 <template lang="pug">
 .note-list(:class="{ fullscreen }")
-  .list(
+  .note-list__list(
     :class="{ 'pb-3': isMain }"
   )
-    draggable(
+    Draggabled(
       v-model="order"
       handle=".handle"
     )
@@ -14,7 +14,7 @@
           v-for="(listItem, index) in list"
           :key="listItem._id"
         )
-          .list-item.d-flex.align-center(
+          .list-item.q-flex.items-center(
             :class="listItemClasses(listItem, index)"
           )
             transition( name="scale-fade")
@@ -41,15 +41,15 @@
                 color="secondary"
               )
 
-//-             .list-item__text.d-flex.mx-1.ml-2
-//-               textarea.fill-width(
-//-                 @input="updateText(listItem)"
-//-                 @keydown.enter="selectFocusedVariant($event)"
-//-                 @focus="listItem.updateState({ focused: true })"
-//-                 @blur="handleBlur(listItem)"
-//-                 :value="listItem.text"
-//-                 :ref="`textarea-${listItem.id || index}`"
-//-               )
+            .list-item__text.q-flex.mx-1.ml-2
+              textarea.full-width(
+                @input="updateText(listItem)"
+                @keydown.enter="selectFocusedVariant($event)"
+                @focus="listItem.updateState({ focused: true })"
+                @blur="handleBlur(listItem)"
+                :value="listItem.text"
+                :ref="`textarea-${listItem.id || index}`"
+              )
 
 //-             transition( name="scale-fade")
 //-               input.checkbox.mr-1(
@@ -109,9 +109,10 @@
 <script setup lang="ts">
 import { mdiDrag } from '@quasar/extras/mdi-v6'
 import { computed } from 'vue'
-import { type TListItemModel } from '~/composables/models/list-item'
+import { IListItem, type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
+import ListItemsService from '~/composables/services/list-items'
 
 const props = defineProps<{
   fullscreen: boolean,
@@ -119,6 +120,13 @@ const props = defineProps<{
   note: TNoteModel,
   list: TListItemModel[],
 }>()
+
+// eslint-disable-next-line
+const emit = defineEmits<{
+  (event: 'update', value: IListItem): void
+}>()
+
+const saveTimeout: ReturnType<typeof setTimeout> | null = null
 
 const order = computed({
   get() {
@@ -140,10 +148,10 @@ const order = computed({
 
 function listItemClasses(listItem: TListItemModel, index: number) {
   return {
-    first: index === 0,
-    focused: listItem.focused,
-    checked: listItem.checked,
-    completed: listItem.completed,
+    'list-item--first': index === 0,
+    'list-item--focused': listItem.focused,
+    'list-item--checked': listItem.checked,
+    'list-item--completed': listItem.completed,
     'py-1': !props.fullscreen,
     'py-2': props.fullscreen,
   }
@@ -349,127 +357,129 @@ function listItemClasses(listItem: TListItemModel, index: number) {
 //     this.variants = []
 //   }
 
-//   handleBlur (listItem: ListItemModel) {
-//     listItem.updateState({ focused: false, text: listItem.text })
-//     if (this.saveTimeout) {
-//       listItem.save()
-//     }
-//     const $textArea = ListItemsService.getListItemTextarea(this.list, listItem, this.$refs as { [key: string]: HTMLTextAreaElement[] })
-//     if ($textArea && $textArea.parentElement) {
-//       $textArea.parentElement.scrollTop = 0
-//     }
-//   }
+function handleBlur(listItem: TListItemModel) {
+  listItem.updateState({ focused: false, text: listItem.text })
+  if (saveTimeout) {
+    listItem.save()
+  }
+  const $textArea = ListItemsService.getListItemTextarea(props.list, listItem, this.$refs as { [key: string]: HTMLTextAreaElement[] })
+  if ($textArea && $textArea.parentElement) {
+    $textArea.parentElement.scrollTop = 0
+  }
+}
 // }
 </script>
 
 <style lang="scss" scoped>
+$inactive-row-color: #F5F5F5;
+
 .note-list {
-  // &.fullscreen .list-item__text {
-  //   font-size: 18px;
-  // }
+  &.fullscreen .list-item__text {
+    font-size: 18px;
+  }
 
-  // .list {
-  //   position: relative;
-  // }
+  .note-list__list {
+    position: relative;
+    // .sortable-drag {
+    //   opacity: 0 !important;
+    // }
 
-  // .list .sortable-drag {
-  //   opacity: 0 !important;
-  // }
+    // .sortable-ghost {
+    //   background-color: #fff;
+    //   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    //   z-index: 20;
+    // }
 
-  // .list .sortable-ghost {
-  //   background-color: #fff;
-  //   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-  //   z-index: 20;
-  // }
+    // .checkbox {
+    //   min-width: 20px;
+    //   min-height: 20px;
+    //   color: #f00;
+    //   cursor: pointer;
+    // }
 
-  // .list .checkbox {
-  //   min-width: 20px;
-  //   min-height: 20px;
-  //   color: #f00;
-  //   cursor: pointer;
-  // }
+    // .checkbox:note(:checked) {
+    //   opacity: 0.3;
+    // }
 
-  // .list .checkbox:note(:checked) {
-  //   opacity: 0.3;
-  // }
+    .list-item {
+      position: relative;
+      border-top: 1px solid $inactive-row-color;
+      border-bottom: 1px solid transparent;
+      transition: border-top 0.3s, border-bottom 0.3s;
+      background-color: #fff;
 
-  // .list .list-item {
-  //   position: relative;
-  //   border-top: 1px solid $inactive-row-color;
-  //   border-bottom: 1px solid transparent;
-  //   transition: border-top 0.3s, border-bottom 0.3s;
-  //   background-color: #fff;
-  // }
+      textarea {
+        overflow: hidden;
+      }
 
-  // .list .list-item ::v-deep textarea {
-  //   overflow: hidden;
-  // }
+      .list-item__text {
+        max-height: 60px;
+        position: inherit;
+        transition: height 0.3s;
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+      }
 
-  // .list .list-item .list-item__text {
-  //   max-height: 60px;
-  //   position: inherit;
-  //   transition: height 0.3s;
-  //   flex: 1;
-  //   position: relative;
-  //   overflow: hidden;
-  // }
+      .list-item__text.list-item__text--multi-line:after {
+        content: '...';
+        width: 100%;
+        height: 20px;
+        line-height: 18px;
+        position: absolute;
+        top: 38px;
+        background: #fff;
+        cursor: text;
+      }
 
-  // .list .list-item .list-item__text.list-item__text--multi-line:after {
-  //   content: '...';
-  //   width: 100%;
-  //   height: 20px;
-  //   line-height: 18px;
-  //   position: absolute;
-  //   top: 38px;
-  //   background: #fff;
-  //   cursor: text;
-  // }
+      .list-item__text textarea {
+        height: 20px;
+        border: none;
+        color: rgba(0, 0, 0, 0.87);
+        line-height: 20px;
+        outline: none;
+        resize: none;
+      }
 
-  // .list .list-item .list-item__text textarea {
-  //   height: 20px;
-  //   border: none;
-  //   color: rgba(0, 0, 0, 0.87);
-  //   line-height: 20px;
-  //   outline: none;
-  //   resize: none;
-  // }
+      &.list-item--first {
+        border-top: 1px solid transparent;
+      }
 
-  // .list .list-item.first {
-  //   border-top: 1px solid transparent;
-  // }
+      &.list-item--checked .list-item__text textarea {
+        color: $grey-2;
+        text-decoration: line-through;
+      }
 
-  // .list .list-item.checked .list-item__text textarea {
-  //   color: $grey-lighten-2;
-  //   text-decoration: line-through;
-  // }
+      &.list-item--focused {
+        border-top: 1px solid $grey-2;
+        border-bottom: 1px solid $grey-2;
+      }
 
-  // .list .list-item.focused {
-  //   border-top: 1px solid $grey-lighten-2;
-  //   border-bottom: 1px solid $grey-lighten-2;
-  // }
+      &.list-item--focused .list-item__text {
+        max-height: 178px;
+        overflow: auto;
+      }
 
-  // .list .list-item.focused .list-item__text {
-  //   max-height: 178px;
-  //   overflow: auto;
-  // }
+      &.list-item--focused .list-item__text:after {
+        display: none;
+      }
 
-  // .list .list-item.focused .list-item__text:after {
-  //   display: none;
-  // }
+      // .handle {
+      //   min-width: 28px;
+      //   min-height: 24px;
+      //   position: relative;
+      //   z-index: 20;
+      //   margin-left: -8px;
+      //   cursor: pointer;
+      // }
 
-  // .list .list-item .handle {
-  //   min-width: 28px;
-  //   min-height: 24px;
-  //   position: relative;
-  //   z-index: 20;
-  //   margin-left: -8px;
-  //   cursor: pointer;
-  // }
+      // .remove-button {
+      //   min-width: 24px;
+      //   height: 24px;
+      // }
+    }
 
-  // .list .list-item .remove-button {
-  //   min-width: 24px;
-  //   height: 24px;
-  // }
+  }
 
   // .new-list-item-button {
   //   height: 24px;
