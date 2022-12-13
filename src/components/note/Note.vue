@@ -45,26 +45,29 @@
         :is-main="true"
         ref="noteList"
       )
-  //-     template(v-if="completedListItems.length")
-  //-       v-divider.my-2(
-  //-         v-if="completedListItems.length"
-  //-       )
-  //-       v-expansion-panels.mt-2.mb-4(
-  //-         v-model="expandedListItems"
-  //-         multiple
-  //-       )
-  //-         v-expansion-panel
-  //-           v-expansion-panel-header
-  //-             template(v-slot:actions)
-  //-               v-icon.icon $expand
-  //-             .completed-list-header.green--text.d-flex.align-center
-  //-               .font-weight-bold.font-size-16 {{ completedListItems.length }}
-  //-               .ml-2 completed
-  //-           v-expansion-panel-content
-  //-             note-list(
-  //-               :note="note"
-  //-               :list="completedListItems"
-  //-             )
+      template(v-if="note.completedListItems.length")
+        q-separator.my-2
+        q-expansion-item
+          template(v-slot:header)
+            .completed-list-header.text-green.q-flex.items-center
+              .text-weight-bold.font-size-16 {{ note.completedListItems.length }}
+              .ml-2 completed
+          NoteList(
+            @focus="emit('list-item-focus', $event)"
+            @blur="emit('list-item-blur', $event)"
+            @update-text="emit('list-item-update-text', $event)"
+            @update-order="emit('list-item-update-order', $event)"
+            @save="emit('list-item-save', $event)"
+            @check="emit('list-item-check', $event)"
+            @uncheck="emit('list-item-uncheck', $event)"
+            @complete="emit('list-item-complete', $event)"
+            @activate="emit('list-item-activate', $event)"
+            @remove="emit('list-item-remove', $event)"
+            :note="note"
+            :list="note.completedListItems"
+            :fullscreen="fullscreen"
+            :is-main="false"
+          )
 
   //- fullscreen(
   //-   v-if="isFullscreen"

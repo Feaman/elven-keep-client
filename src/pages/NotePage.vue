@@ -71,7 +71,7 @@ async function removeListItem(listItem: TListItemModel) {
 }
 
 function activateListItem(listItem: TListItemModel) {
-  console.log('HEREJjkh')
+  note.completeListItem(false, listItem)
 }
 
 function saveListItem(listItem: TListItemModel) {
