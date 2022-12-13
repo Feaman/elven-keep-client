@@ -147,7 +147,7 @@ const rootElement = ref<HTMLElement | null>(null)
 let $root: HTMLElement | null
 const variants = ref<TVariant[]>([])
 const variantsMenuX = ref(0)
-const variantsShown = ref(true)
+const variantsShown = ref(false)
 const variantsMenuY = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
 

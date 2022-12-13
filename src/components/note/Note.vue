@@ -15,9 +15,13 @@
         :icon="mdiCheckAll"
         size="xs"
         color="primary"
-        round
+        glossy
+        square
       )
-        ToolTip Complete checked items
+        ToolTip(
+          anchor="center left"
+          self="center right"
+        ) Complete checked items
     q-input.note__text(
       v-if="note.type?.name === NOTE_TYPE_TEXT"
       @update:model-value="emit('update', {text: String($event)})"

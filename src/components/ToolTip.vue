@@ -1,4 +1,14 @@
 <template lang="pug">
-q-tooltip.text-body2
+q-tooltip(
+  :anchor="anchor"
+  :self="self"
+).text-body2
   slot
 </template>
+
+<script setup lang="ts">
+defineProps<{
+  anchor?: string
+  self?: string
+}>()
+</script>
