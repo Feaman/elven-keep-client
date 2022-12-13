@@ -1,6 +1,6 @@
 import { computed, ref, Ref } from 'vue'
 import coAuthorModel, { TCoAuthorModel } from '~/composables/models/co-author'
-import { TListItemModel } from '~/composables/models/list-item'
+import { TListItemModel, type TVariant } from '~/composables/models/list-item'
 import noteModel, { INote, TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 import BaseService from '~/services/base'

@@ -149,7 +149,7 @@
 
 <script setup lang="ts">
 import { mdiCheckAll } from '@quasar/extras/mdi-v6'
-import { TVariant, type TListItemModel } from '~/composables/models/list-item'
+import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import { type INote, type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 

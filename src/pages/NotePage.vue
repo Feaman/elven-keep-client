@@ -17,7 +17,7 @@
     @list-item-activate="activateListItem"
     @list-item-remove="removeListItem"
     @list-item-add="addListItem"
-    @select-variatn="selectVariant"
+    @select-variant="selectVariant"
     :note="note"
     :fullscreen="fullscreen"
   )
@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { TVariant, type TListItemModel } from '~/composables/models/list-item'
+import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import noteModel, { type TNoteModel } from '~/composables/models/note'
 import { TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'

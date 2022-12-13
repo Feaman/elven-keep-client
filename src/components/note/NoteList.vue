@@ -104,10 +104,10 @@
           clickable v-ripple
         )
           q-item-section
-            .q-flex.items-center(
+            .q-flex.items-center.full-width(
               @click="selectVariant(variantsListItem, variant)"
             )
-              .limit-width(v-html="variant.highlightedText")
+              .limit-width.font-size-14(v-html="variant.highlightedText")
               .text-green.font-size-12.ml-2(v-if="variant.isExists") exists
               .text-red.font-size-12.ml-2(v-if="variant.duplicatesQuantity") •&nbsp; {{ variant.duplicatesQuantity }}
 </template>
@@ -538,7 +538,12 @@ function handleBlur(listItem: TListItemModel) {
 //   min-height: 32px;
 // }
 
-.list-item__variants .list-item__variant--focused {
-  background-color: rgba(0, 0, 0, 0.1);
+.note-list__menu {
+  max-width: 800px;
+  width: calc(100% - 80px);
+
+  .list-item__variants .list-item__variant--focused {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

@@ -1,6 +1,6 @@
 import { computed, Ref, ref, UnwrapRef } from 'vue'
 import coAuthorModel, { ICoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
-import listItemModel, { IListItem, TListItemModel } from '~/composables/models/list-item'
+import listItemModel, { IListItem, TListItemModel, type TVariant } from '~/composables/models/list-item'
 import { TStatusModel } from '~/composables/models/status'
 import { TTypeModel, TYPE_LIST } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
@@ -255,11 +255,15 @@ export default function noteModel(noteData: INote) {
     if (variant.noteId === listItem.noteId && variant.listItemId !== listItem.id) {
       const existentListItem = list.value.find((listItem: TListItemModel) => listItem.id === variant.listItemId)
       if (existentListItem) {
-        Object.assign(existentListItem, { completed, checked, order })
-        remove(false)
+        existentListItem.completed = false
+        existentListItem.checked = false
+        existentListItem.order = listItem.order
+        saveListItem(existentListItem)
+        removeListItem(listItem)
       }
     } else {
-      update({ text: variant.text })
+      listItem.text = variant.text
+      saveListItem(listItem)
     }
   }
 
