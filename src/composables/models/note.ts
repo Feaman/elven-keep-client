@@ -46,10 +46,6 @@ export default function noteModel(noteData: INote) {
 
   const globalStore = useGlobalStore()
 
-  // if (noteData.user) {
-  // user.value = useUserStore(noteData.user)
-  // }
-
   function handleList(listData: IListItem[] = []) {
     listData.forEach((listItemData) => list.value.push(listItemModel(listItemData) as unknown as TListItemModel))
   }
@@ -59,12 +55,10 @@ export default function noteModel(noteData: INote) {
   }
 
   function handleType() {
-    // @ts-ignore
     const foundType = TypesService.types.value.find((_type) => _type.id === typeId.value)
     if (!foundType) {
       throw new Error(`Type '${typeId.value}' not found`)
     } else {
-      // @ts-ignore
       type.value = foundType
     }
   }
@@ -72,10 +66,6 @@ export default function noteModel(noteData: INote) {
   function isList() {
     return type.value?.name === TYPE_LIST
   }
-
-  // function isText() {
-  //   return this.type?.name === TypeModel.TYPE_TEXT
-  // }
 
   function addListItem(listItemData: IListItem | null = null) {
     const order = list.value.length ? Math.max(...list.value.map((listItem) => listItem.order)) + 1 : 1
@@ -124,18 +114,6 @@ export default function noteModel(noteData: INote) {
   //   return this.save(!!(data.text || data.title))
   // }
 
-  // updateState(data: INote) {
-  //   NotesService.vuex.commit('updateNote', { note: this, data })
-  // }
-
-  // removeFromState() {
-  //   BaseService.vuex.commit('removeNote', this)
-  // }
-
-  // setNoteToListItems() {
-  // this.list.forEach((listItem) => listItem.updateState({ note: this }))
-  // }
-
   // removeCoAuthor(coAuthor: CoAuthorModel) {
   //   NotesService.vuex.commit('removeNoteCoAuthor', { note: this, coAuthor })
   //   return ApiService.removeNoteCoAuthor(coAuthor)
@@ -156,10 +134,6 @@ export default function noteModel(noteData: INote) {
       // BaseService.vuex.commit('addRemovingNote', this)
     }
   }
-
-  // setStatus(status: StatusModel) {
-  //   this.updateState({ statusId: status.id, status })
-  // }
 
   // checkIfClear() {
   //   const isList = this.type?.name === TypeModel.TYPE_LIST

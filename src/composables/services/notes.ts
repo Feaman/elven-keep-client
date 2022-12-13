@@ -12,7 +12,6 @@ export const searchQuery = ref('')
 function generateNotes(notesData: INote[]) {
   notesData.forEach((noteData: INote) => {
     const note = noteModel(noteData)
-    // note.setNoteToListItems()
     notes.value.push(note as unknown as TNoteModel)
   })
 }

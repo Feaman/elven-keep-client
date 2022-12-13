@@ -490,8 +490,8 @@ function handleBlur(listItem: TListItemModel) {
       }
 
       &.list-item--focused {
-        border-top: 1px solid $grey-5;
-        border-bottom: 1px solid $grey-5;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        z-index: 10;
       }
 
       &.list-item--focused .list-item__text {
