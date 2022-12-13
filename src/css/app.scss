@@ -2,8 +2,13 @@
 @import './helpers.scss';
 @import './mixins.scss';
 
+// :root {
+  // --animate-duration: 3s;
+// }
+
 body {
   font-size: 16px;
+  overflow: hidden;
 }
 
 .q-flex {

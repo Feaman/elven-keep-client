@@ -3,7 +3,7 @@ import { LocalStorage, WebStorageGetMethodReturnType } from 'quasar'
 export default class StorageService {
   private static key = '__ELVEN-NOTES__'
 
-  static set(data: any) {
+  static set(data: object) {
     // Merge data with existing one
     const existingData = this.get()
     data = Object.assign(existingData, data)

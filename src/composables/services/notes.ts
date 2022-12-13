@@ -1,6 +1,6 @@
 import { computed, ref, Ref } from 'vue'
 import coAuthorModel, { TCoAuthorModel } from '~/composables/models/co-author'
-import { TListItemModel, Variant } from '~/composables/models/list-item'
+import { TListItemModel } from '~/composables/models/list-item'
 import noteModel, { INote, TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 import BaseService from '~/services/base'
@@ -38,9 +38,9 @@ const filtered = computed(() => {
   })
 })
 
-function findNoteListItemVariants(note: TNoteModel, variants: Variant[], listItem: TListItemModel, query: string) {
+function findNoteListItemVariants(note: TNoteModel, variants: TVariant[], listItem: TListItemModel, query: string) {
   note.list
-    .filter((_listItem) => _listItem !== listItem && _listItem.statusId !== StatusesService.active.value.id)
+    .filter((_listItem) => _listItem !== listItem && _listItem.statusId !== StatusesService.inactive.value.id)
     .forEach((_listItem) => {
       if (
         _listItem.text.toLowerCase().includes(query)
@@ -61,7 +61,7 @@ function findNoteListItemVariants(note: TNoteModel, variants: Variant[], listIte
 }
 
 function findListItemVariants(listItem: TListItemModel, query: string) {
-  const variants: Variant[] = []
+  const variants: TVariant[] = []
   query = query.toLocaleLowerCase()
 
   if (query.length > 1) {
@@ -81,7 +81,7 @@ function findListItemVariants(listItem: TListItemModel, query: string) {
   })
 
   // Duplicates and unique
-  const resultVariants: Variant[] = []
+  const resultVariants: TVariant[] = []
   const regexp = new RegExp(query, 'i')
   variants.forEach((variant) => {
     if (!resultVariants.find((item) => item.text.toLowerCase() === variant.text.toLowerCase())) {

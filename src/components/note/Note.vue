@@ -38,6 +38,7 @@
         @complete="emit('list-item-complete', $event)"
         @activate="emit('list-item-activate', $event)"
         @remove="emit('list-item-remove', $event)"
+        @select-variant="emit('select-variant', $event)"
         :fullscreen="fullscreen"
         :note="note"
         :list="note.mainListItems"
@@ -148,7 +149,7 @@
 
 <script setup lang="ts">
 import { mdiCheckAll } from '@quasar/extras/mdi-v6'
-import { type IListItem, type TListItemModel } from '~/composables/models/list-item'
+import { TVariant, type TListItemModel } from '~/composables/models/list-item'
 import { type INote, type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 
@@ -163,6 +164,8 @@ const props = defineProps<{
 // eslint-disable-next-line
 const emit = defineEmits<{
   (event: 'update', value: INote): void
+  (event: 'list-item-add'): void
+  (event: 'list-item-remove', listItem: TListItemModel): void
   (event: 'list-item-focus', listItem: TListItemModel): void
   (event: 'list-item-blur', listItem: TListItemModel): void
   (event: 'list-item-check', listItem: TListItemModel): void
@@ -172,6 +175,7 @@ const emit = defineEmits<{
   (event: 'list-item-update-text', value: { listItem: TListItemModel, text: string }): void
   (event: 'list-item-update-order', value: { listItem: TListItemModel, order: string }): void
   (event: 'list-item-save', value: { listItem: TListItemModel, text: string }): void
+  (event: 'select-variant', value: { listItem: TListItemModel, variant: TVariant }): void
 }>()
 
 // import { Vue, Component, Prop, Watch } from 'vue-property-decorator'

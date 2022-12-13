@@ -47,7 +47,7 @@
               textarea.full-width(
                 @input="updateText(listItem)"
                 @keydown.enter="selectFocusedVariant($event)"
-                @focus="emit('focus', listItem)"
+                @focus.stop="handleFocus(listItem)"
                 @blur="handleBlur(listItem)"
                 :value="listItem.text"
                 :id="generateTextareaRefName(listItem)"
@@ -84,37 +84,38 @@
       )
       .text-grey.ml-2 Add item
 
-//-   v-menu(
-//-     @input="handleMenuInput($event)"
-//-     :value="variants.length"
-//-     :position-x="variantsMenuX"
-//-     :position-y="variantsMenuY"
-//-     transition="slide-fade"
-//-     max-width="340px"
-//-     content-class="hint-menu"
-//-     z-index="30"
-//-     absolute
-//-   )
-//-     v-list.variants(
-//-       ref="variants"
-//-     )
-//-       v-list-item.variant.cursor-pointer(
-//-         v-for="(variant, index) in variants.slice(0, 10)"
-//-         :key="index"
-//-         :class="{ focused: variant.focused }"
-//-       )
-//-         v-list-item-title.d-flex.align-center.fill-width(
-//-           @click="selectVariant(variantsListItem, variant)"
-//-         )
-//-           .limit-width(v-html="variant.highlightedText")
-//-           .green--text.font-size-12.ml-2(v-if="variant.isExists") exists
-//-           .red--text.font-size-12.ml-2(v-if="variant.duplicatesQuantity") •&nbsp; {{ variant.duplicatesQuantity }}
+  transition(
+    appear
+    enter-active-class="animated zoomIn"
+    leave-active-class="animated zoomOut"
+  )
+    q-card.note-list__menu.shadow-6.py-2(
+      v-if="variantsShown"
+      :style="{ top: `${variantsMenuY}px`, left:  `${variantsMenuX}px` }"
+    )
+      q-list.list-item__variants(
+        ref="variantsElement"
+        dense
+      )
+        q-item.list-item__variant(
+          v-for="(variant, index) in variants.slice(0, 10)"
+          :key="index"
+          :class="{ 'list-item__focused': variant.focused }"
+          clickable v-ripple
+        )
+          q-item-section
+            .q-flex.items-center(
+              @click="selectVariant(variantsListItem, variant)"
+            )
+              .limit-width(v-html="variant.highlightedText")
+              .text-green.font-size-12.ml-2(v-if="variant.isExists") exists
+              .text-red.font-size-12.ml-2(v-if="variant.duplicatesQuantity") •&nbsp; {{ variant.duplicatesQuantity }}
 </template>
 
 <script setup lang="ts">
 import { mdiDrag, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { type TListItemModel } from '~/composables/models/list-item'
+import { ref, onUnmounted, computed, onMounted, nextTick } from 'vue'
+import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
 
@@ -138,11 +139,17 @@ const emit = defineEmits<{
   (event: 'complete', listItem: TListItemModel): void
   (event: 'activate', listItem: TListItemModel): void
   (event: 'remove', listItem: TListItemModel): void
+  (event: 'select-variant', value: { listItem: TListItemModel, variant: TVariant }): void
 }>()
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null
 const rootElement = ref<HTMLElement | null>(null)
 let $root: HTMLElement | null
+const variants = ref<TVariant[]>([])
+const variantsMenuX = ref(0)
+const variantsShown = ref(true)
+const variantsMenuY = ref(0)
+const variantsListItem = ref<TListItemModel | null>(null)
 
 function generateTextareaRefName(listItem: TListItemModel) {
   return `textarea-${listItem.generatedId}`
@@ -174,6 +181,10 @@ const order = computed({
   },
 })
 
+function handleFocus(listItem: TListItemModel) {
+  emit('focus', listItem)
+}
+
 function listItemClasses(listItem: TListItemModel, index: number) {
   return {
     'list-item--first': index === 0,
@@ -196,34 +207,42 @@ function listItemClasses(listItem: TListItemModel, index: number) {
 //   }
 // }
 
-//   variants: Variant[] = []
-//   variantsMenuX = 0
-//   variantsMenuY = 0
-//   variantsListItem: ListItemModel | null = null
-
 //   @Watch('list')
 //   onListChanged () {
 //     this.$nextTick(() => {
 //       ListItemsService.handleTextAreaHeights(this.list, this.$refs as { [key: string]: HTMLTextAreaElement [] })
 //     })
 //   }
+function hideVariants() {
+  variantsShown.value = false
+}
 
-//   mounted () {
-//     if (this.isMain && this.list.length === 1 && !this.list[0].text) {
-//       setTimeout(() => {
-//         const textareaComponents = this.$refs[`textarea-${this.list[0].id || 0}`] as HTMLTextAreaElement[]
-//         textareaComponents[0].focus()
-//       })
-//     }
-//     BaseService.events.$on('keydown', this.handleKeyDown)
-//     this.$el.querySelectorAll('.list-item textarea').forEach($textarea => {
-//       this.handleTextareaKeydown($textarea as HTMLTextAreaElement)
-//     })
+async function init() {
+  $root = rootElement.value
+  if (props.isMain && props.list.length === 1 && !props.list[0].text) {
+    await nextTick()
+    props.list[0].$textarea.focus()
+  }
+  $root?.addEventListener('mousedown', hideVariants)
 
-//     setTimeout(() => {
-//       ListItemsService.handleTextAreaHeights(this.list, this.$refs as { [key: string]: HTMLTextAreaElement[] })
-//     })
-//   }
+  // BaseService.events.$on('keydown', handleKeyDown)
+  // $el.querySelectorAll('.list-item textarea').forEach($textarea => {
+  // handleTextareaKeydown($textarea as HTMLTextAreaElement)
+  // })
+
+  // setTimeout(() => {
+  // ListItemsService.handleTextAreaHeights(list, $refs as { [key: string]: HTMLTextAreaElement[] })
+  // })
+  assignTextAreas()
+}
+
+onMounted(() => {
+  init()
+})
+
+onUnmounted(() => {
+  $root?.removeEventListener('mousedown', hideVariants)
+})
 
 //   beforeDestroy () {
 //     BaseService.events.$off('keydown', this.handleKeyDown)
@@ -272,11 +291,11 @@ function listItemClasses(listItem: TListItemModel, index: number) {
 //     })
 //   }
 
-//   handleMenuInput (isMenuOpened: boolean) {
-//     if (!isMenuOpened) {
-//       this.variants = []
-//     }
-//   }
+function handleMenuInput(isMenuOpened: boolean) {
+  if (!isMenuOpened) {
+    variants.value = []
+  }
+}
 
 //   handleKeyDown (event: KeyboardEvent) {
 //     switch (true) {
@@ -286,20 +305,6 @@ function listItemClasses(listItem: TListItemModel, index: number) {
 //       case KeyboardEvents.is(event, KeyboardEvents.ARROW_DOWN):
 //         this.focusVariant('down')
 //         break
-//     }
-//   }
-
-//   selectFocusedVariant (event: KeyboardEvent) {
-//     if (this.variants.length) {
-//       const focusedListItem = this.list.find(item => item.focused)
-//       if (!focusedListItem) {
-//         throw new Error(`Focused list item not found`)
-//       }
-//       const focusedVariant = this.variants.find(variant => variant.focused)
-//       if (focusedVariant) {
-//         this.selectVariant(focusedListItem, focusedVariant)
-//         event.preventDefault()
-//       }
 //     }
 //   }
 
@@ -351,35 +356,48 @@ function complete(event: Event, listItem: TListItemModel) {
 
 function selectFocusedVariant(event: Event) {
   console.log(event)
+  // if (this.variants.length) {
+  //   const focusedListItem = this.list.find((item) => item.focused)
+  //   if (!focusedListItem) {
+  //     throw new Error('Focused list item not found')
+  //   }
+  //   const focusedVariant = this.variants.find((variant) => variant.focused)
+  //   if (focusedVariant) {
+  //     this.selectVariant(focusedListItem, focusedVariant)
+  //     event.preventDefault()
+  //   }
+  // }
 }
 
-function updateText(listItem: TListItemModel) {
+async function updateText(listItem: TListItemModel) {
   const text = listItem.$textarea?.value
   if (saveTimeout) {
     clearTimeout(saveTimeout)
   }
   emit('update-text', { listItem, text })
-  // this.variants = NotesService.findListItemVariants(listItem, text)
-  // if (this.variants.length) {
-  //   this.variantsListItem = listItem
-  //   const boundingBox = $textarea.getBoundingClientRect()
-  //   const menuHeight = this.variants.length * 32 + 16
-  //   const y = boundingBox.y + (boundingBox.y - 56 < menuHeight ? 32 : -menuHeight)
-  //   this.$nextTick(() => {
-  //     this.variantsMenuX = boundingBox.x
-  //     this.variantsMenuY = y
-  //   })
-  // }
+  variants.value = NotesService.findListItemVariants(listItem, text)
+  if (variants.value.length) {
+    variantsListItem.value = listItem
+    const boundingBox = listItem.$textarea.getBoundingClientRect()
+    const menuHeight = variants.value.length * 32 + 16
+    const y = boundingBox.y + (boundingBox.y - 56 < menuHeight ? 32 : -menuHeight)
+    await nextTick()
+    variantsMenuX.value = boundingBox.x
+    variantsMenuY.value = y
+    variantsShown.value = true
+  }
   saveTimeout = setTimeout(() => {
     emit('save', listItem)
     saveTimeout = null
   }, 400)
 }
 
-//   selectVariant (listItem: ListItemModel, variant: Variant) {
-//     listItem.selectVariant(variant)
-//     this.variants = []
-//   }
+function selectVariant(listItem: TListItemModel | null, variant: TVariant) {
+  if (listItem) {
+    emit('select-variant', { listItem, variant })
+    variants.value = []
+  }
+}
 
 function handleBlur(listItem: TListItemModel) {
   emit('blur', listItem)
@@ -389,11 +407,6 @@ function handleBlur(listItem: TListItemModel) {
   }
 }
 // }
-
-onMounted(() => {
-  $root = rootElement.value
-  assignTextAreas()
-})
 </script>
 
 <style lang="scss" scoped>
@@ -457,10 +470,10 @@ onMounted(() => {
       }
 
       .list-item__text textarea {
-        height: 20px;
+        height: 24px;
         border: none;
         color: rgba(0, 0, 0, 0.87);
-        line-height: 20px;
+        line-height: 24px;
         outline: none;
         resize: none;
         transition: color 0.2s;
@@ -477,8 +490,8 @@ onMounted(() => {
       }
 
       &.list-item--focused {
-        border-top: 1px solid $grey-4;
-        border-bottom: 1px solid $grey-4;
+        border-top: 1px solid $grey-5;
+        border-bottom: 1px solid $grey-5;
       }
 
       &.list-item--focused .list-item__text {
@@ -516,13 +529,16 @@ onMounted(() => {
     }
   }
 
+  .note-list__menu {
+    position: absolute;
+  }
 }
 
 // .hint-menu .v-list-item {
 //   min-height: 32px;
 // }
 
-// .variants .variant.focused {
-//   background-color: rgba(0, 0, 0, 0.1);
-// }
+.list-item__variants .list-item__variant--focused {
+  background-color: rgba(0, 0, 0, 0.1);
+}
 </style>

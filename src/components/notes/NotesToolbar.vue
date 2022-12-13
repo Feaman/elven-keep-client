@@ -1,8 +1,6 @@
 <template lang="pug">
 .notes-toolbar
-  q-header(
-    elevated
-  )
+  q-header.notes-toolbar__header
     q-toolbar.ml-2
       .q-flex.align-center.full-width
         NotesSearch
@@ -37,15 +35,13 @@ const router = useRouter()
 // }
 </script>
 
-<style lang="stylus" scoped>
-.notes-toolbar
-  position absolute
-  z-index 100
+<style lang="scss" scoped>
+.notes-toolbar {
+  height: 50px;
+  position: absolute;
 
-::v-deep .v-toolbar__content
-  width 100%
-  padding: 4px 2px 4px 16px
-
-  .v-toolbar
-    z-index 20
+  .notes-toolbar__header {
+    z-index: 3000;
+  }
+}
 </style>

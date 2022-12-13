@@ -17,6 +17,7 @@
     @list-item-activate="activateListItem"
     @list-item-remove="removeListItem"
     @list-item-add="addListItem"
+    @select-variatn="selectVariant"
     :note="note"
     :fullscreen="fullscreen"
   )
@@ -25,7 +26,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { type TListItemModel } from '~/composables/models/list-item'
+import { TVariant, type TListItemModel } from '~/composables/models/list-item'
 import noteModel, { type TNoteModel } from '~/composables/models/note'
 import { TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
@@ -45,6 +46,10 @@ function handleNote() {
     throw new Error(`Note width id "${props.id}" not found`)
   }
   note = foundNote
+}
+
+function selectVariant({ listItem, variant }: { listItem: TListItemModel, variant: TVariant }) {
+  note.selectVariant(listItem, variant)
 }
 
 function checkListItem(listItem: TListItemModel) {

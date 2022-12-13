@@ -26,6 +26,7 @@
   bottom: 0 !important;
   right: 24px !important;
 }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s;
@@ -34,6 +35,7 @@
 .fade-leave-to {
   opacity: 0;
 }
+
 .fade-5-enter-active,
 .fade-5-leave-active {
   transition: opacity 0.5s;
@@ -42,6 +44,7 @@
 .fade-5-leave-to {
   opacity: 0;
 }
+
 .slide-fade-enter-active {
   transition: all 0.2s ease;
 }
@@ -53,6 +56,7 @@
   transform: translateX(30px);
   opacity: 0;
 }
+
 .slide-fade-absolute-enter-active {
   transition: all 0.2s ease;
 }
@@ -70,6 +74,7 @@
   position: absolute !important;
   bottom: 6px;
 }
+
 .slide-fade-fast-enter-active {
   transition: all 0.1s ease;
 }
@@ -155,4 +160,40 @@
 .vertical-list-effect-move {
   width: 100%;
   transition: transform 0.3s;
+}
+
+@keyframes slideFadeOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.3;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0px);
+  }
+}
+.animated.slideFadeOut {
+  animation: slideFadeOut 0.3s;
+}
+
+@keyframes slideFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+.animated.slideFadeIn {
+  animation: slideFadeIn 0.3s;
 }

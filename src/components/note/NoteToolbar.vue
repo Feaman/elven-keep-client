@@ -1,8 +1,6 @@
 <template lang="pug">
 .note-toolbar
-  q-header.q-flex.flex-center(
-    elevated
-  )
+  q-header.q-flex.flex-center
     q-toolbar.note-toolbar__toolbar.full-width.pa-0
       .q-flex.align-center.full-width
         q-btn(

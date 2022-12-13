@@ -4,8 +4,18 @@ q-layout(
 )
   q-page-container(v-if="isErrorShown")
     ErrorPage(:error="{statusCode: error?.statusCode, message: error?.message}")
-  q-page-container.page(v-else)
-    router-view
+  q-page-container.page.pa-0(v-else)
+    .header
+    router-view(
+      v-slot="{ Component }"
+    )
+      transition(
+        appear
+        enter-active-class="animated slideFadeIn"
+      )
+        component(
+          :is="Component"
+        )
 </template>
 
 <script setup lang="ts">
@@ -37,7 +47,20 @@ BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
 </script>
 
 <style lang="scss" scoped>
+.header {
+  width: 100%;
+  height: 50px;
+  position: absolute;
+  background-color: #fbc02d;
+  box-shadow: 0 0 10px 2px rgb(0 0 0 / 20%), 0 0px 10px rgb(0 0 0 / 24%);
+}
+
 .page {
   height: 100vh;
+
+  &>div {
+    padding-top: 50px;
+    overflow-x: hidden;
+  }
 }
 </style>

@@ -91,7 +91,7 @@ export default function noteModel(noteData: INote) {
   }
 
   async function save(savingText = false) {
-    console.log('Note saved')
+    console.log(savingText)
     // NotesService.vuex.commit('clearNoteTimeout', this)
     //   const saveTimeout = setTimeout(() => {
     //     if (this.id) {
@@ -251,6 +251,18 @@ export default function noteModel(noteData: INote) {
     })
   }
 
+  function selectVariant(listItem: TListItemModel, variant: TVariant) {
+    if (variant.noteId === listItem.noteId && variant.listItemId !== listItem.id) {
+      const existentListItem = list.value.find((listItem: TListItemModel) => listItem.id === variant.listItemId)
+      if (existentListItem) {
+        Object.assign(existentListItem, { completed, checked, order })
+        remove(false)
+      }
+    } else {
+      update({ text: variant.text })
+    }
+  }
+
   handleList(noteData.list)
   handleCoAuthors(noteData.coAuthors)
   handleType()
@@ -285,6 +297,7 @@ export default function noteModel(noteData: INote) {
     saveListItem,
     removeListItem,
     addListItem,
+    selectVariant,
   }
 }
 

@@ -3,7 +3,7 @@ import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
 
-export type Variant = {
+export type TVariant = {
   noteId: number,
   listItemId: number,
   text: string,
@@ -41,7 +41,7 @@ export default function listItemModel(listItemData: IListItem) {
   const updated = ref(listItemData.updated ? new Date(listItemData.updated) : null)
   const statusId = ref(listItemData.statusId || StatusesService.active.value.id)
   const status = ref(StatusesService.findById(statusId.value))
-  const $textarea: HTMLTextAreaElement | null = null
+  const $textarea: HTMLTextAreaElement = document.createElement('textarea')
 
   // restore() {
   //   if (this.id) {
@@ -55,18 +55,6 @@ export default function listItemModel(listItemData: IListItem) {
   // clearList() {
   //   if (this.note?.list) {
   //     this.note.list = this.note?.list.filter((listItem) => listItem.statusId !== StatusesService.getInActive().id)
-  //   }
-  // }
-
-  // selectVariant(variant: Variant) {
-  //   if (variant.noteId === this.noteId && variant.listItemId !== this.id) {
-  //     const existentListItem = this.note?.list.find((listItem: ListItemModel) => listItem.id === variant.listItemId)
-  //     if (existentListItem) {
-  //       existentListItem.update({ completed: this.completed, checked: this.checked, order: this.order })
-  //       this.remove(false)
-  //     }
-  //   } else {
-  //     this.update({ text: variant.text })
   //   }
   // }
 
