@@ -1,4 +1,4 @@
-import { TListItemModel } from '~/composables/models/list-item'
+import listItemModel, { TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 
@@ -31,8 +31,19 @@ function filterCompleted(note: TNoteModel) {
   return note.list.filter((listItem) => listItem.completed && listItem.statusId === StatusesService.active.value.id)
 }
 
+function createListItem() {
+  return listItemModel(
+    {
+      updated: String(new Date()),
+      statusId: StatusesService.active.value.id,
+      text: '',
+    },
+  )
+}
+
 export default {
   handleTextAreaHeights,
   handleListItemTextAreaHeight,
   filterCompleted,
+  createListItem,
 }

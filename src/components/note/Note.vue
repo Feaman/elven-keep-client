@@ -32,7 +32,7 @@
     )
     template(v-if="note.type?.name === NOTE_TYPE_LIST")
       note-list(
-        @add="emit('list-item-add')"
+        @add="emit('list-item-add', $event)"
         @focus="emit('list-item-focus', $event)"
         @blur="emit('list-item-blur', $event)"
         @update-text="emit('list-item-update-text', $event)"

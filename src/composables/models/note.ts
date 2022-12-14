@@ -69,17 +69,10 @@ export default function noteModel(noteData: TNote) {
     return type.value?.name === TYPE_LIST
   }
 
-  function addListItem(listItemData: TListItem | null = null) {
+  function addListItem(listItem: TListItemModel) {
     const order = list.value.length ? Math.max(...list.value.map((listItem) => listItem.order)) + 1 : 1
-    const listItem = listItemModel(
-      {
-        noteId: id.value,
-        updated: String(new Date()),
-        order,
-        statusId: StatusesService.active.value.id,
-        ...listItemData || { text: '' },
-      },
-    )
+    listItem.noteId = id.value
+    listItem.order = order
     list.value.push(listItem as unknown as TListItemModel)
   }
 

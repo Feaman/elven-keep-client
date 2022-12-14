@@ -116,6 +116,7 @@ import { ref, onUnmounted, computed, onMounted, nextTick } from 'vue'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
+import ListItemsService from '~/composables/services/list-items'
 
 const props = defineProps<{
   fullscreen: boolean,
@@ -126,7 +127,7 @@ const props = defineProps<{
 
 // eslint-disable-next-line
 const emit = defineEmits<{
-  (event: 'add'): void
+  (event: 'add', listItem: TListItemModel): void
   (event: 'focus', listItem: TListItemModel): void
   (event: 'blur', listItem: TListItemModel): void
   (event: 'update-text', value: { listItem: TListItemModel, text: string }): void
@@ -326,10 +327,10 @@ onUnmounted(() => {
 //   }
 
 async function add() {
-  emit('add')
+  const listItem = ListItemsService.createListItem()
+  emit('add', listItem as unknown as TListItemModel)
   await nextTick()
-  const listItem = props.list[props.list.length - 1]
-  const $textarea = getListItemTextarea(listItem)
+  const $textarea = getListItemTextarea(listItem as unknown as TListItemModel)
   listItem.$textarea = $textarea
   // handleTextareaKeydown($textarea)
   $textarea.focus()

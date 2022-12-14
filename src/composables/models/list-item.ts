@@ -13,7 +13,7 @@ export type TVariant = {
   duplicatesQuantity?: number,
 }
 
-export interface TListItem {
+export type TListItem = {
   id?: number
   noteId?: number
   order?: number

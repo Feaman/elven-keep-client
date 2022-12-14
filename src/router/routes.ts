@@ -18,7 +18,14 @@ const routes: RouteRecordRaw[] = [
       path: '',
       component: () => import('~/pages/NotePage.vue'),
     }],
-    alias: ['/new/list', '/new/text'],
+  },
+  {
+    path: '/new/:id',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{
+      path: '',
+      component: () => import('~/pages/NotePage.vue'),
+    }],
   },
   {
     path: '/error',

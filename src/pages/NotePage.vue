@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import noteModel, { type TNote, type TNoteModel } from '~/composables/models/note'
@@ -32,8 +32,8 @@ import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
 import TypesService from '~/composables/services/types'
 
-let noteIndex = 0
-const note = computed(() => NotesService.notes.value[noteIndex])
+const noteIndex = ref(0)
+const note = computed(() => NotesService.notes.value[noteIndex.value])
 const route = useRoute()
 const fullscreen = ref(false)
 
@@ -85,23 +85,23 @@ function blurListItem(listItem: TListItemModel) {
   note.value.saveListItem(listItem)
 }
 
-function addListItem() {
-  note.value.addListItem()
+function addListItem(listItem: TListItemModel) {
+  note.value.addListItem(listItem)
 }
 
 function init() {
   if (route.path === '/new/list') {
     NotesService.notes.value.push(noteModel({ typeId: TypesService.findByName(TYPE_LIST).id }) as unknown as TNoteModel)
-    noteIndex = NotesService.notes.value.length - 1
+    noteIndex.value = NotesService.notes.value.length - 1
   } else if (route.path === '/new/text') {
     NotesService.notes.value.push(noteModel({ typeId: TypesService.findByName(TYPE_TEXT).id }) as unknown as TNoteModel)
-    noteIndex = NotesService.notes.value.length - 1
+    noteIndex.value = NotesService.notes.value.length - 1
   } else if (/^\/note\/\d+$/.test(route.path)) {
     const foundNote = NotesService.notes.value.find((note: TNoteModel) => note.id === Number(route.params.id))
     if (!foundNote) {
       throw new Error(`Note width id "${route.params.id}" not found`)
     }
-    noteIndex = NotesService.notes.value.indexOf(foundNote)
+    noteIndex.value = NotesService.notes.value.indexOf(foundNote)
   }
 }
 
@@ -109,8 +109,16 @@ init()
 
 watch(
   route,
-  () => init(),
+  () => {
+    init()
+  },
 )
+
+onBeforeUnmount(() => {
+  if (!note.value.id) {
+    NotesService.notes.value = NotesService.notes.value.filter((_note) => _note.id !== note.value.id)
+  }
+})
 </script>
 
 <style lang="scss">

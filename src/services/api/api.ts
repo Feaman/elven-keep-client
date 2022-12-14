@@ -1,5 +1,5 @@
 import { ICoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
-import { TListItem, TListItemModel } from '~/composables/models/list-item'
+import { type TListItem, TListItemModel } from '~/composables/models/list-item'
 import { TNote, TNoteModel } from '~/composables/models/note'
 import { IStatus } from '~/composables/models/status'
 import { IType } from '~/composables/models/type'
@@ -46,6 +46,15 @@ export default class ApiService extends BaseService {
       completed: listItem.completed,
     }))
 
+    function prom() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve('')
+        }, 7000)
+      })
+    }
+    await prom()
+
     const { data } = await this.api.post('notes', noteData)
     return data as TNote
   }
@@ -57,15 +66,6 @@ export default class ApiService extends BaseService {
       typeId,
       isCompletedListExpanded,
     }
-
-    function prom() {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve('')
-        }, 7000)
-      })
-    }
-    await prom()
     const { data } = await this.api.put(`notes/${id}`, noteData)
     return data as TNote
   }
@@ -99,6 +99,15 @@ export default class ApiService extends BaseService {
       order: listItem.order,
       completed: listItem.completed,
     }
+
+    function prom() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve('')
+        }, 7000)
+      })
+    }
+    await prom()
     const { data } = await this.api.post('list-items', listItemData)
     return data as TListItem
   }
