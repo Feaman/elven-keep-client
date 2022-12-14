@@ -27,7 +27,7 @@ export const useGlobalStore = defineStore('global', () => {
   // function addNote(state: RootState, note: NoteModel) {
   //   state.notes.unshift(note)
   // }
-  // function updateNote(_state: RootState, { note, data }: { note: NoteModel, data: INote }) {
+  // function updateNote(_state: RootState, { note, data }: { note: NoteModel, data: TNote }) {
   //   Object.assign(note, data)
   // }
   // function removeNote(state: RootState, note: NoteModel) {

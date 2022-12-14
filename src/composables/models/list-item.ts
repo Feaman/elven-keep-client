@@ -13,7 +13,7 @@ export type TVariant = {
   duplicatesQuantity?: number,
 }
 
-export interface IListItem {
+export interface TListItem {
   id?: number
   noteId?: number
   order?: number
@@ -28,7 +28,7 @@ export interface IListItem {
   updated?: string
 }
 
-export default function listItemModel(listItemData: IListItem) {
+export default function listItemModel(listItemData: TListItem) {
   const id = ref(listItemData.id)
   const generatedId = `${(new Date()).getMilliseconds()}-${id.value}`
   const text = ref(listItemData.text || '')

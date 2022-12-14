@@ -6,6 +6,7 @@
         @update:model-value="emit('update', { title: String($event) })"
         :model-value="note.title"
         placeholder="Title"
+        debounce="400"
         dense
       )
       q-btn.note__complete-checked-button.text-black(
@@ -51,11 +52,14 @@
       )
       template(v-if="note.completedListItems.length")
         q-separator.my-2
-        q-expansion-item
+        q-expansion-item(
+          header-style="padding-right: 0; padding-left: 8px"
+        )
           template(v-slot:header)
             .completed-list-header.text-green.q-flex.items-center
               .text-weight-bold.font-size-16 {{ note.completedListItems.length }}
               .ml-2 completed
+            q-space
           NoteList(
             @focus="emit('list-item-focus', $event)"
             @blur="emit('list-item-blur', $event)"
@@ -157,7 +161,7 @@
 <script setup lang="ts">
 import { mdiCheckAll } from '@quasar/extras/mdi-v6'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
-import { type INote, type TNoteModel } from '~/composables/models/note'
+import { type TNote, type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 
 const NOTE_TYPE_LIST = TYPE_LIST
@@ -170,7 +174,7 @@ const props = defineProps<{
 
 // eslint-disable-next-line
 const emit = defineEmits<{
-  (event: 'update', value: INote): void
+  (event: 'update', value: TNote): void
   (event: 'list-item-add'): void
   (event: 'list-item-remove', listItem: TListItemModel): void
   (event: 'list-item-focus', listItem: TListItemModel): void
@@ -379,6 +383,14 @@ function completeChecked() {
         line-height: 26px;
         padding: 0;
       }
+    }
+
+    :deep(.q-item__section--side) {
+      padding: 0;
+    }
+
+    :deep(.q-focus-helper) {
+      display: none;
     }
 
     //     .v-expansion-panel:before {

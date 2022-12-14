@@ -5,7 +5,7 @@
     :note="note"
   ).full-width
   Note(
-    @update="Object.assign(note, $event)"
+    @update="updateNote"
     @list-item-focus="$event.focused = true"
     @list-item-blur="blurListItem"
     @list-item-update-text="updateListItemText"
@@ -24,58 +24,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
-import noteModel, { type TNoteModel } from '~/composables/models/note'
-import { TYPE_TEXT } from '~/composables/models/type'
+import noteModel, { type TNote, type TNoteModel } from '~/composables/models/note'
+import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
 import TypesService from '~/composables/services/types'
 
+let noteIndex = 0
+const note = computed(() => NotesService.notes.value[noteIndex])
 const route = useRoute()
 const fullscreen = ref(false)
-let note: TNoteModel
 
-const props = defineProps<{
-  id: number,
-}>()
-
-function handleNote() {
-  const foundNote = NotesService.notes.value.find((note: TNoteModel) => note.id === Number(props.id))
-  if (!foundNote) {
-    throw new Error(`Note width id "${props.id}" not found`)
-  }
-  note = foundNote
+function updateNote(noteData: TNote) {
+  Object.assign(note.value, noteData)
+  note.value.save()
 }
 
 function selectVariant({ listItem, variant }: { listItem: TListItemModel, variant: TVariant }) {
-  note.selectVariant(listItem, variant)
+  note.value.selectVariant(listItem, variant)
 }
 
 function checkListItem(listItem: TListItemModel) {
   listItem.checked = true
-  note.saveListItem(listItem)
+  note.value.saveListItem(listItem)
 }
 
 function uncheckListItem(listItem: TListItemModel) {
   listItem.checked = false
-  note.saveListItem(listItem)
+  note.value.saveListItem(listItem)
 }
 
 function completeListItem(listItem: TListItemModel) {
-  note.completeListItem(true, listItem)
+  note.value.completeListItem(true, listItem)
 }
 
 async function removeListItem(listItem: TListItemModel) {
-  await note.removeListItem(listItem)
+  await note.value.removeListItem(listItem)
 }
 
 function activateListItem(listItem: TListItemModel) {
-  note.completeListItem(false, listItem)
+  note.value.completeListItem(false, listItem)
 }
 
 function saveListItem(listItem: TListItemModel) {
-  note.saveListItem(listItem)
+  note.value.saveListItem(listItem)
 }
 
 function updateListItemText({ listItem, text }: { listItem: TListItemModel, text: string }) {
@@ -88,24 +82,35 @@ function updateListItemOrder({ listItem, order }: { listItem: TListItemModel, or
 
 function blurListItem(listItem: TListItemModel) {
   listItem.focused = false
-  note.saveListItem(listItem)
+  note.value.saveListItem(listItem)
 }
 
 function addListItem() {
-  note.addListItem()
+  note.value.addListItem()
 }
 
-switch (route.path) {
-  case '/new/list':
-    note = noteModel({}) as unknown as TNoteModel
-    break
-  case '/new/text':
-    note = noteModel({ typeId: TypesService.findByName(TYPE_TEXT).id }) as unknown as TNoteModel
-    break
-  default:
-    handleNote()
-    break
+function init() {
+  if (route.path === '/new/list') {
+    NotesService.notes.value.push(noteModel({ typeId: TypesService.findByName(TYPE_LIST).id }) as unknown as TNoteModel)
+    noteIndex = NotesService.notes.value.length - 1
+  } else if (route.path === '/new/text') {
+    NotesService.notes.value.push(noteModel({ typeId: TypesService.findByName(TYPE_TEXT).id }) as unknown as TNoteModel)
+    noteIndex = NotesService.notes.value.length - 1
+  } else if (/^\/note\/\d+$/.test(route.path)) {
+    const foundNote = NotesService.notes.value.find((note: TNoteModel) => note.id === Number(route.params.id))
+    if (!foundNote) {
+      throw new Error(`Note width id "${route.params.id}" not found`)
+    }
+    noteIndex = NotesService.notes.value.indexOf(foundNote)
+  }
 }
+
+init()
+
+watch(
+  route,
+  () => init(),
+)
 </script>
 
 <style lang="scss">

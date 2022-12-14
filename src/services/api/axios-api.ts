@@ -16,7 +16,7 @@ export default class AxiosApi implements IApi {
     this.api.interceptors.response.use((response: AxiosResponse) => responseHandler(response))
   }
 
-  get(url: string, config: object) {
+  get(url: string, config?: object) {
     return this.api.get(url, config)
   }
 
@@ -28,7 +28,7 @@ export default class AxiosApi implements IApi {
     return this.api.put(url, data, config)
   }
 
-  delete(url: string, data: object) {
+  delete(url: string, data?: object) {
     return this.api.delete(url, data)
   }
 }

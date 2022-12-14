@@ -3,74 +3,72 @@
   :class="{ fullscreen }"
   ref="rootElement"
 )
-  .note-list__list(
+  .note-list__container(
     :class="{ 'pb-3': isMain }"
   )
-    div(
+    .note-list__list(
       handle=".list-item__handle"
     )
       transition-group(
         name="vertical-list-effect"
       )
-        div(
-          v-for="(listItem, index) in list"
+        .list-item.q-flex.items-center(
+          v-for="listItem in list"
           :key="listItem.generatedId"
+          :class="listItemClasses(listItem)"
         )
-          .list-item.q-flex.items-center(
-            :class="listItemClasses(listItem, index)"
-          )
-            transition( name="scale-fade")
-              input.list-item__checkbox.mr-1(
-                v-if="fullscreen"
-                @change="check($event, listItem)"
-                :checked="listItem.checked"
-                :class="{ 'ml-9': !listItem.text }"
-                type="checkbox"
-                color="secondary"
-              )
-
-            q-icon.text-grey-6(
-              v-if="!fullscreen"
-              :name="mdiDrag"
-              size="sm"
+          transition( name="scale-fade")
+            input.list-item__checkbox.mr-1(
+              v-if="fullscreen"
+              @change="check($event, listItem)"
+              :checked="listItem.checked"
+              :class="{ 'ml-9': !listItem.text }"
+              type="checkbox"
+              color="secondary"
             )
 
-            transition(name="scale-fade")
-              input.list-item__checkbox.complete-checkbox(
-                v-if="!fullscreen"
-                @change="complete($event, listItem)"
-                :checked="listItem.completed"
-                type="checkbox"
-              )
+          q-icon.text-grey-6(
+            v-if="!fullscreen"
+            :name="mdiDrag"
+            size="sm"
+          )
 
-            .list-item__text.q-flex.mx-1.ml-2
-              textarea.full-width(
-                @input="updateText(listItem)"
-                @keydown.enter="selectFocusedVariant($event)"
-                @focus.stop="handleFocus(listItem)"
-                @blur="handleBlur(listItem)"
-                :value="listItem.text"
-                :id="generateTextareaRefName(listItem)"
-              )
+          transition(name="scale-fade")
+            input.list-item__checkbox.complete-checkbox(
+              v-if="!fullscreen"
+              @change="complete($event, listItem)"
+              :checked="listItem.completed"
+              type="checkbox"
+            )
 
-            transition( name="scale-fade")
-              input.list-item__checkbox.mr-1(
-                v-if="!fullscreen"
-                @change="check($event, listItem)"
-                :checked="listItem.checked"
-                :class="{ 'ml-9': !listItem.text }"
-                type="checkbox"
-                color="secondary"
-              )
-            transition( name="slide-fade")
-              q-btn.list-item__remove-button(
-                v-if="!fullscreen"
-                @click="emit('remove', listItem)"
-                :icon="mdiClose"
-                color="grey-5"
-                flat
-                round
-              )
+          .list-item__text.q-flex.mx-1.ml-2
+            textarea.full-width(
+              @input="updateText(listItem)"
+              @keydown.enter="selectFocusedVariant($event)"
+              @focus.stop="handleFocus(listItem)"
+              @blur="handleBlur(listItem)"
+              :value="listItem.text"
+              :id="generateTextareaRefName(listItem)"
+            )
+
+          transition( name="scale-fade")
+            input.list-item__checkbox.mr-1(
+              v-if="!fullscreen"
+              @change="check($event, listItem)"
+              :checked="listItem.checked"
+              :class="{ 'ml-9': !listItem.text }"
+              type="checkbox"
+              color="secondary"
+            )
+          transition( name="slide-fade")
+            q-btn.list-item__remove-button(
+              v-if="!fullscreen"
+              @click="emit('remove', listItem)"
+              :icon="mdiClose"
+              color="grey-5"
+              flat
+              round
+            )
 
     .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
       v-if="isMain && !fullscreen"
@@ -185,9 +183,8 @@ function handleFocus(listItem: TListItemModel) {
   emit('focus', listItem)
 }
 
-function listItemClasses(listItem: TListItemModel, index: number) {
+function listItemClasses(listItem: TListItemModel) {
   return {
-    'list-item--first': index === 0,
     'list-item--focused': listItem.focused,
     'list-item--checked': listItem.checked,
     'list-item--completed': listItem.completed,
@@ -291,11 +288,11 @@ onUnmounted(() => {
 //     })
 //   }
 
-function handleMenuInput(isMenuOpened: boolean) {
-  if (!isMenuOpened) {
-    variants.value = []
-  }
-}
+// function handleMenuInput(isMenuOpened: boolean) {
+//   if (!isMenuOpened) {
+//     variants.value = []
+//   }
+// }
 
 //   handleKeyDown (event: KeyboardEvent) {
 //     switch (true) {
@@ -385,6 +382,8 @@ async function updateText(listItem: TListItemModel) {
     variantsMenuX.value = boundingBox.x
     variantsMenuY.value = y
     variantsShown.value = true
+  } else {
+    variantsShown.value = false
   }
   saveTimeout = setTimeout(() => {
     emit('save', listItem)
@@ -417,6 +416,7 @@ function handleBlur(listItem: TListItemModel) {
 
   .note-list__list {
     position: relative;
+
     // .sortable-drag {
     //   opacity: 0 !important;
     // }
@@ -430,9 +430,18 @@ function handleBlur(listItem: TListItemModel) {
     .list-item {
       position: relative;
       border-top: 1px solid $grey-4;
-      border-bottom: 1px solid transparent;
-      transition: border-top 0.3s, border-bottom 0.3s;
+      border-bottom: 1px solid $grey-4;
+      transition: box-shadow 0.2s;
       background-color: #fff;
+      margin-top: -1px;
+
+      &:first-child {
+        border-top: 1px solid transparent;
+      }
+
+      &:last-child {
+        border-bottom: 1px solid transparent;
+      }
 
       .list-item__checkbox {
         min-width: 20px;
@@ -473,7 +482,7 @@ function handleBlur(listItem: TListItemModel) {
         height: 24px;
         border: none;
         color: rgba(0, 0, 0, 0.87);
-        line-height: 24px;
+        line-height: 20px;
         outline: none;
         resize: none;
         transition: color 0.2s;
@@ -490,7 +499,9 @@ function handleBlur(listItem: TListItemModel) {
       }
 
       &.list-item--focused {
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        border-top: 1px solid transparent;
+        border-bottom: 1px solid transparent;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         z-index: 10;
       }
 
@@ -531,6 +542,7 @@ function handleBlur(listItem: TListItemModel) {
 
   .note-list__menu {
     position: absolute;
+    z-index: 30;
   }
 }
 

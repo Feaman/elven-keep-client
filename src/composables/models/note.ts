@@ -1,16 +1,18 @@
+import { AxiosError } from 'axios'
 import { computed, Ref, ref, UnwrapRef } from 'vue'
 import coAuthorModel, { ICoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
-import listItemModel, { IListItem, TListItemModel, type TVariant } from '~/composables/models/list-item'
+import listItemModel, { TListItem, TListItemModel, type TVariant } from '~/composables/models/list-item'
 import { TStatusModel } from '~/composables/models/status'
-import { TTypeModel, TYPE_LIST } from '~/composables/models/type'
+import { TYPE_LIST, type TTypeModel } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
+import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
 import { IUser } from './user'
 
-export interface INote {
+export interface TNote {
   id?: number
   title?: string | ''
   text?: string | ''
@@ -21,13 +23,13 @@ export interface INote {
   userId?: number
   user?: IUser
   isCompletedListExpanded?: boolean
-  list?: IListItem[]
+  list?: TListItem[]
   coAuthors?: ICoAuthor[]
   created?: string
   updated?: string
 }
 
-export default function noteModel(noteData: INote) {
+export default function noteModel(noteData: TNote) {
   const id = ref(noteData.id)
   const isSaving = ref(false)
   const title = ref(noteData.title || '')
@@ -46,7 +48,7 @@ export default function noteModel(noteData: INote) {
 
   const globalStore = useGlobalStore()
 
-  function handleList(listData: IListItem[] = []) {
+  function handleList(listData: TListItem[] = []) {
     listData.forEach((listItemData) => list.value.push(listItemModel(listItemData) as unknown as TListItemModel))
   }
 
@@ -67,49 +69,37 @@ export default function noteModel(noteData: INote) {
     return type.value?.name === TYPE_LIST
   }
 
-  function addListItem(listItemData: IListItem | null = null) {
+  function addListItem(listItemData: TListItem | null = null) {
     const order = list.value.length ? Math.max(...list.value.map((listItem) => listItem.order)) + 1 : 1
     const listItem = listItemModel(
       {
         noteId: id.value,
         updated: String(new Date()),
         order,
+        statusId: StatusesService.active.value.id,
         ...listItemData || { text: '' },
       },
     )
     list.value.push(listItem as unknown as TListItemModel)
   }
 
-  async function save(savingText = false) {
-    console.log(savingText)
+  async function save() {
     // NotesService.vuex.commit('clearNoteTimeout', this)
-    //   const saveTimeout = setTimeout(() => {
-    //     if (this.id) {
-    //       ApiService.updateNote(this)
-    //         .then((data) => resolve(data))
-    //         .catch((error) => NotesService.error(error))
-    //     } else {
-    //       NotesService.vuex.commit('addNote', this)
-    //       return ApiService.addNote(this)
-    //         .then((noteData) => {
-    //           history.replaceState({}, '', `/note/${noteData.id}`)
-    //           const newNoteData: INote = {
-    //             id: noteData.id,
-    //             userId: noteData.userId,
-    //           }
-    //           if (noteData.user) {
-    //             newNoteData.user = new UserModel(noteData.user)
-    //           }
-    //           this.updateState(newNoteData)
-    //           resolve(newNoteData)
-    //         })
-    //         .catch((error) => NotesService.error(error))
-    //     }
-    //   }, savingText ? 400 : 0)
+    console.log(`note id: ${id.value}`)
+    if (id.value) {
+      console.log('saving note')
+      await ApiService.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
+    } else {
+      console.log('createing note')
+      const noteData = await ApiService.addNote(list.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
+      id.value = noteData.id
+      window.history.replaceState({}, '', `/note/${noteData.id}`)
+    }
+
     // this.updateState({ saveTimeout })
   }
 
-  // update(data: INote) {
+  // update(data: TNote) {
   //   NotesService.vuex.commit('updateNote', { note: this, data })
   //   return this.save(!!(data.text || data.title))
   // }
@@ -186,29 +176,37 @@ export default function noteModel(noteData: INote) {
   }
 
   async function saveListItem(listItem: TListItemModel) {
-    if (!list.value.includes(listItem)) {
-      throw new Error(`List item with id "${listItem.id}" doesn't exists in note's with id "${id.value}" list`)
-    }
-    if (!id.value) {
-      await save()
-    }
-    if (!listItem.id) {
-      const data = await BaseService.api.addListItem(listItem)
-      listItem.id = data.id
-      listItem.created = new Date(data.created || '')
-      listItem.updated = new Date(data.updated || '')
-    } else {
-      const data = await BaseService.api.updateListItem(listItem)
-      listItem.updated = new Date(data.updated || '')
+    try {
+      if (!list.value.includes(listItem)) {
+        throw new Error(`List item with id "${listItem.id}" doesn't exists in note's with id "${id.value}" list`)
+      }
+      console.log('list item saving')
+      if (!id.value) {
+        console.log('No ID start note save()')
+        await save()
+        listItem.noteId = id.value
+      }
+      if (!listItem.id) {
+        const data = await ApiService.addListItem(listItem)
+        listItem.id = data.id
+        listItem.created = new Date(data.created || '')
+        listItem.updated = new Date(data.updated || '')
+      } else {
+        const data = await ApiService.updateListItem(listItem)
+        listItem.updated = new Date(data.updated || '')
+      }
+    } catch (error) {
+      BaseService.showError(error as Error | AxiosError)
     }
   }
+
   async function removeListItem(listItem: TListItemModel, addToRestore = true) {
     if (listItem.id) {
       listItem.statusId = StatusesService.inactive.value.id
       if (addToRestore) {
         removingItemLists.value.push(listItem as unknown as TListItemModel)
       }
-      await BaseService.api.removeListItem(listItem)
+      await ApiService.removeListItem(listItem)
     }
   }
 
@@ -264,6 +262,7 @@ export default function noteModel(noteData: INote) {
     isMyNote,
     isSaving,
     checkedListItems,
+    save,
     completeListItem,
     hide,
     removeItem,

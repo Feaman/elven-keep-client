@@ -1,16 +1,15 @@
 import { computed, ref, Ref } from 'vue'
 import coAuthorModel, { TCoAuthorModel } from '~/composables/models/co-author'
 import { TListItemModel, type TVariant } from '~/composables/models/list-item'
-import noteModel, { INote, TNoteModel } from '~/composables/models/note'
+import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
-import BaseService from '~/services/base'
+import ApiService from '~/services/api/api'
 
 const notes: Ref<TNoteModel[]> = ref([])
-const { api } = BaseService
 export const searchQuery = ref('')
 
-function generateNotes(notesData: INote[]) {
-  notesData.forEach((noteData: INote) => {
+function generateNotes(notesData: TNote[]) {
+  notesData.forEach((noteData: TNote) => {
     const note = noteModel(noteData)
     notes.value.push(note as unknown as TNoteModel)
   })
@@ -104,12 +103,12 @@ function addNoteCoAuthor(note: TNoteModel, coAuthor: TCoAuthorModel) {
 }
 
 async function addCoAuthor(note: TNoteModel, email: string) {
-  const noteCoAuthorData = await api.addNoteCoAuthor(note, email)
+  const noteCoAuthorData = await ApiService.addNoteCoAuthor(note, email)
   addNoteCoAuthor(note, coAuthorModel(noteCoAuthorData) as unknown as TCoAuthorModel)
 }
 
 function setOrder(note: TNoteModel, order: number[]) {
-  api.setOrder(note, order)
+  ApiService.setOrder(note, order)
 }
 
 function clear() {
@@ -123,15 +122,6 @@ function clear() {
       // note.removeFromState()
     }
   })
-}
-
-function find(noteId: number) {
-  const note = notes.value.find((note) => note.id === noteId)
-  if (!note) {
-    throw new Error(`Note with id "${noteId}" not found`)
-  }
-
-  return note
 }
 
 function generateMaxOrder(listItemId: number, list: TListItemModel[]) {
@@ -148,7 +138,7 @@ function generateMaxOrder(listItemId: number, list: TListItemModel[]) {
 
 async function removeNote(note: TNoteModel, addRemovingNote = true) {
   note.hide(addRemovingNote)
-  // await BaseService.api.removeNote(note)
+  await ApiService.removeNote(note)
 }
 
 export default {
@@ -156,7 +146,6 @@ export default {
   filtered,
   searchQuery,
   generateMaxOrder,
-  find,
   generateNotes,
   findNoteListItemVariants,
   clear,
