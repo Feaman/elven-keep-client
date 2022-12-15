@@ -1,88 +1,88 @@
 <template lang="pug">
 .note.q-flex.column.items-center.full-height
   .note__content.column.no-wrap.full-width.full-height.pt-2.px-3
-    .q-flex.items-center
-      q-input.note__title-field.mt-1.mb-2(
-        @update:model-value="emit('update', { title: String($event) })"
-        :model-value="note.title"
-        placeholder="Title"
-        debounce="400"
-        dense
-      )
-      q-btn.note__complete-checked-button.text-black(
-        v-if="note.type?.name === NOTE_TYPE_LIST"
-        @click="completeChecked()"
-        :disabled="!note.checkedListItems.length"
-        :icon="mdiCheckAll"
-        size="xs"
-        color="primary"
-        glossy
-        square
-      )
-        ToolTip(
-          anchor="center left"
-          self="center right"
-        ) Complete checked items
-    q-input.note__text(
-      v-if="note.type?.name === NOTE_TYPE_TEXT"
-      @update:model-value="emit('update', {text: String($event)})"
-      :model-value="note.text"
-      type="textarea"
-      placeholder="Text"
-    )
-    template(v-if="note.type?.name === NOTE_TYPE_LIST")
-      note-list(
-        @add="emit('list-item-add', $event)"
-        @focus="emit('list-item-focus', $event)"
-        @blur="emit('list-item-blur', $event)"
-        @update-text="emit('list-item-update-text', $event)"
-        @update-order="emit('list-item-update-order', $event)"
-        @save="emit('list-item-save', $event)"
-        @check="emit('list-item-check', $event)"
-        @uncheck="emit('list-item-uncheck', $event)"
-        @complete="emit('list-item-complete', $event)"
-        @activate="emit('list-item-activate', $event)"
-        @remove="emit('list-item-remove', $event)"
-        @select-variant="emit('select-variant', $event)"
-        :fullscreen="fullscreen"
-        :note="note"
-        :list="note.mainListItems"
-        :is-main="true"
-        ref="noteList"
-      )
-      template(v-if="note.completedListItems.length")
-        q-separator.my-2
-        q-expansion-item(
-          header-style="padding-right: 0; padding-left: 8px"
-        )
-          template(v-slot:header)
-            .completed-list-header.text-green.q-flex.items-center
-              .text-weight-bold.font-size-16 {{ note.completedListItems.length }}
-              .ml-2 completed
-            q-space
-          NoteList(
-            @focus="emit('list-item-focus', $event)"
-            @blur="emit('list-item-blur', $event)"
-            @update-text="emit('list-item-update-text', $event)"
-            @update-order="emit('list-item-update-order', $event)"
-            @save="emit('list-item-save', $event)"
-            @check="emit('list-item-check', $event)"
-            @uncheck="emit('list-item-uncheck', $event)"
-            @complete="emit('list-item-complete', $event)"
-            @activate="emit('list-item-activate', $event)"
-            @remove="emit('list-item-remove', $event)"
-            :note="note"
-            :list="note.completedListItems"
-            :fullscreen="fullscreen"
-            :is-main="false"
-          )
 
-  //- fullscreen(
-  //-   v-if="isFullscreen"
-  //-   @close="isFullscreen = false"
-  //-   :note="note"
-  //-   :show="isFullscreen"
-  //- )
+    FullScreenView(
+      @close="emit('fullscreen', false)"
+      @list-item-check="emit('list-item-check', $event)"
+      @list-item-uncheck="emit('list-item-uncheck', $event)"
+      :note="note"
+      :show="fullscreen"
+    )
+
+    template(v-if="!fullscreen")
+      .q-flex.items-center
+        q-input.note__title-field.mt-1.mb-2(
+          @update:model-value="emit('update', { title: String($event) })"
+          :model-value="note.title"
+          placeholder="Title"
+          debounce="400"
+          dense
+        )
+        q-btn.note__complete-checked-button.text-black(
+          v-if="note.type?.name === NOTE_TYPE_LIST"
+          @click="completeChecked()"
+          :disabled="!note.checkedListItems.length"
+          :icon="mdiCheckAll"
+          size="xs"
+          color="primary"
+          glossy
+          square
+        )
+          ToolTip(
+            anchor="center left"
+            self="center right"
+          ) Complete checked items
+      q-input.note__text(
+        v-if="note.type?.name === NOTE_TYPE_TEXT"
+        @update:model-value="emit('update', {text: String($event)})"
+        :model-value="note.text"
+        type="textarea"
+        placeholder="Text"
+      )
+      template(v-if="note.type?.name === NOTE_TYPE_LIST")
+        NoteList(
+          @add="emit('list-item-add', $event)"
+          @focus="emit('list-item-focus', $event)"
+          @blur="emit('list-item-blur', $event)"
+          @update-text="emit('list-item-update-text', $event)"
+          @update-order="emit('list-item-update-order', $event)"
+          @save="emit('list-item-save', $event)"
+          @check="emit('list-item-check', $event)"
+          @uncheck="emit('list-item-uncheck', $event)"
+          @complete="emit('list-item-complete', $event)"
+          @activate="emit('list-item-activate', $event)"
+          @remove="emit('list-item-remove', $event)"
+          @select-variant="emit('select-variant', $event)"
+          :note="note"
+          is-main
+        )
+        template(v-if="note.completedListItems.length")
+          q-separator.my-2
+          q-expansion-item(
+            header-style="padding-right: 0; padding-left: 8px"
+            @update:model-value="expandCompleted"
+            :model-value="note.isCompletedListExpanded"
+          )
+            template(v-slot:header)
+              .completed-list-header.text-green.q-flex.items-center
+                .text-weight-bold.font-size-16 {{ note.completedListItems.length }}
+                .ml-2 completed
+              q-space
+            NoteList(
+              v-if="note.isCompletedListExpanded"
+              @focus="emit('list-item-focus', $event)"
+              @blur="emit('list-item-blur', $event)"
+              @update-text="emit('list-item-update-text', $event)"
+              @update-order="emit('list-item-update-order', $event)"
+              @save="emit('list-item-save', $event)"
+              @check="emit('list-item-check', $event)"
+              @uncheck="emit('list-item-uncheck', $event)"
+              @complete="emit('list-item-complete', $event)"
+              @activate="emit('list-item-activate', $event)"
+              @remove="emit('list-item-remove', $event)"
+              :note="note"
+            )
 
   //- v-dialog(
   //-   v-if="noteUser"
@@ -174,8 +174,9 @@ const props = defineProps<{
 
 // eslint-disable-next-line
 const emit = defineEmits<{
+  (event: 'fullscreen', value: boolean): void
   (event: 'update', value: TNote): void
-  (event: 'list-item-add'): void
+  (event: 'list-item-add', listItem: TListItemModel): void
   (event: 'list-item-remove', listItem: TListItemModel): void
   (event: 'list-item-focus', listItem: TListItemModel): void
   (event: 'list-item-blur', listItem: TListItemModel): void
@@ -189,18 +190,6 @@ const emit = defineEmits<{
   (event: 'select-variant', value: { listItem: TListItemModel, variant: TVariant }): void
 }>()
 
-// import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
-// import { State } from 'vuex-class'
-// import CoAuthorModel from '~/models/co-author'
-// import NoteModel from '~/models/note'
-// import TypeModel from '~/models/type'
-// import UserModel from '~/models/user'
-// import NotesService from '~/services/notes'
-// import KeyboardEvents from '~/services/keyboard-events'
-// import BaseService from '~/services/base'
-// import ListItemsService from '~/services/list-items'
-// @Component
-// export default class NoteComponent extends Vue {
 //   noteUser: UserModel | null = null
 //   renderCompletedList = false
 //   isFullscreen = false
@@ -271,6 +260,10 @@ const emit = defineEmits<{
 function completeChecked() {
   props.note.completeAllChecked()
 }
+
+function expandCompleted(isExpanded: boolean) {
+  emit('update', { isCompletedListExpanded: isExpanded })
+}
 //   handleKeyDown(event: KeyboardEvent) {
 //     switch (true) {
 //       case KeyboardEvents.is(event, KeyboardEvents.BACKSPACE):
@@ -322,17 +315,11 @@ function completeChecked() {
 </script>
 
 <style lang="scss" scoped>
-// @import '~assets/css/variables'
-// $active-row-color = #6A1B9A
 .note {
   .note__content {
     max-width: 900px;
     overflow: auto;
     flex: 1;
-
-    //     .v-expansion-panel-header {
-    //       min-height: 32px;
-    //     }
 
     .note__title-field {
       width: 100%;
@@ -392,16 +379,6 @@ function completeChecked() {
     :deep(.q-focus-helper) {
       display: none;
     }
-
-    //     .v-expansion-panel:before {
-    //       box-shadow: none;
-    //     }
-
-    //     .v-expansion-panel ::v-deep .v-expansion-panel-content__wrap,
-    //     .v-expansion-panel .v-expansion-panel-header {
-    //       padding: 0;
-    //     }
-    //   }
 
     //   .co-authors-list {
     //     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);

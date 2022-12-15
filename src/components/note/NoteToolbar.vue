@@ -12,7 +12,7 @@
         )
         q-separator(vertical)
         q-btn(
-          @click="$emit('co-authors-clicked')"
+          @click="emit('co-authors-clicked')"
           :icon="mdiAccountGroup"
           color="black"
           flat
@@ -24,7 +24,7 @@
         q-separator(vertical)
         q-space
         q-btn(
-          @click="$emit('fullscreen', note)"
+          @click="emit('fullscreen')"
           :icon="mdiFullscreen"
           color="black"
           flat
@@ -56,6 +56,12 @@ import {
 import { type TNoteModel } from '~/composables/models/note'
 
 const router = useRouter()
+
+// eslint-disable-next-line
+const emit = defineEmits<{
+  (event: 'fullscreen'): void
+  (event: 'co-authors-clicked'): void
+}>()
 
 defineProps<{
   note: TNoteModel,

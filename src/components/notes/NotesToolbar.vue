@@ -4,23 +4,7 @@
     q-toolbar.ml-2
       .q-flex.align-center.full-width
         NotesSearch
-        .toolbar-tools.d-flex
-          q-btn.ml-2(
-            @click="router.push('/new/list')"
-            :icon="mdiFormatListBulletedSquare"
-            color="black"
-            flat
-            round
-          )
-            ToolTip Create list note
-          q-btn(
-            @click="router.push('/new/text')"
-            :icon="mdiTextBoxOutline"
-            color="black"
-            flat
-            round
-          )
-            ToolTip Create text note
+        CreateTools
         q-space
         user-menu
 </template>
@@ -28,6 +12,7 @@
 <script setup lang="ts">
 import { mdiFormatListBulletedSquare, mdiTextBoxOutline } from '@quasar/extras/mdi-v6'
 import { useRouter } from 'vue-router'
+import CreateTools from '../CreateTools.vue'
 
 const router = useRouter()
 // function goToPage(page: string) {

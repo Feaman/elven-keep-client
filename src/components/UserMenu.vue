@@ -8,6 +8,8 @@
   )
     q-menu(
       max-width="380px"
+      transition-show="scale"
+      transition-hide="jump-left"
     )
       .bg-grey-4.px-4.pt-2.pb-2
         .text-weight-bold {{ globalStore.user?.getFio() }}

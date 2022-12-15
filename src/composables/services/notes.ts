@@ -95,7 +95,7 @@ function findListItemVariants(listItem: TListItemModel) {
     variant.highlightedText = variant.text.replace(regexp, (text: string) => `<span class="green--text">${text}</span>`)
   })
 
-  return resultVariants
+  return resultVariants.slice(0, 10)
 }
 
 function addNoteCoAuthor(note: TNoteModel, coAuthor: TCoAuthorModel) {

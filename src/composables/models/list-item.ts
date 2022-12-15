@@ -43,6 +43,7 @@ export default function listItemModel(listItemData: TListItem) {
   const status = ref(StatusesService.findById(statusId.value))
   const $textarea: HTMLTextAreaElement = document.createElement('textarea')
   const isCreating = ref(false)
+  const isUpdateNeeded = ref(false)
 
   // restore() {
   //   if (this.id) {
@@ -74,6 +75,7 @@ export default function listItemModel(listItemData: TListItem) {
     statusId,
     status,
     isCreating,
+    isUpdateNeeded,
   }
 }
 

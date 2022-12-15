@@ -7,7 +7,7 @@
   .error-page__error.column.text-center.full-width.full-height
     .text-h1.text-yellow-7.text-weight-bold {{ error.statusCode }}
     .text-h3.text-weight-bold.mt-8 Awww... What the dragon?!
-    div.text-h4.text-blue-5.ml-1.mt-8 {{ error.message }}
+    .error-page__message.text-h4.text-blue-5.font-size-18.ml-1.mt-8 {{ error.message }}
     q-btn(
       label="404"
       color="white"
@@ -42,6 +42,10 @@ defineProps<{
     min-width: calc(50% - 16px);
     align-items: center;
     justify-content: center;
+
+    .error-page__message {
+      line-height: 20px;
+    }
   }
 }
 

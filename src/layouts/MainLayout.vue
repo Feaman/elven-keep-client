@@ -8,12 +8,12 @@ q-layout(
     template(
       v-if="$route.name === 'notes'"
     )
-      q-skeleton(
+      q-skeleton.bg-grey-3(
         type="rect"
         height="50px"
       )
       .row.pa-4
-        q-skeleton.note.ma-2(
+        q-skeleton.note.bg-grey-3.ma-2(
           v-for="index in 4"
           :key="index"
           type="rect"
@@ -31,7 +31,7 @@ q-layout(
         div(
           :style="{ maxWidth: '900px', width: '100%', }"
         )
-          q-skeleton(
+          q-skeleton.bg-grey-3(
             type="rect"
             height="50px"
           )
@@ -40,42 +40,11 @@ q-layout(
               v-for="index in 10"
               :key="index"
             )
-              q-skeleton(
+              q-skeleton.bg-grey-3(
                 type="rect"
-                width="28px"
-                height="28px"
+                width="100%"
+                height="24px"
               )
-              q-skeleton.ml-2(
-                type="rect"
-                width="28px"
-                height="28px"
-              )
-              q-skeleton.ml-2(
-                type="rect"
-                width="calc(100% - 112px)"
-                height="28px"
-              )
-              q-skeleton.ml-2(
-                type="rect"
-                width="28px"
-                height="28px"
-              )
-              q-skeleton.ml-2(
-                type="rect"
-                width="28px"
-                height="28px"
-              )
-          .q-flex.mt-4.ml-9
-            q-skeleton(
-              type="rect"
-              width="28px"
-              height="28px"
-            )
-            q-skeleton.ml-2(
-              type="rect"
-              width="120px"
-              height="28px"
-            )
   q-page-container.page.pa-0(v-else)
     .header
     router-view.page-content(

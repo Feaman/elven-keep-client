@@ -1,6 +1,6 @@
 <template lang="pug">
 .note-list(
-  :class="{ fullscreen, 'note-list__focused': note.isFocused }"
+  :class="{ 'is-fullscreen': fullscreen, 'note-list__focused': note.isFocused }"
   ref="rootElement"
 )
   .note-list__container(
@@ -97,7 +97,7 @@
         dense
       )
         q-item.list-item__variant(
-          v-for="(variant, index) in variants.slice(0, 10)"
+          v-for="(variant, index) in variants"
           :key="index"
           :class="{ 'list-item__focused': variant.focused }"
           clickable v-ripple
@@ -120,10 +120,9 @@ import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
 
 const props = defineProps<{
-  fullscreen: boolean,
-  isMain: boolean,
+  fullscreen?: boolean,
+  isMain?: boolean,
   note: TNoteModel,
-  list: TListItemModel[],
 }>()
 
 // eslint-disable-next-line
@@ -151,6 +150,7 @@ const variantsShown = ref(false)
 const variantsMenuY = ref(0)
 const variantsMenuMaxWidth = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
+const list = computed(() => (props.isMain ? props.note.mainListItems : props.note.completedListItems))
 
 function generateTextareaRefName(listItem: TListItemModel) {
   return `textarea-${listItem.generatedId}`
@@ -161,16 +161,16 @@ function getListItemTextarea(listItem: TListItemModel) {
 }
 
 function assignTextAreas() {
-  props.list.forEach((listItem) => listItem.$textarea = getListItemTextarea(listItem))
+  list.value.forEach((listItem) => listItem.$textarea = getListItemTextarea(listItem))
 }
 
 const order = computed({
   get() {
-    return props.list.map((listItem) => listItem.id || 0)
+    return list.value.map((listItem) => listItem.id || 0)
   },
   set(order) {
     order.forEach((listItemId, index) => {
-      const listItem = props.list.find((listItem) => listItem.id === listItemId)
+      const listItem = list.value.find((listItem) => listItem.id === listItemId)
       if (!listItem) {
         throw new Error(`List item ${listItemId} not found`)
       }
@@ -184,7 +184,7 @@ const order = computed({
 
 function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
   if (window.innerHeight - yPosition - 32 < menuHeight) {
-    return window.innerHeight - menuHeight
+    return window.innerHeight - menuHeight - 16
   }
   return yPosition + 32
 }
@@ -194,7 +194,7 @@ async function checkVariants(listItem: TListItemModel) {
   if (variants.value.length) {
     variantsListItem.value = listItem
     const boundingBox = listItem.$textarea.getBoundingClientRect()
-    const menuHeight = variants.value.length * 34 + 16
+    const menuHeight = variants.value.length * 34
     const y = calculateVariantsMenuYPosition(boundingBox.y, menuHeight)
     await nextTick()
     variantsMenuX.value = boundingBox.x
@@ -240,9 +240,9 @@ function listItemClasses(listItem: TListItemModel) {
 
 async function init() {
   $root = rootElement.value
-  if (props.isMain && props.list.length === 1 && !props.list[0].text) {
+  if (props.isMain && list.value.length === 1 && !list.value[0].text) {
     await nextTick()
-    props.list[0].$textarea.focus()
+    list.value[0].$textarea.focus()
   }
 
   // BaseService.events.$on('keydown', handleKeyDown)
@@ -417,28 +417,31 @@ function handleBlur(listItem: TListItemModel) {
 
 <style lang="scss" scoped>
 .note-list {
-  &.fullscreen .list-item__text {
+  &.is-fullscreen .list-item__text {
     font-size: 18px;
   }
 
   &.note-list__focused .note-list__list {
-    .list-item__container {
-      opacity: 0.6;
+    .list-item {
+      opacity: 0.5;
     }
   }
 
   .note-list__list {
 
     .list-item__container {
-      opacity: 1;
-
       &:not(:last-child) {
         border-bottom: 1px solid $grey-4;
       }
 
-      &.list-item__container--focused {
+      &.list-item__container--focused .list-item {
         opacity: 1;
       }
+    }
+
+    .list-item {
+      opacity: 1;
+
     }
 
     // .sortable-drag {
@@ -456,7 +459,7 @@ function handleBlur(listItem: TListItemModel) {
 
       .list-item {
         background-color: #fff;
-        transition: opacity 0.3s;
+        transition: opacity 0.5s;
 
         &:first-child {
           border-top: 1px solid transparent;

@@ -46,15 +46,6 @@ export default class ApiService extends BaseService {
       completed: listItem.completed,
     }))
 
-    function prom() {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve('')
-        }, 7000)
-      })
-    }
-    await prom()
-
     const { data } = await this.api.post('notes', noteData)
     return data as TNote
   }
@@ -100,14 +91,6 @@ export default class ApiService extends BaseService {
       completed: listItem.completed,
     }
 
-    function prom() {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve('')
-        }, 7000)
-      })
-    }
-    await prom()
     const { data } = await this.api.post('list-items', listItemData)
     return data as TListItem
   }

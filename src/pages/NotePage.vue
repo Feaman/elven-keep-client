@@ -1,7 +1,7 @@
 <template lang="pug">
 .note-page.full-height
   NoteToolbar(
-    @fullscreen="fullscreen = $event"
+    @fullscreen="fullscreen = true"
     :note="note"
   ).full-width
   Note(
@@ -18,6 +18,7 @@
     @list-item-remove="removeListItem"
     @list-item-add="addListItem"
     @select-variant="selectVariant"
+    @fullscreen="fullscreen = $event"
     :note="note"
     :fullscreen="fullscreen"
   )
@@ -82,7 +83,9 @@ function updateListItemOrder({ listItem, order }: { listItem: TListItemModel, or
 
 function blurListItem(listItem: TListItemModel) {
   listItem.focused = false
-  note.value.saveListItem(listItem)
+  if (!listItem.text) {
+    note.value.removeItem(listItem)
+  }
 }
 
 function addListItem(listItem: TListItemModel) {

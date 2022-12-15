@@ -45,6 +45,9 @@ export default function noteModel(noteData: TNote) {
   const coAuthors = ref<TCoAuthorModel[]>([])
   const isCompletedListExpanded = ref(!!noteData.isCompletedListExpanded)
   const removingItemLists = ref<TListItemModel[]>([])
+  const isCreating = ref(false)
+  const isUpdateNeeded = ref(false)
+  let logId = 0
 
   const globalStore = useGlobalStore()
 
@@ -75,10 +78,19 @@ export default function noteModel(noteData: TNote) {
       isSaving.value = true
       if (id.value) {
         await ApiService.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
+      } else if (isCreating.value) {
+        isUpdateNeeded.value = true
       } else {
+        isCreating.value = true
         const noteData = await ApiService.addNote(list.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
         id.value = noteData.id
+        userId.value = noteData.user?.id
         window.history.replaceState({}, '', `/note/${noteData.id}`)
+        isCreating.value = false
+        if (isUpdateNeeded.value && id.value) {
+          await ApiService.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
+          isUpdateNeeded.value = false
+        }
       }
       isSaving.value = false
     } catch (error) {
@@ -99,22 +111,35 @@ export default function noteModel(noteData: TNote) {
         throw new Error(`List item with id "${listItem.id}" doesn't exists in note's with id "${id.value}" list`)
       }
       isSaving.value = true
-      if (!id.value) {
+      logId += 1
+      console.log(`-=== ${logId} === -`)
+      if (!id.value && !listItem.isCreating) {
+        console.log(`${logId}: 1`)
+        listItem.isCreating = true
         await save()
         listItem.noteId = id.value
       }
-      if (!listItem.id) {
+      if (listItem.id) {
+        console.log(`${logId}: 2`)
+        const data = await ApiService.updateListItem(listItem)
+        listItem.updated = new Date(data.updated || '')
+      } else if (isCreating.value && listItem.isCreating) {
+        console.log(`${logId}: 3`)
+        listItem.isUpdateNeeded = true
+      } else {
+        console.log(`${logId}: 4`)
         listItem.isCreating = true
-        console.log('creating')
         const data = await ApiService.addListItem(listItem)
         listItem.id = data.id
         listItem.created = new Date(data.created || '')
         listItem.updated = new Date(data.updated || '')
         listItem.isCreating = false
-        console.log('finished')
-      } else {
-        const data = await ApiService.updateListItem(listItem)
-        listItem.updated = new Date(data.updated || '')
+        if (listItem.isUpdateNeeded) {
+          console.log(`${logId}: 5`)
+          const data = await ApiService.updateListItem(listItem)
+          listItem.updated = new Date(data.updated || '')
+          listItem.isUpdateNeeded = false
+        }
       }
       isSaving.value = false
     } catch (error) {
@@ -263,6 +288,8 @@ export default function noteModel(noteData: TNote) {
     isSaving,
     checkedListItems,
     isFocused,
+    isCreating,
+    isUpdateNeeded,
     save,
     completeListItem,
     hide,
