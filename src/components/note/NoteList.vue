@@ -1,6 +1,6 @@
 <template lang="pug">
 .note-list(
-  :class="{ fullscreen }"
+  :class="{ fullscreen, 'note-list__focused': note.isFocused }"
   ref="rootElement"
 )
   .note-list__container(
@@ -9,15 +9,19 @@
     .note-list__list(
       handle=".list-item__handle"
     )
-      transition-group(
-        name="vertical-list-effect"
+      TransitionGroup(
+        name="vertical-list"
+        tag="div"
+        style="position: relative"
       )
-        .list-item.q-flex.items-center(
+        .list-item__container(
           v-for="listItem in list"
           :key="listItem.generatedId"
-          :class="listItemClasses(listItem)"
+          :class="{ 'list-item__container--focused': listItem.focused }"
         )
-          transition( name="scale-fade")
+          .list-item.q-flex.items-center(
+            :class="listItemClasses(listItem)"
+          )
             input.list-item__checkbox.mr-1(
               v-if="fullscreen"
               @change="check($event, listItem)"
@@ -27,13 +31,12 @@
               color="secondary"
             )
 
-          q-icon.text-grey-6(
-            v-if="!fullscreen"
-            :name="mdiDrag"
-            size="sm"
-          )
+            q-icon.text-grey-6(
+              v-if="!fullscreen"
+              :name="mdiDrag"
+              size="sm"
+            )
 
-          transition(name="scale-fade")
             input.list-item__checkbox.complete-checkbox(
               v-if="!fullscreen"
               @change="complete($event, listItem)"
@@ -41,17 +44,16 @@
               type="checkbox"
             )
 
-          .list-item__text.q-flex.mx-1.ml-2
-            textarea.full-width(
-              @input="updateText(listItem)"
-              @keydown.enter="selectFocusedVariant($event)"
-              @focus.stop="handleFocus(listItem)"
-              @blur="handleBlur(listItem)"
-              :value="listItem.text"
-              :id="generateTextareaRefName(listItem)"
-            )
+            .list-item__text.q-flex.mx-1.ml-2
+              textarea.full-width(
+                @input="updateText(listItem)"
+                @keydown.enter="selectFocusedVariant($event)"
+                @focus="handleFocus(listItem)"
+                @blur="handleBlur(listItem)"
+                :value="listItem.text"
+                :id="generateTextareaRefName(listItem)"
+              )
 
-          transition( name="scale-fade")
             input.list-item__checkbox.mr-1(
               v-if="!fullscreen"
               @change="check($event, listItem)"
@@ -60,7 +62,6 @@
               type="checkbox"
               color="secondary"
             )
-          transition( name="slide-fade")
             q-btn.list-item__remove-button(
               v-if="!fullscreen"
               @click="emit('remove', listItem)"
@@ -87,9 +88,9 @@
     enter-active-class="animated zoomIn"
     leave-active-class="animated zoomOut"
   )
-    q-card.note-list__menu.shadow-6.py-2(
+    q-card.note-list__menu.shadow-6(
       v-if="variantsShown"
-      :style="{ top: `${variantsMenuY}px`, left:  `${variantsMenuX}px` }"
+      :style="{ maxWidth: `${variantsMenuMaxWidth}px`,top: `${variantsMenuY}px`, left:  `${variantsMenuX}px` }"
     )
       q-list.list-item__variants(
         ref="variantsElement"
@@ -102,7 +103,7 @@
           clickable v-ripple
         )
           q-item-section
-            .q-flex.items-center.full-width(
+            .q-flex.items-center.full-width.py-1(
               @click="selectVariant(variantsListItem, variant)"
             )
               .limit-width.font-size-14(v-html="variant.highlightedText")
@@ -112,7 +113,7 @@
 
 <script setup lang="ts">
 import { mdiDrag, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
-import { ref, onUnmounted, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
@@ -148,6 +149,7 @@ const variants = ref<TVariant[]>([])
 const variantsMenuX = ref(0)
 const variantsShown = ref(false)
 const variantsMenuY = ref(0)
+const variantsMenuMaxWidth = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
 
 function generateTextareaRefName(listItem: TListItemModel) {
@@ -180,13 +182,37 @@ const order = computed({
   },
 })
 
-function handleFocus(listItem: TListItemModel) {
+function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
+  if (window.innerHeight - yPosition - 32 < menuHeight) {
+    return window.innerHeight - menuHeight
+  }
+  return yPosition + 32
+}
+
+async function checkVariants(listItem: TListItemModel) {
+  variants.value = NotesService.findListItemVariants(listItem)
+  if (variants.value.length) {
+    variantsListItem.value = listItem
+    const boundingBox = listItem.$textarea.getBoundingClientRect()
+    const menuHeight = variants.value.length * 34 + 16
+    const y = calculateVariantsMenuYPosition(boundingBox.y, menuHeight)
+    await nextTick()
+    variantsMenuX.value = boundingBox.x
+    variantsMenuY.value = y
+    variantsMenuMaxWidth.value = (rootElement.value?.offsetWidth || 350) - 52
+    variantsShown.value = true
+  } else {
+    variantsShown.value = false
+  }
+}
+
+async function handleFocus(listItem: TListItemModel) {
   emit('focus', listItem)
+  await checkVariants(listItem)
 }
 
 function listItemClasses(listItem: TListItemModel) {
   return {
-    'list-item--focused': listItem.focused,
     'list-item--checked': listItem.checked,
     'list-item--completed': listItem.completed,
     'py-1': !props.fullscreen,
@@ -211,9 +237,6 @@ function listItemClasses(listItem: TListItemModel) {
 //       ListItemsService.handleTextAreaHeights(this.list, this.$refs as { [key: string]: HTMLTextAreaElement [] })
 //     })
 //   }
-function hideVariants() {
-  variantsShown.value = false
-}
 
 async function init() {
   $root = rootElement.value
@@ -221,7 +244,6 @@ async function init() {
     await nextTick()
     props.list[0].$textarea.focus()
   }
-  $root?.addEventListener('mousedown', hideVariants)
 
   // BaseService.events.$on('keydown', handleKeyDown)
   // $el.querySelectorAll('.list-item textarea').forEach($textarea => {
@@ -236,10 +258,6 @@ async function init() {
 
 onMounted(() => {
   init()
-})
-
-onUnmounted(() => {
-  $root?.removeEventListener('mousedown', hideVariants)
 })
 
 //   beforeDestroy () {
@@ -373,19 +391,7 @@ async function updateText(listItem: TListItemModel) {
     clearTimeout(saveTimeout)
   }
   emit('update-text', { listItem, text })
-  variants.value = NotesService.findListItemVariants(listItem, text)
-  if (variants.value.length) {
-    variantsListItem.value = listItem
-    const boundingBox = listItem.$textarea.getBoundingClientRect()
-    const menuHeight = variants.value.length * 32 + 16
-    const y = boundingBox.y + (boundingBox.y - 56 < menuHeight ? 32 : -menuHeight)
-    await nextTick()
-    variantsMenuX.value = boundingBox.x
-    variantsMenuY.value = y
-    variantsShown.value = true
-  } else {
-    variantsShown.value = false
-  }
+  await checkVariants(listItem)
   saveTimeout = setTimeout(() => {
     emit('save', listItem)
     saveTimeout = null
@@ -405,8 +411,8 @@ function handleBlur(listItem: TListItemModel) {
   if ($textArea && $textArea.parentElement) {
     $textArea.parentElement.scrollTop = 0
   }
+  variantsShown.value = false
 }
-// }
 </script>
 
 <style lang="scss" scoped>
@@ -415,8 +421,25 @@ function handleBlur(listItem: TListItemModel) {
     font-size: 18px;
   }
 
+  &.note-list__focused .note-list__list {
+    .list-item__container {
+      opacity: 0.6;
+    }
+  }
+
   .note-list__list {
-    position: relative;
+
+    .list-item__container {
+      opacity: 1;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid $grey-4;
+      }
+
+      &.list-item__container--focused {
+        opacity: 1;
+      }
+    }
 
     // .sortable-drag {
     //   opacity: 0 !important;
@@ -428,108 +451,96 @@ function handleBlur(listItem: TListItemModel) {
     //   z-index: 20;
     // }
 
-    .list-item {
-      position: relative;
-      border-top: 1px solid $grey-4;
-      border-bottom: 1px solid $grey-4;
-      transition: box-shadow 0.2s;
-      background-color: #fff;
-      margin-top: -1px;
+    .list-item__container {
+      width: 100%;
 
-      &:first-child {
-        border-top: 1px solid transparent;
-      }
+      .list-item {
+        background-color: #fff;
+        transition: opacity 0.3s;
 
-      &:last-child {
-        border-bottom: 1px solid transparent;
-      }
+        &:first-child {
+          border-top: 1px solid transparent;
+        }
 
-      .list-item__checkbox {
-        min-width: 20px;
-        min-height: 20px;
-        color: #f00;
-        cursor: pointer;
-      }
+        &:last-child {
+          border-bottom: 1px solid transparent;
+        }
 
-      .list-item__checkbox:not(:checked) {
-        opacity: 0.3;
-      }
+        &.list-item--first {
+          border-top: 1px solid transparent;
+        }
 
-      textarea {
-        overflow: hidden;
-      }
+        &.list-item--checked .list-item__text textarea {
+          color: $grey-4;
+          text-decoration: line-through;
+          transition: color 0.2s;
+        }
 
-      .list-item__text {
-        max-height: 60px;
-        position: inherit;
-        transition: height 0.3s;
-        flex: 1;
-        position: relative;
-        overflow: hidden;
-      }
+        &.list-item--focused .list-item__text {
+          max-height: 178px;
+          overflow: auto;
+        }
 
-      .list-item__text.list-item__text--multi-line:after {
-        content: '...';
-        width: 100%;
-        height: 20px;
-        line-height: 18px;
-        position: absolute;
-        top: 38px;
-        background: #fff;
-        cursor: text;
-      }
+        .list-item__checkbox {
+          min-width: 20px;
+          min-height: 20px;
+          color: #f00;
+          cursor: pointer;
+        }
 
-      .list-item__text textarea {
-        height: 24px;
-        border: none;
-        color: rgba(0, 0, 0, 0.87);
-        line-height: 20px;
-        outline: none;
-        resize: none;
-        transition: color 0.2s;
-      }
+        .list-item__checkbox:not(:checked) {
+          opacity: 0.3;
+        }
 
-      &.list-item--first {
-        border-top: 1px solid transparent;
-      }
+        textarea {
+          overflow: hidden;
+        }
 
-      &.list-item--checked .list-item__text textarea {
-        color: $grey-4;
-        text-decoration: line-through;
-        transition: color 0.2s;
-      }
+        .list-item__text {
+          max-height: 60px;
+          position: inherit;
+          transition: height 0.3s;
+          flex: 1;
+          position: relative;
+          overflow: hidden;
+        }
 
-      &.list-item--focused {
-        border-top: 1px solid transparent;
-        border-bottom: 1px solid transparent;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-        z-index: 10;
-      }
+        .list-item__text.list-item__text--multi-line:after {
+          content: '...';
+          width: 100%;
+          height: 20px;
+          line-height: 18px;
+          position: absolute;
+          top: 38px;
+          background: #fff;
+          cursor: text;
+        }
 
-      &.list-item--focused .list-item__text {
-        max-height: 178px;
-        overflow: auto;
-      }
+        .list-item__text textarea {
+          height: 24px;
+          border: none;
+          color: rgba(0, 0, 0, 0.87);
+          line-height: 20px;
+          outline: none;
+          resize: none;
+          transition: color 0.2s;
+        }
 
-      &.list-item--focused .list-item__text:after {
-        display: none;
-      }
+        .list-item__handle {
+          min-width: 28px;
+          min-height: 24px;
+          position: relative;
+          z-index: 20;
+          margin-left: -8px;
+          cursor: pointer;
+        }
 
-      .list-item__handle {
-        min-width: 28px;
-        min-height: 24px;
-        position: relative;
-        z-index: 20;
-        margin-left: -8px;
-        cursor: pointer;
-      }
-
-      .list-item__remove-button {
-        min-width: 24px;
-        min-height: 24px;
+        .list-item__remove-button {
+          min-width: 24px;
+          min-height: 24px;
+        }
       }
     }
-
   }
 
   .note-list__create-button {
@@ -552,11 +563,14 @@ function handleBlur(listItem: TListItemModel) {
 // }
 
 .note-list__menu {
-  max-width: 800px;
-  width: calc(100% - 80px);
+  .list-item__variants {
+    .list-item__variant:not(:last-child) {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
 
-  .list-item__variants .list-item__variant--focused {
-    background-color: rgba(0, 0, 0, 0.1);
+    .list-item__variant--focused {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
   }
 }
 </style>

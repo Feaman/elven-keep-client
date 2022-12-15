@@ -4,7 +4,6 @@ import UsersService from '~/composables/services/users'
 import ApiService from '~/services/api/api'
 import AxiosApi from '~/services/api/axios-api'
 import StorageService from '~/services/storage'
-import { useGlobalStore } from '~/stores/global'
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -20,8 +19,7 @@ declare module '@vue/runtime-core' {
 // for each client)
 const axiosInstance = axios.create({ baseURL: 'https://api.notes.pavlo.ru/' })
 
-export default boot(({ app }) => {
-  const globalStore = useGlobalStore()
+export default boot(() => {
   const axiosApi = new AxiosApi(axiosInstance)
   axiosApi.setRequestInterceptor((config) => {
     // Auth token
@@ -33,12 +31,7 @@ export default boot(({ app }) => {
     // Set SSE salt
     // config.headers['x-sse-salt'] = this.vuex.state.SSESalt
 
-    globalStore.isLoading = true
     return config
-  })
-  axiosApi.setResponseInterceptor((response) => {
-    globalStore.isLoading = false
-    return response
   })
   ApiService.api = axiosApi
 })

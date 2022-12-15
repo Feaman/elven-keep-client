@@ -1,5 +1,5 @@
 import { ICoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
-import { type TListItem, TListItemModel } from '~/composables/models/list-item'
+import { TListItemModel, type TListItem } from '~/composables/models/list-item'
 import { TNote, TNoteModel } from '~/composables/models/note'
 import { IStatus } from '~/composables/models/status'
 import { IType } from '~/composables/models/type'

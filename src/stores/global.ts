@@ -5,12 +5,10 @@ import useUserStore, { IUser, TUserModel } from '../composables/models/user'
 
 export const useGlobalStore = defineStore('global', () => {
   const initError = ref<TGlobalError | undefined>(undefined)
-  const isLoading = ref(false)
+  const isInitDataLoading = ref(false)
   const user = ref<TUserModel | null>(null)
   const mainListScrollTop = ref(0)
   const SSESalt = ''
-  const isNoteSaving = false
-  const isInitInfoLoading = true
 
   // function updateNoteListSortedBy(_state: RootState, note: NoteModel) {
   // note.list.sort((previousItem, nextItem) => ((previousItem.updated || 0) < (nextItem.updated || 0) ? -1 : 1))
@@ -64,11 +62,9 @@ export const useGlobalStore = defineStore('global', () => {
   return {
     user,
     initError,
-    isLoading,
+    isInitDataLoading,
     mainListScrollTop,
     SSESalt,
-    isNoteSaving,
-    isInitInfoLoading,
     // removingEntities,
     setUser,
   }

@@ -132,34 +132,20 @@
 .horizontal-list-effect-move {
   transition: transform 0.3s;
 }
-.vertical-list-effect-item {
-  width: 100%;
-  display: inline-block;
-  margin-right: 10px;
+
+// Vertical list
+.vertical-list-move,
+.vertical-list-enter-active,
+.vertical-list-leave-active {
+  transition: opacity 0s, all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
 }
-.vertical-list-effect-leave-active {
-  width: 100%;
-  position: absolute;
-}
-.vertical-list-effect-enter-active,
-.vertical-list-effect-leave-active {
-  width: 100%;
-}
-.vertical-list-effect-enter-active {
-  transition: all 0.3s;
-}
-.vertical-list-effect-leave-active {
-  transition: all 0s;
-}
-.vertical-list-effect-enter,
-.vertical-list-effect-leave-to {
-  width: 100%;
+.vertical-list-enter-from,
+.vertical-list-leave-to {
   opacity: 0;
-  transform: translateX(30px);
+  transform: scaleY(0.01) translate(0, 30px);
 }
-.vertical-list-effect-move {
-  width: 100%;
-  transition: transform 0.3s;
+.vertical-list-leave-active {
+  position: absolute;
 }
 
 @keyframes slideFadeOut {

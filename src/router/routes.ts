@@ -4,7 +4,11 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('~/pages/IndexPage.vue') }],
+    children: [{
+      path: '',
+      name: 'notes',
+      component: () => import('~/pages/IndexPage.vue'),
+    }],
   },
   {
     path: '/sign',
@@ -16,6 +20,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [{
       path: '',
+      name: 'existed-note',
       component: () => import('~/pages/NotePage.vue'),
     }],
   },
@@ -24,6 +29,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [{
       path: '',
+      name: 'new-note',
       component: () => import('~/pages/NotePage.vue'),
     }],
   },

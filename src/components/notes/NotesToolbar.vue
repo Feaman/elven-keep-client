@@ -1,6 +1,6 @@
 <template lang="pug">
 .notes-toolbar
-  q-header.notes-toolbar__header
+  q-header.notes-toolbar__header(elevated)
     q-toolbar.ml-2
       .q-flex.align-center.full-width
         NotesSearch

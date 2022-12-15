@@ -58,9 +58,9 @@ function findNoteListItemVariants(note: TNoteModel, variants: TVariant[], listIt
     })
 }
 
-function findListItemVariants(listItem: TListItemModel, query: string) {
+function findListItemVariants(listItem: TListItemModel) {
   const variants: TVariant[] = []
-  query = query.toLocaleLowerCase()
+  const query = listItem.text.toLocaleLowerCase()
 
   if (query.length > 1) {
     notes.value.forEach((note) => {

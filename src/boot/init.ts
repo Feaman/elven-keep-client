@@ -1,14 +1,11 @@
 import { AxiosError } from 'axios'
 import mitt from 'mitt'
-import draggable from 'vuedraggable'
 import { boot } from 'quasar/wrappers'
+import draggable from 'vuedraggable'
 import BaseService, { TGlobalError, type TEvents } from '~/services/base'
 import InitService from '~/services/init'
-import { useGlobalStore } from '~/stores/global'
 
-export default boot(async ({ app }) => {
-  const store = useGlobalStore()
-
+export default boot(({ app }) => {
   BaseService.eventBus = mitt<TEvents>()
   BaseService.showError = (error: Error | TGlobalError) => {
     let resultError: TGlobalError | Error = error
@@ -33,9 +30,5 @@ export default boot(async ({ app }) => {
 
   app.component('Draggable', draggable)
 
-  try {
-    await InitService.initApplication()
-  } catch (error) {
-    store.initError = BaseService.parseAxiosError(error as AxiosError)
-  }
+  InitService.initApplication()
 })
