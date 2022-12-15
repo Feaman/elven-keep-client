@@ -45,7 +45,11 @@
             )
 
             .list-item__text.q-flex.mx-1.ml-2
+              div(
+                v-if="fullscreen"
+              ) {{ listItem.text }}
               textarea.full-width(
+                v-else
                 @input="updateText(listItem)"
                 @keydown.enter="selectFocusedVariant($event)"
                 @focus="handleFocus(listItem)"

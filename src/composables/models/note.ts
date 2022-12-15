@@ -112,22 +112,21 @@ export default function noteModel(noteData: TNote) {
       }
       isSaving.value = true
       logId += 1
-      console.log(`-=== ${logId} === -`)
-      if (!id.value && !listItem.isCreating) {
-        console.log(`${logId}: 1`)
-        listItem.isCreating = true
-        await save()
-        listItem.noteId = id.value
-      }
+      const logIid = logId
       if (listItem.id) {
-        console.log(`${logId}: 2`)
+        console.log(`${logIid}: update list item`)
         const data = await ApiService.updateListItem(listItem)
         listItem.updated = new Date(data.updated || '')
-      } else if (isCreating.value && listItem.isCreating) {
-        console.log(`${logId}: 3`)
+      } else if (isCreating.value || listItem.isCreating) {
+        console.log(`${logIid}: need update`)
         listItem.isUpdateNeeded = true
       } else {
-        console.log(`${logId}: 4`)
+        if (!id.value) {
+          console.log(`${logIid}: create note`)
+          await save()
+          listItem.noteId = id.value
+        }
+        console.log(`${logIid}: create list item`)
         listItem.isCreating = true
         const data = await ApiService.addListItem(listItem)
         listItem.id = data.id
@@ -135,7 +134,7 @@ export default function noteModel(noteData: TNote) {
         listItem.updated = new Date(data.updated || '')
         listItem.isCreating = false
         if (listItem.isUpdateNeeded) {
-          console.log(`${logId}: 5`)
+          console.log(`${logIid}: final update list item`)
           const data = await ApiService.updateListItem(listItem)
           listItem.updated = new Date(data.updated || '')
           listItem.isUpdateNeeded = false

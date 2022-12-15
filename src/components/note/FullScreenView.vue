@@ -1,11 +1,12 @@
 <template lang="pug">
 .fullscreen-view
   q-dialog(
+    @update:model-value="emit('close')"
+    :model-value="show"
     :maximized="true"
     transition-show="scale"
     transition-hide="jump-left"
-    @update:model-value="emit('close')"
-    :model-value="show"
+    seamless
   )
     q-card.fullscreen__card.full-height
       q-card-section.full-height.column.no-wrap.pa-4.px-6
