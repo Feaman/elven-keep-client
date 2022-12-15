@@ -33,8 +33,8 @@ export default boot(() => {
 
     return config
   })
-  axiosApi.setResponseInterceptor((response) => new Promise((resolve) => {
-    setTimeout(() => resolve(response), 3000)
-  }))
+  // axiosApi.setResponseInterceptor((response) => new Promise((resolve) => {
+  //   setTimeout(() => resolve(response), 3000)
+  // }))
   ApiService.api = axiosApi
 })

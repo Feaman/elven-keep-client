@@ -2,10 +2,12 @@
 .note-page.full-height
   NoteToolbar(
     @fullscreen="fullscreen = true"
+    @co-authors-clicked="showAuthors = true"
     :note="note"
   ).full-width
   Note(
     @update="updateNote"
+    @hide-authors="showAuthors = false"
     @list-item-focus="$event.focused = true"
     @list-item-blur="blurListItem"
     @list-item-update-text="updateListItemText"
@@ -21,6 +23,7 @@
     @fullscreen="fullscreen = $event"
     :note="note"
     :fullscreen="fullscreen"
+    :show-authors="showAuthors"
   )
 </template>
 
@@ -37,6 +40,7 @@ const noteIndex = ref(0)
 const note = computed(() => NotesService.notes.value[noteIndex.value])
 const route = useRoute()
 const fullscreen = ref(false)
+const showAuthors = ref(false)
 
 function updateNote(noteData: TNote) {
   Object.assign(note.value, noteData)

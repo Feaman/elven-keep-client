@@ -84,14 +84,38 @@
               :note="note"
             )
 
-  //- v-dialog(
-  //-   v-if="noteUser"
-  //-   v-model="coAuthorsDialogShown"
-  //-   :max-width="500"
-  //-   transition="scale-fade"
-  //-   @keydown.esc.stop=""
-  //- )
-  //-   v-card.pb-4
+  q-dialog(
+    v-if="note.userId"
+    @close:model-value="emit('hide-authors')"
+    :model-value="showAuthors"
+    transition-show="scale"
+    transition-hide="jump-left"
+  )
+    q-card
+      q-toolbar.q-flex.bg-primary.shadow-3
+        q-toolbar-title.text-black Authors
+        q-space
+        q-btn(
+          @click="emit('hide-authors')"
+          :icon="mdiClose"
+          color="black"
+          flat
+          round
+          dense
+        )
+      q-card-section
+        .text-grey Author
+        q-list
+          q-item(
+            clickable
+            v-ripple
+          )
+            q-item-section
+              q-item-label Item with caption
+              q-item-label(
+                caption
+              ) Caption
+
   //-     v-toolbar(
   //-       color="primary"
   //-     )
@@ -159,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiCheckAll } from '@quasar/extras/mdi-v6'
+import { mdiCheckAll, mdiClose } from '@quasar/extras/mdi-v6'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import { type TNote, type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
@@ -170,11 +194,13 @@ const NOTE_TYPE_TEXT = TYPE_TEXT
 const props = defineProps<{
   note: TNoteModel
   fullscreen: boolean
+  showAuthors: boolean
 }>()
 
 // eslint-disable-next-line
 const emit = defineEmits<{
   (event: 'fullscreen', value: boolean): void
+  (event: 'hide-authors'): void
   (event: 'update', value: TNote): void
   (event: 'list-item-add', listItem: TListItemModel): void
   (event: 'list-item-remove', listItem: TListItemModel): void
@@ -408,6 +434,8 @@ function expandCompleted(isExpanded: boolean) {
   //     }
   //   }
 }
+
+.note__authors {}
 
 // .co-authors {
 // max-height: 250px;
