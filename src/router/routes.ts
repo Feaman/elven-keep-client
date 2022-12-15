@@ -33,11 +33,6 @@ const routes: RouteRecordRaw[] = [
       component: () => import('~/pages/NotePage.vue'),
     }],
   },
-  {
-    path: '/error',
-    component: () => import('layouts/ErrorLayout.vue'),
-    children: [{ path: '', component: () => import('~/components/ErrorPage.vue') }],
-  },
 
   // Always leave this as last one,
   // but you can also remove it
