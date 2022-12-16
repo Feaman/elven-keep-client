@@ -1,10 +1,10 @@
 import { computed, ref, Ref } from 'vue'
-import coAuthorModel, { TCoAuthorModel } from '~/composables/models/co-author'
 import { TListItemModel, type TVariant } from '~/composables/models/list-item'
 import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 import ApiService from '~/services/api/api'
 
+const currentNote: Ref<TNoteModel | null> = ref(null)
 const notes: Ref<TNoteModel[]> = ref([])
 export const searchQuery = ref('')
 
@@ -83,28 +83,30 @@ function findListItemVariants(listItem: TListItemModel) {
   const regexp = new RegExp(query, 'i')
   variants.forEach((variant) => {
     if (!resultVariants.find((item) => item.text.toLowerCase() === variant.text.toLowerCase())) {
-      const duplicates = variants.filter((_element) => variant.listItemId !== _element.listItemId
-        && _element.text.toLowerCase() === variant.text.toLowerCase())
+      const duplicates = variants.filter((_element) => (
+        variant.listItemId !== _element.listItemId
+        && _element.text.toLowerCase() === variant.text.toLowerCase()
+        && _element.noteId === listItem.noteId
+      ))
       variant.duplicatesQuantity = duplicates.length
       resultVariants.push(variant)
     }
   })
 
   // Highlight
-  variants.forEach((variant) => {
-    variant.highlightedText = variant.text.replace(regexp, (text: string) => `<span class="green--text">${text}</span>`)
+  resultVariants.forEach((variant) => {
+    variant.highlightedText = variant.text.replace(regexp, (text: string) => `<span class="text-green">${text}</span>`)
   })
 
+  if (
+    resultVariants.length === 1
+    && resultVariants[0].text === listItem.text
+    && resultVariants[0].noteId !== listItem.noteId
+  ) {
+    return []
+  }
+
   return resultVariants.slice(0, 10)
-}
-
-function addNoteCoAuthor(note: TNoteModel, coAuthor: TCoAuthorModel) {
-  note.addCoAuthor(coAuthor)
-}
-
-async function addCoAuthor(note: TNoteModel, email: string) {
-  const noteCoAuthorData = await ApiService.addNoteCoAuthor(note, email)
-  addNoteCoAuthor(note, coAuthorModel(noteCoAuthorData) as unknown as TCoAuthorModel)
 }
 
 function setOrder(note: TNoteModel, order: number[]) {
@@ -142,6 +144,7 @@ async function removeNote(note: TNoteModel, addRemovingNote = true) {
 }
 
 export default {
+  currentNote,
   notes,
   filtered,
   searchQuery,
@@ -150,7 +153,6 @@ export default {
   findNoteListItemVariants,
   clear,
   setOrder,
-  addCoAuthor,
   findListItemVariants,
   removeNote,
 }

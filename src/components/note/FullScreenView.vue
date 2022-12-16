@@ -1,15 +1,17 @@
 <template lang="pug">
-.fullscreen-view
+.fullscreen-view.full-width
   q-dialog(
     @update:model-value="emit('close')"
+    @close:model-value="emit('close')"
+    @hide="emit('close')"
     :model-value="show"
     :maximized="true"
-    transition-show="scale"
-    transition-hide="jump-left"
+    transition-show="flip-up"
+    transition-hide="flip-down"
     seamless
   )
-    q-card.fullscreen__card.full-height
-      q-card-section.full-height.column.no-wrap.pa-4.px-6
+    q-card.full-width.full-height.q-flex.justify-center
+      q-card-section.fullscreen__card-section.full-height.column.no-wrap.pa-4.px-6
         NoteList(
           @check="emit('list-item-check', $event)"
           @uncheck="emit('list-item-uncheck', $event)"
@@ -47,9 +49,11 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss" scoped>
-.fullscreen-view {
-  .fullscreen__card {
-    overflow: auto;
-  }
+.fullscreen-view {}
+
+.fullscreen__card-section {
+  max-width: 900px;
+  width: 100%;
+  overflow: auto;
 }
 </style>

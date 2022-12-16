@@ -3,112 +3,42 @@
   NoteToolbar(
     @fullscreen="fullscreen = true"
     @co-authors-clicked="showAuthors = true"
-    :note="note"
+    :note="currentNote"
   ).full-width
   Note(
-    @update="updateNote"
-    @hide-authors="showAuthors = false"
-    @list-item-focus="$event.focused = true"
-    @list-item-blur="blurListItem"
-    @list-item-update-text="updateListItemText"
-    @list-item-update-order="updateListItemOrder"
-    @list-item-save="saveListItem"
-    @list-item-check="checkListItem"
-    @list-item-uncheck="uncheckListItem"
-    @list-item-complete="completeListItem"
-    @list-item-activate="activateListItem"
-    @list-item-remove="removeListItem"
-    @list-item-add="addListItem"
-    @select-variant="selectVariant"
     @fullscreen="fullscreen = $event"
-    :note="note"
+    @hide-authors="showAuthors = false"
+    :note="currentNote"
     :fullscreen="fullscreen"
     :show-authors="showAuthors"
   )
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
-import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
-import noteModel, { type TNote, type TNoteModel } from '~/composables/models/note'
+import noteModel, { type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
 import TypesService from '~/composables/services/types'
 
-const noteIndex = ref(0)
-const note = computed(() => NotesService.notes.value[noteIndex.value])
+const { currentNote } = NotesService
 const route = useRoute()
 const fullscreen = ref(false)
 const showAuthors = ref(false)
 
-function updateNote(noteData: TNote) {
-  Object.assign(note.value, noteData)
-  note.value.save()
-}
-
-function selectVariant({ listItem, variant }: { listItem: TListItemModel, variant: TVariant }) {
-  note.value.selectVariant(listItem, variant)
-}
-
-function checkListItem(listItem: TListItemModel) {
-  listItem.checked = true
-  note.value.saveListItem(listItem)
-}
-
-function uncheckListItem(listItem: TListItemModel) {
-  listItem.checked = false
-  note.value.saveListItem(listItem)
-}
-
-function completeListItem(listItem: TListItemModel) {
-  note.value.completeListItem(true, listItem)
-}
-
-async function removeListItem(listItem: TListItemModel) {
-  await note.value.removeListItem(listItem)
-}
-
-function activateListItem(listItem: TListItemModel) {
-  note.value.completeListItem(false, listItem)
-}
-
-function saveListItem(listItem: TListItemModel) {
-  note.value.saveListItem(listItem)
-}
-
-function updateListItemText({ listItem, text }: { listItem: TListItemModel, text: string }) {
-  listItem.text = text
-}
-
-function updateListItemOrder({ listItem, order }: { listItem: TListItemModel, order: number }) {
-  listItem.order = order
-}
-
-function blurListItem(listItem: TListItemModel) {
-  listItem.focused = false
-  if (!listItem.text) {
-    note.value.removeItem(listItem)
-  }
-}
-
-function addListItem(listItem: TListItemModel) {
-  note.value.addListItem(listItem)
-}
-
 function init() {
-  if (route.path === '/new/list') {
-    NotesService.notes.value.push(noteModel({ typeId: TypesService.findByName(TYPE_LIST).id }) as unknown as TNoteModel)
-    noteIndex.value = NotesService.notes.value.length - 1
-  } else if (route.path === '/new/text') {
-    NotesService.notes.value.push(noteModel({ typeId: TypesService.findByName(TYPE_TEXT).id }) as unknown as TNoteModel)
-    noteIndex.value = NotesService.notes.value.length - 1
+  if (['/new/list', '/new/text'].includes(route.path)) {
+    const type = route.path === '/new/list' ? TYPE_LIST : TYPE_TEXT
+    const note = noteModel({ typeId: TypesService.findByName(type).id }) as unknown as TNoteModel
+    NotesService.notes.value.push(note as unknown as TNoteModel)
+    currentNote.value = note
   } else if (/^\/note\/\d+$/.test(route.path)) {
     const foundNote = NotesService.notes.value.find((note: TNoteModel) => note.id === Number(route.params.id))
     if (!foundNote) {
       throw new Error(`Note width id "${route.params.id}" not found`)
     }
-    noteIndex.value = NotesService.notes.value.indexOf(foundNote)
+    currentNote.value = foundNote
   }
 }
 
@@ -122,8 +52,8 @@ watch(
 )
 
 onBeforeUnmount(() => {
-  if (!note.value.id) {
-    NotesService.notes.value = NotesService.notes.value.filter((_note) => _note.id !== note.value.id)
+  if (!currentNote.value?.id) {
+    NotesService.notes.value = NotesService.notes.value.filter((_note) => _note.id !== currentNote.value?.id)
   }
 })
 </script>

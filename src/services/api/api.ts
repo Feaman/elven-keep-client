@@ -117,8 +117,8 @@ export default class ApiService extends BaseService {
     return data as ConfigObject
   }
 
-  static async addNoteCoAuthor(note: TNoteModel, email: string): Promise<ICoAuthor> {
-    const { data } = await this.api.post(`notes/${note.id}/co-author`, { email })
+  static async addNoteCoAuthor(noteId: number, email: string): Promise<ICoAuthor> {
+    const { data } = await this.api.post(`notes/${noteId}/co-author`, { email })
     return data as ICoAuthor
   }
 

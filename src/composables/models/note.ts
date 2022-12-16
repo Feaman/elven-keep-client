@@ -1,5 +1,4 @@
-import { AxiosError } from 'axios'
-import { computed, Ref, ref, UnwrapRef } from 'vue'
+import { computed, Ref, ref, UnwrapRef, watch } from 'vue'
 import coAuthorModel, { ICoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
 import listItemModel, { TListItem, TListItemModel, type TVariant } from '~/composables/models/list-item'
 import { TStatusModel } from '~/composables/models/status'
@@ -10,7 +9,7 @@ import TypesService from '~/composables/services/types'
 import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
-import { IUser } from './user'
+import userModel, { IUser, TUserModel } from './user'
 
 export interface TNote {
   id?: number
@@ -43,16 +42,24 @@ export default function noteModel(noteData: TNote) {
   const status = computed(() => StatusesService.findById(statusId.value))
   const list: Ref<TListItemModel[]> = ref([])
   const coAuthors = ref<TCoAuthorModel[]>([])
+  const user = ref<TUserModel | null>(null)
   const isCompletedListExpanded = ref(!!noteData.isCompletedListExpanded)
   const removingItemLists = ref<TListItemModel[]>([])
   const isCreating = ref(false)
   const isUpdateNeeded = ref(false)
+  const unSavedListItems = ref<TListItemModel[]>([])
   let logId = 0
 
   const globalStore = useGlobalStore()
 
   function handleList(listData: TListItem[] = []) {
     listData.forEach((listItemData) => list.value.push(listItemModel(listItemData) as unknown as TListItemModel))
+  }
+
+  function handleUser(userData: IUser | undefined) {
+    if (userData) {
+      user.value = userModel(userData) as unknown as TUserModel
+    }
   }
 
   function handleCoAuthors(coAuthorsData: ICoAuthor[] = []) {
@@ -72,7 +79,22 @@ export default function noteModel(noteData: TNote) {
     return type.value?.name === TYPE_LIST
   }
 
-  async function save() {
+  async function createListItem(listItem: TListItemModel, logIid: number) {
+    listItem.noteId = id.value
+    const data = await ApiService.addListItem(listItem)
+    listItem.id = data.id
+    listItem.created = new Date(data.created || '')
+    listItem.updated = new Date(data.updated || '')
+    listItem.isCreating = false
+    if (listItem.isUpdateNeeded) {
+      console.log(`${logIid}: final update list item`)
+      const data = await ApiService.updateListItem(listItem)
+      listItem.updated = new Date(data.updated || '')
+      listItem.isUpdateNeeded = false
+    }
+  }
+
+  async function save(logIid: number) {
     // NotesService.vuex.commit('clearNoteTimeout', this)
     try {
       isSaving.value = true
@@ -91,10 +113,11 @@ export default function noteModel(noteData: TNote) {
           await ApiService.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
           isUpdateNeeded.value = false
         }
+        unSavedListItems.value.forEach((listItem) => createListItem(listItem, logIid))
       }
       isSaving.value = false
     } catch (error) {
-      BaseService.showError(error as Error | AxiosError)
+      BaseService.showError(error as Error)
     }
   }
 
@@ -117,44 +140,28 @@ export default function noteModel(noteData: TNote) {
         console.log(`${logIid}: update list item`)
         const data = await ApiService.updateListItem(listItem)
         listItem.updated = new Date(data.updated || '')
-      } else if (isCreating.value || listItem.isCreating) {
+      } else if (listItem.isCreating) {
         console.log(`${logIid}: need update`)
         listItem.isUpdateNeeded = true
       } else {
-        if (!id.value) {
-          console.log(`${logIid}: create note`)
-          await save()
-          listItem.noteId = id.value
-        }
-        console.log(`${logIid}: create list item`)
         listItem.isCreating = true
-        const data = await ApiService.addListItem(listItem)
-        listItem.id = data.id
-        listItem.created = new Date(data.created || '')
-        listItem.updated = new Date(data.updated || '')
-        listItem.isCreating = false
-        if (listItem.isUpdateNeeded) {
-          console.log(`${logIid}: final update list item`)
-          const data = await ApiService.updateListItem(listItem)
-          listItem.updated = new Date(data.updated || '')
-          listItem.isUpdateNeeded = false
+        if (!id.value) {
+          if (!isCreating.value) {
+            console.log(`${logIid}: create note`)
+            save(logIid)
+          }
+          console.log(`${logIid}: schedule list item`)
+          unSavedListItems.value.push(listItem)
+        } else {
+          console.log(`${logIid}: create list item`)
+          await createListItem(listItem, logId)
         }
       }
       isSaving.value = false
     } catch (error) {
-      BaseService.showError(error as Error | AxiosError)
+      BaseService.showError(error as Error)
     }
   }
-
-  // update(data: TNote) {
-  //   NotesService.vuex.commit('updateNote', { note: this, data })
-  //   return this.save(!!(data.text || data.title))
-  // }
-
-  // removeCoAuthor(coAuthor: CoAuthorModel) {
-  //   NotesService.vuex.commit('removeNoteCoAuthor', { note: this, coAuthor })
-  //   return ApiService.removeNoteCoAuthor(coAuthor)
-  // }
 
   // restore() {
   //   if (this.id) {
@@ -220,6 +227,25 @@ export default function noteModel(noteData: TNote) {
     coAuthors.value.push(coAuthor)
   }
 
+  async function createCoAuthor(email: string) {
+    const noteCoAuthorData = await ApiService.addNoteCoAuthor(Number(id.value), email)
+    addCoAuthor(coAuthorModel(noteCoAuthorData) as unknown as TCoAuthorModel)
+  }
+
+  async function removeCoAuthor(coAuthor: TCoAuthorModel) {
+    try {
+      if (userId.value !== globalStore.user?.id) {
+        NotesService.notes.value = NotesService.notes.value.filter((note) => note.id !== id.value)
+        BaseService.router.push('/')
+      } else {
+        coAuthors.value = coAuthors.value.filter((_coAuthor) => _coAuthor.id !== coAuthor.id)
+      }
+      await ApiService.removeNoteCoAuthor(coAuthor)
+    } catch (error) {
+      BaseService.showError(error as Error)
+    }
+  }
+
   function removeItem(item: TListItemModel) {
     list.value = list.value.filter((_item) => _item.id !== item.id)
   }
@@ -246,6 +272,12 @@ export default function noteModel(noteData: TNote) {
       completeListItem(true, listItem)
     })
   }
+  function blurListItem(listItem: TListItemModel) {
+    listItem.focused = false
+    if (!listItem.text) {
+      removeItem(listItem)
+    }
+  }
 
   function selectVariant(listItem: TListItemModel, variant: TVariant) {
     if (variant.noteId === listItem.noteId && variant.listItemId !== listItem.id) {
@@ -263,9 +295,22 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
+  function checkListItem(listItem: TListItemModel) {
+    listItem.checked = true
+    saveListItem(listItem)
+  }
+
+  function unCheckListItem(listItem: TListItemModel) {
+    listItem.checked = false
+    saveListItem(listItem)
+  }
+
   handleList(noteData.list)
   handleCoAuthors(noteData.coAuthors)
   handleType()
+  handleUser(noteData.user)
+
+  watch(title, () => save(10000))
 
   return {
     id,
@@ -289,11 +334,16 @@ export default function noteModel(noteData: TNote) {
     isFocused,
     isCreating,
     isUpdateNeeded,
+    user,
+    unCheckListItem,
+    checkListItem,
+    addCoAuthor,
+    createCoAuthor,
+    removeCoAuthor,
     save,
     completeListItem,
     hide,
     removeItem,
-    addCoAuthor,
     isList,
     handleList,
     handleCoAuthors,
@@ -302,6 +352,7 @@ export default function noteModel(noteData: TNote) {
     removeListItem,
     addListItem,
     selectVariant,
+    blurListItem,
   }
 }
 

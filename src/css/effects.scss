@@ -2,24 +2,29 @@
 .tools-left-leave-active {
   transition: opacity 0.7s, left 0.7s;
 }
+
 .tools-left-enter,
 .tools-left-leave-to {
   opacity: 0;
   left: -184px !important;
 }
+
 .tools-right-enter-active,
 .tools-right-leave-active {
   transition: opacity 0.7s, right 0.7s;
 }
+
 .tools-right-enter,
 .tools-right-leave-to {
   opacity: 0;
   right: -36px !important;
 }
+
 .tools-buttons-enter-active,
 .tools-buttons-leave-active {
   transition: opacity 0.7s, bottom 0.7s, right 0.7s;
 }
+
 .tools-buttons-enter,
 .tools-buttons-leave-to {
   opacity: 0;
@@ -31,6 +36,7 @@
 .fade-leave-active {
   transition: opacity 0.2s;
 }
+
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
@@ -40,6 +46,7 @@
 .fade-5-leave-active {
   transition: opacity 0.5s;
 }
+
 .fade-5-enter,
 .fade-5-leave-to {
   opacity: 0;
@@ -48,9 +55,11 @@
 .slide-fade-enter-active {
   transition: all 0.2s ease;
 }
+
 .slide-fade-leave-active {
   transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1);
 }
+
 .slide-fade-enter,
 .slide-fade-leave-to {
   transform: translateX(30px);
@@ -60,16 +69,19 @@
 .slide-fade-absolute-enter-active {
   transition: all 0.2s ease;
 }
+
 .slide-fade-absolute-leave-active {
   position: absolute !important;
   bottom: 6px;
   transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1), opacity 0.1s;
 }
+
 .slide-fade-absolute-enter,
 .slide-fade-absolute-leave-to {
   transform: translateX(30px);
   opacity: 0;
 }
+
 .slide-fade-absolute-leave-to {
   position: absolute !important;
   bottom: 6px;
@@ -78,57 +90,72 @@
 .slide-fade-fast-enter-active {
   transition: all 0.1s ease;
 }
+
 .slide-fade-fast-leave-active {
   transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1);
 }
+
 .slide-fade-fast-enter,
 .slide-fade-fast-leave-to {
   transform: translateX(30px);
   opacity: 0;
 }
+
 .slide-fade-slow-enter-active {
   transition: all 0.3s ease;
 }
+
 .slide-fade-slow-leave-active {
   transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
 }
+
 .slide-fade-slow-enter,
 .slide-fade-slow-leave-to {
   transform: translateX(30px);
   opacity: 0;
 }
+
 .scale-fade-enter-active {
   transition: all 0.2s ease;
 }
+
 .scale-fade-leave-active {
   transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1);
 }
+
 .scale-fade-enter,
 .scale-fade-leave-to {
   opacity: 0;
 }
+
 .scale-fade-enter {
   transform: scale(1.2);
 }
+
 .scale-fade-leave-active {
   transform: scale(0.2);
 }
+
 .horizontal-list-effect-item {
   display: inline-block;
   margin-right: 10px;
 }
+
 .horizontal-list-effect-leave-active {
   position: absolute;
 }
+
 .horizontal-list-effect-enter-active,
 .horizontal-list-effect-leave-active {
   transition: all 0.3s;
 }
+
 .horizontal-list-effect-enter,
 .horizontal-list-effect-leave-to {
   opacity: 0;
   transform: translateX(30px);
 }
+
 .horizontal-list-effect-move {
   transition: transform 0.3s;
 }
@@ -137,13 +164,15 @@
 .vertical-list-move,
 .vertical-list-enter-active,
 .vertical-list-leave-active {
-  transition: opacity 0s, all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1), opacity 0s;
 }
+
 .vertical-list-enter-from,
 .vertical-list-leave-to {
   opacity: 0;
   transform: scaleY(0.01) translate(0, 30px);
 }
+
 .vertical-list-leave-active {
   position: absolute;
 }
@@ -153,15 +182,18 @@
     opacity: 1;
     transform: translateX(0);
   }
+
   50% {
     opacity: 0.3;
     transform: translateX(30px);
   }
+
   100% {
     opacity: 0;
     transform: translateX(0px);
   }
 }
+
 .animated.slideFadeOut {
   animation: slideFadeOut 0.3s;
 }
@@ -171,15 +203,18 @@
     opacity: 0;
     transform: translateX(0);
   }
+
   50% {
     opacity: 0.7;
     transform: translateX(30px);
   }
+
   100% {
     opacity: 1;
     transform: translateX(0px);
   }
 }
+
 .animated.slideFadeIn {
   animation: slideFadeIn 0.3s;
 }

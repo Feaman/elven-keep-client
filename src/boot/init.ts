@@ -5,7 +5,7 @@ import draggable from 'vuedraggable'
 import BaseService, { TGlobalError, type TEvents } from '~/services/base'
 import InitService from '~/services/init'
 
-export default boot(({ app }) => {
+export default boot(async ({ app }) => {
   BaseService.eventBus = mitt<TEvents>()
   BaseService.showError = (error: Error | TGlobalError) => {
     let resultError: TGlobalError | Error = error
@@ -30,5 +30,5 @@ export default boot(({ app }) => {
 
   app.component('Draggable', draggable)
 
-  InitService.initApplication()
+  await InitService.initApplication()
 })

@@ -44,6 +44,7 @@ export default function listItemModel(listItemData: TListItem) {
   const $textarea: HTMLTextAreaElement = document.createElement('textarea')
   const isCreating = ref(false)
   const isUpdateNeeded = ref(false)
+  const saveTimeout: ReturnType<typeof setTimeout> | null = null
 
   // restore() {
   //   if (this.id) {
@@ -76,6 +77,7 @@ export default function listItemModel(listItemData: TListItem) {
     status,
     isCreating,
     isUpdateNeeded,
+    saveTimeout,
   }
 }
 

@@ -95,9 +95,9 @@
     q-card.note-list__menu.shadow-6(
       v-if="variantsShown"
       :style="{ maxWidth: `${variantsMenuMaxWidth}px`,top: `${variantsMenuY}px`, left:  `${variantsMenuX}px` }"
+      ref="variantsElement"
     )
       q-list.list-item__variants(
-        ref="variantsElement"
         dense
       )
         q-item.list-item__variant(
@@ -117,7 +117,8 @@
 
 <script setup lang="ts">
 import { mdiDrag, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { QCard } from 'quasar'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
@@ -134,18 +135,17 @@ const emit = defineEmits<{
   (event: 'add', listItem: TListItemModel): void
   (event: 'focus', listItem: TListItemModel): void
   (event: 'blur', listItem: TListItemModel): void
-  (event: 'update-text', value: { listItem: TListItemModel, text: string }): void
-  (event: 'update-order', value: { listItem: TListItemModel, order: number }): void
+  (event: 'update-text', listItem: TListItemModel, text: string): void
+  (event: 'update-order', listItem: TListItemModel, order: number): void
   (event: 'save', listItem: TListItemModel): void
   (event: 'check', listItem: TListItemModel): void
   (event: 'uncheck', listItem: TListItemModel): void
   (event: 'complete', listItem: TListItemModel): void
   (event: 'activate', listItem: TListItemModel): void
   (event: 'remove', listItem: TListItemModel): void
-  (event: 'select-variant', value: { listItem: TListItemModel, variant: TVariant }): void
+  (event: 'select-variant', listItem: TListItemModel, variant: TVariant): void
 }>()
 
-let saveTimeout: ReturnType<typeof setTimeout> | null = null
 const rootElement = ref<HTMLElement | null>(null)
 let $root: HTMLElement | null
 const variants = ref<TVariant[]>([])
@@ -155,6 +155,7 @@ const variantsMenuY = ref(0)
 const variantsMenuMaxWidth = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
 const list = computed(() => (props.isMain ? props.note.mainListItems : props.note.completedListItems))
+const variantsElement = ref<QCard | null>(null)
 
 function generateTextareaRefName(listItem: TListItemModel) {
   return `textarea-${listItem.generatedId}`
@@ -178,7 +179,7 @@ const order = computed({
       if (!listItem) {
         throw new Error(`List item ${listItemId} not found`)
       }
-      emit('update-order', { listItem, order: index + 1 })
+      emit('update-order', listItem, index + 1)
     })
     if (props.note.id) {
       NotesService.setOrder(props.note, order)
@@ -187,10 +188,10 @@ const order = computed({
 })
 
 function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
-  if (window.innerHeight - yPosition - 32 < menuHeight) {
-    return window.innerHeight - menuHeight - 16
+  if (yPosition - 50 > menuHeight) {
+    return yPosition - menuHeight
   }
-  return yPosition + 32
+  return 58
 }
 
 async function checkVariants(listItem: TListItemModel) {
@@ -242,12 +243,20 @@ function listItemClasses(listItem: TListItemModel) {
 //     })
 //   }
 
+function hideVariants(event: Event) {
+  if (!variantsElement.value?.$el.contains(event.target as Element)) {
+    variantsShown.value = false
+  }
+}
+
 async function init() {
   $root = rootElement.value
   if (props.isMain && list.value.length === 1 && !list.value[0].text) {
     await nextTick()
     list.value[0].$textarea.focus()
   }
+
+  document.addEventListener('mousedown', hideVariants)
 
   // BaseService.events.$on('keydown', handleKeyDown)
   // $el.querySelectorAll('.list-item textarea').forEach($textarea => {
@@ -262,6 +271,10 @@ async function init() {
 
 onMounted(() => {
   init()
+})
+
+onUnmounted(() => {
+  document.removeEventListener('mousedown', hideVariants)
 })
 
 //   beforeDestroy () {
@@ -391,20 +404,20 @@ function selectFocusedVariant(event: Event) {
 
 async function updateText(listItem: TListItemModel) {
   const text = listItem.$textarea?.value
-  if (saveTimeout) {
-    clearTimeout(saveTimeout)
+  if (listItem.saveTimeout) {
+    clearTimeout(listItem.saveTimeout)
   }
-  emit('update-text', { listItem, text })
+  emit('update-text', listItem, text)
   await checkVariants(listItem)
-  saveTimeout = setTimeout(() => {
+  listItem.saveTimeout = setTimeout(() => {
     emit('save', listItem)
-    saveTimeout = null
-  }, 400)
+    listItem.saveTimeout = null
+  }, 400) as unknown as null
 }
 
 function selectVariant(listItem: TListItemModel | null, variant: TVariant) {
   if (listItem) {
-    emit('select-variant', { listItem, variant })
+    emit('select-variant', listItem, variant)
     variants.value = []
   }
 }
@@ -415,7 +428,7 @@ function handleBlur(listItem: TListItemModel) {
   if ($textArea && $textArea.parentElement) {
     $textArea.parentElement.scrollTop = 0
   }
-  variantsShown.value = false
+  // variantsShown.value = false
 }
 </script>
 
