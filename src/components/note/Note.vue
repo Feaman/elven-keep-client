@@ -4,8 +4,8 @@
 
     FullScreenView(
       @close="emit('fullscreen', false)"
-      @list-item-check="note.checkListItem"
-      @list-item-uncheck="note.unCheckListItem"
+      @list-item-check="note.checkOrUncheckListItem($event, true)"
+      @list-item-uncheck="note.checkOrUncheckListItem($event, false)"
       :note="note"
       :show="fullscreen"
     )
@@ -40,19 +40,6 @@
       )
       template(v-if="note.type?.name === NOTE_TYPE_LIST")
         NoteList(
-          @add="note.addListItem"
-          @focus="$event.isFocused = true"
-          @blur="note.blurListItem"
-          @update-text="updateListItemText"
-          @update-order="updateListItemOrder"
-          @save="note.saveListItem"
-          @check="note.checkListItem"
-          @uncheck="note.unCheckListItem"
-          @complete="note.completeListItem(true, $event)"
-          @activate="note.completeListItem(false, $event)"
-          @remove="note.removeListItem"
-          @select-variant="note.selectVariant"
-          :note="note"
           is-main
         )
         template(v-if="note.completedListItems.length")
@@ -68,17 +55,6 @@
               q-space
             NoteList(
               v-if="note.isCompletedListExpanded"
-              @focus="$event.isFocused = true"
-              @blur="note.blurListItem"
-              @update-text="updateListItemText"
-              @update-order="updateListItemOrder"
-              @save="note.saveListItem"
-              @check="note.checkListItem"
-              @uncheck="note.unCheckListItem"
-              @complete="note.completeListItem"
-              @activate="note.completeListItem"
-              @remove="note.removeListItem"
-              :note="note"
             )
 
   q-dialog(
@@ -184,10 +160,6 @@ const emit = defineEmits<{
   (event: 'hide-authors'): void
   (event: 'hide'): void
 }>()
-
-function updateListItemText(listItem: TListItemModel, text: string) {
-  listItem.text = text.trim()
-}
 
 function updateListItemOrder(listItem: TListItemModel, order: number) {
   listItem.order = order

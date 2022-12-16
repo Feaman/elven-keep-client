@@ -4,26 +4,22 @@ import StatusesService from '~/composables/services/statuses'
 
 function handleListItemTextAreaHeight($textArea: HTMLTextAreaElement) {
   let textAreaHeight = 0
-  if (!$textArea) {
-    throw new Error('Text area not found')
-  }
-
   const $parent = $textArea.parentElement
   $parent?.classList.remove('list-item__text--multi-line')
   $textArea.style.height = '0'
   textAreaHeight = $textArea.scrollHeight
   $textArea.style.height = `${textAreaHeight}px`
 
-  if (textAreaHeight > 62) {
+  if (textAreaHeight > 64) {
     $parent?.classList.add('list-item__text--multi-line')
   }
 
   return $textArea
 }
 
-function handleTextAreaHeights(list: TListItemModel[], refs: { [key: string]: HTMLTextAreaElement[] }) {
+function handleTextAreaHeights(list: TListItemModel[]) {
   list.forEach((listItem) => {
-    handleListItemTextAreaHeight(list, listItem, refs)
+    handleListItemTextAreaHeight(listItem.$textarea)
   })
 }
 

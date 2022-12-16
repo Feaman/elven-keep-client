@@ -219,9 +219,7 @@ export default function noteModel(noteData: TNote) {
       && listItem.statusId === StatusesService.active.value.id),
   ) as Ref<TListItemModel[]>
 
-  const mainListItems = computed(
-    () => filterAndSort(),
-  ) as Ref<TListItemModel[]>
+  const mainListItems = computed(() => filterAndSort()) as Ref<TListItemModel[]>
 
   function addCoAuthor(coAuthor: TCoAuthorModel) {
     coAuthors.value.push(coAuthor)
@@ -260,7 +258,7 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
-  function completeListItem(isCompleted: boolean, listItem: TListItemModel) {
+  function completeListItem(listItem: TListItemModel, isCompleted: boolean) {
     const newOrder = NotesService.generateMaxOrder(Number(id.value), list.value)
     listItem.completed = isCompleted
     listItem.order = newOrder
@@ -269,7 +267,7 @@ export default function noteModel(noteData: TNote) {
 
   async function completeAllChecked() {
     checkedListItems.value.forEach((listItem) => {
-      completeListItem(true, listItem)
+      completeListItem(listItem, true)
     })
   }
   function blurListItem(listItem: TListItemModel) {
@@ -295,13 +293,8 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
-  function checkListItem(listItem: TListItemModel) {
-    listItem.checked = true
-    saveListItem(listItem)
-  }
-
-  function unCheckListItem(listItem: TListItemModel) {
-    listItem.checked = false
+  function checkOrUncheckListItem(listItem: TListItemModel, isChecked: boolean) {
+    listItem.checked = isChecked
     saveListItem(listItem)
   }
 
@@ -335,8 +328,7 @@ export default function noteModel(noteData: TNote) {
     isCreating,
     isUpdateNeeded,
     user,
-    unCheckListItem,
-    checkListItem,
+    checkOrUncheckListItem,
     addCoAuthor,
     createCoAuthor,
     removeCoAuthor,

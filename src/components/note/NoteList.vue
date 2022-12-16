@@ -6,9 +6,7 @@
   .note-list__container(
     :class="{ 'pb-3': isMain }"
   )
-    .note-list__list(
-      handle=".list-item__handle"
-    )
+    .note-list__list
       TransitionGroup(
         name="vertical-list"
         tag="div"
@@ -68,7 +66,7 @@
             )
             q-btn.list-item__remove-button(
               v-if="!fullscreen"
-              @click="emit('remove', listItem)"
+              @click="note.removeListItem(listItem)"
               :icon="mdiClose"
               color="grey-5"
               flat
@@ -117,8 +115,9 @@
 
 <script setup lang="ts">
 import { mdiDrag, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, unref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { QCard } from 'quasar'
+import draggable from 'vuedraggable'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
@@ -127,23 +126,6 @@ import ListItemsService from '~/composables/services/list-items'
 const props = defineProps<{
   fullscreen?: boolean,
   isMain?: boolean,
-  note: TNoteModel,
-}>()
-
-// eslint-disable-next-line
-const emit = defineEmits<{
-  (event: 'add', listItem: TListItemModel): void
-  (event: 'focus', listItem: TListItemModel): void
-  (event: 'blur', listItem: TListItemModel): void
-  (event: 'update-text', listItem: TListItemModel, text: string): void
-  (event: 'update-order', listItem: TListItemModel, order: number): void
-  (event: 'save', listItem: TListItemModel): void
-  (event: 'check', listItem: TListItemModel): void
-  (event: 'uncheck', listItem: TListItemModel): void
-  (event: 'complete', listItem: TListItemModel): void
-  (event: 'activate', listItem: TListItemModel): void
-  (event: 'remove', listItem: TListItemModel): void
-  (event: 'select-variant', listItem: TListItemModel, variant: TVariant): void
 }>()
 
 const rootElement = ref<HTMLElement | null>(null)
@@ -154,7 +136,17 @@ const variantsShown = ref(false)
 const variantsMenuY = ref(0)
 const variantsMenuMaxWidth = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
-const list = computed(() => (props.isMain ? props.note.mainListItems : props.note.completedListItems))
+const note = unref(NotesService.currentNote as unknown as TNoteModel)
+
+// const list = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))
+const list = computed({
+  get: () => (props.isMain ? note.mainListItems : note.completedListItems),
+  set: (list) => {
+    console.log(list)
+    debugger
+    return list
+  },
+})
 const variantsElement = ref<QCard | null>(null)
 
 function generateTextareaRefName(listItem: TListItemModel) {
@@ -179,10 +171,10 @@ const order = computed({
       if (!listItem) {
         throw new Error(`List item ${listItemId} not found`)
       }
-      emit('update-order', listItem, index + 1)
+      // emit('update-order', listItem, index + 1)
     })
-    if (props.note.id) {
-      NotesService.setOrder(props.note, order)
+    if (note.id) {
+      NotesService.setOrder(note, order)
     }
   },
 })
@@ -212,7 +204,7 @@ async function checkVariants(listItem: TListItemModel) {
 }
 
 async function handleFocus(listItem: TListItemModel) {
-  emit('focus', listItem)
+  listItem.focused = true
   await checkVariants(listItem)
 }
 
@@ -263,19 +255,15 @@ async function init() {
   // handleTextareaKeydown($textarea as HTMLTextAreaElement)
   // })
 
-  // setTimeout(() => {
-  // ListItemsService.handleTextAreaHeights(list, $refs as { [key: string]: HTMLTextAreaElement[] })
-  // })
   assignTextAreas()
+
+  await nextTick()
+  ListItemsService.handleTextAreaHeights(list.value)
 }
 
-onMounted(() => {
-  init()
-})
+onMounted(init)
 
-onUnmounted(() => {
-  document.removeEventListener('mousedown', hideVariants)
-})
+onUnmounted(() => document.removeEventListener('mousedown', hideVariants))
 
 //   beforeDestroy () {
 //     BaseService.events.$off('keydown', this.handleKeyDown)
@@ -363,7 +351,7 @@ onUnmounted(() => {
 
 async function add() {
   const listItem = ListItemsService.createListItem()
-  emit('add', listItem as unknown as TListItemModel)
+  note.addListItem(listItem as unknown as TListItemModel)
   await nextTick()
   const $textarea = getListItemTextarea(listItem as unknown as TListItemModel)
   listItem.$textarea = $textarea
@@ -372,19 +360,11 @@ async function add() {
 }
 
 function check(event: Event, listItem: TListItemModel) {
-  if ((event.target as HTMLInputElement).checked) {
-    emit('check', listItem)
-  } else {
-    emit('uncheck', listItem)
-  }
+  note.checkOrUncheckListItem(listItem, (event.target as HTMLInputElement).checked)
 }
 
 function complete(event: Event, listItem: TListItemModel) {
-  if ((event.target as HTMLInputElement).checked) {
-    emit('complete', listItem)
-  } else {
-    emit('activate', listItem)
-  }
+  note.completeListItem(listItem, (event.target as HTMLInputElement).checked)
 }
 
 function selectFocusedVariant(event: Event) {
@@ -407,23 +387,23 @@ async function updateText(listItem: TListItemModel) {
   if (listItem.saveTimeout) {
     clearTimeout(listItem.saveTimeout)
   }
-  emit('update-text', listItem, text)
+  listItem.text = text.trim()
   await checkVariants(listItem)
   listItem.saveTimeout = setTimeout(() => {
-    emit('save', listItem)
+    note.saveListItem(listItem)
     listItem.saveTimeout = null
   }, 400) as unknown as null
 }
 
 function selectVariant(listItem: TListItemModel | null, variant: TVariant) {
   if (listItem) {
-    emit('select-variant', listItem, variant)
+    note.selectVariant(listItem, variant)
     variants.value = []
   }
 }
 
 function handleBlur(listItem: TListItemModel) {
-  emit('blur', listItem)
+  note.blurListItem(listItem)
   const $textArea = getListItemTextarea(listItem)
   if ($textArea && $textArea.parentElement) {
     $textArea.parentElement.scrollTop = 0
@@ -474,6 +454,17 @@ function handleBlur(listItem: TListItemModel) {
     .list-item__container {
       width: 100%;
 
+      &.list-item__container--focused {
+        .list-item .list-item__text {
+          max-height: 178px;
+          overflow: auto;
+
+          &:after {
+            display: none;
+          }
+        }
+      }
+
       .list-item {
         background-color: #fff;
         transition: opacity 0.5s;
@@ -496,11 +487,6 @@ function handleBlur(listItem: TListItemModel) {
           transition: color 0.2s;
         }
 
-        &.list-item--focused .list-item__text {
-          max-height: 178px;
-          overflow: auto;
-        }
-
         .list-item__checkbox {
           min-width: 20px;
           min-height: 20px;
@@ -517,23 +503,23 @@ function handleBlur(listItem: TListItemModel) {
         }
 
         .list-item__text {
-          max-height: 60px;
+          max-height: 64px;
           position: inherit;
-          transition: height 0.3s;
           flex: 1;
           position: relative;
           overflow: hidden;
-        }
+          transition: max-height 0.2s;
 
-        .list-item__text.list-item__text--multi-line:after {
-          content: '...';
-          width: 100%;
-          height: 20px;
-          line-height: 18px;
-          position: absolute;
-          top: 38px;
-          background: #fff;
-          cursor: text;
+          &.list-item__text--multi-line:after {
+            content: '...';
+            width: 100%;
+            height: 20px;
+            line-height: 18px;
+            position: absolute;
+            top: 38px;
+            background: #fff;
+            cursor: text;
+          }
         }
 
         .list-item__text textarea {
@@ -543,17 +529,16 @@ function handleBlur(listItem: TListItemModel) {
           line-height: 20px;
           outline: none;
           resize: none;
-          transition: color 0.2s;
         }
 
-        .list-item__handle {
-          min-width: 28px;
-          min-height: 24px;
-          position: relative;
-          z-index: 20;
-          margin-left: -8px;
-          cursor: pointer;
-        }
+        // .list-item__handle {
+        //   min-width: 28px;
+        //   min-height: 24px;
+        //   position: relative;
+        //   z-index: 20;
+        //   margin-left: -8px;
+        //   cursor: pointer;
+        // }
 
         .list-item__remove-button {
           min-width: 24px;
