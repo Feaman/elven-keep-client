@@ -4,32 +4,45 @@
     img.error-page__image(
       src="~assets/crying-girl.jpg"
     )
-  .error-page__error.column.text-center.full-width.full-height
-    .text-h1.text-yellow-7.text-weight-bold {{ error.statusCode }}
-    .text-h3.text-weight-bold.mt-8 Awww... What the dragon?!
-    .error-page__message.text-h4.text-blue-5.font-size-18.ml-1.mt-8 {{ error.message }}
-    q-btn(
-      label="404"
-      color="white"
-      flat
+  .error-page__error.column.no-wrap.text-center.full-height.pb-4
+    .error-page__status-code.text-h1.text-yellow-7.text-weight-bold {{ statusCode }}
+    .error-page__title.text-h3.text-weight-bold.mt-8 Awww... What the dragon?!
+    .error-page__message.text-h4.text-blue-5.font-size-18.ml-1.mt-8 {{ message }}
+    q-btn.mt-6(
+      @click="reload"
+      label="Maybe Reload?"
+      color="pink"
     )
 </template>
 
 <script setup lang="ts">
 import type { TGlobalError } from '~/services/base'
 
-defineProps<{
+const props = defineProps<{
   error: TGlobalError,
 }>()
+
+const statusCode = props.error.statusCode || 500
+const message = props.error.statusCode === 404 ? 'Page note found' : props.error.message
+
+function reload() {
+  window.location.reload()
+}
 </script>
 
 <style lang="scss" scoped>
 .error-page {
   width: 100%;
   height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+  overflow: auto;
   display: flex;
+  box-shadow: inset 0 0 15px 5px rgba(0, 0, 0, 0.3);
 
   .error-page__image-container {
+    overflow: hidden;
+    min-height: 102px;
+    width: 50%;
 
     .error-page__image {
       width: 100%;
@@ -39,9 +52,18 @@ defineProps<{
   }
 
   .error-page__error {
-    min-width: calc(50% - 16px);
+    width: 50%;
+    position: relative;
     align-items: center;
     justify-content: center;
+
+    .error-page__status-code {
+      line-height: 78px;
+    }
+
+    .error-page__title {
+      line-height: 46px;
+    }
 
     .error-page__message {
       line-height: 20px;
@@ -49,17 +71,53 @@ defineProps<{
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 700px) {
+  .error-page__status-code {
+    font-size: 60px;
+    line-height: 60px !important;
+  }
+
+  .error-page__title {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  .error-page__status-code {
+    font-size: 50px;
+    line-height: 50px !important;
+  }
+
+  .error-page__title {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 400px) {
+  .error-page__status-code {
+    font-size: 40px;
+    line-height: 40px !important;
+  }
+
+  .error-page__title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 1196px) {
   .error-page {
     flex-direction: column;
 
     .error-page__image-container {
       max-height: 30vh;
+      max-height: calc(var(--vh, 1vh) * 30);
+      width: 100%;
     }
 
     .error-page__error {
       justify-content: start;
       margin-top: 10%;
+      width: 100%;
     }
   }
 }

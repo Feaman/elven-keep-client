@@ -64,7 +64,7 @@ function findListItemVariants(listItem: TListItemModel) {
 
   if (query.length > 1) {
     notes.value.forEach((note) => {
-      if (note.isList()) {
+      if (note.isList) {
         findNoteListItemVariants(note, variants, listItem, query)
       }
     })

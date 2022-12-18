@@ -14,7 +14,7 @@ q-card.note-preview.cursor-pointer.gradient.full-height.pa-4.pt-2(
         :class="{ checked: listItem.checked }"
       )
         q-icon(color="grey-5" :name="mdiCheckboxBlankOutline")
-        .list-item__text.limit-width(:class="{'text-grey-8': !listItem.checked, 'text-grey-5': listItem.checked}").ml-2 {{ listItem.text }}
+        .list-item__text.limit-width.ml-1(:class="{'text-grey-8': !listItem.checked, 'text-grey-5': listItem.checked}") {{ listItem.text }}
 
     NoteCoAuthors(:co-authors="note.coAuthors")
 
@@ -88,7 +88,7 @@ const NOTE_TYPE_LIST = TYPE_LIST
 
   .remove-button {
     position: absolute;
-    right: 4px;
+    right: 2px;
     top: 3px;
     background: radial-gradient(#fff 30%, transparent);
   }

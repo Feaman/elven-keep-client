@@ -11,35 +11,38 @@
           round
         )
         q-separator(vertical)
-        q-btn(
-          @click="emit('co-authors-clicked')"
-          :icon="mdiAccountGroup"
-          color="black"
-          flat
-          round
-        )
-          ToolTip Manage authors
+        transition(name="horizontal-list")
+          q-btn(
+            v-if="note.id"
+            @click="emit('co-authors-clicked')"
+            :icon="mdiAccountGroup"
+            color="black"
+            flat
+            round
+          )
+            ToolTip Manage authors
         q-separator(vertical)
         CreateTools
         q-separator(vertical)
         q-space
-        q-btn(
-          @click="emit('fullscreen')"
-          :icon="mdiFullscreen"
-          color="black"
-          flat
-          round
-        )
-        q-btn(
-          v-if="note.id"
-          :icon="note.isSaving ? mdiCloudUploadOutline : mdiCloudCheckOutline"
-          color="black"
-          flat
-          round
-        )
-          ToolTip {{ note.isSaving ? 'Saving to cloud' : 'Saved to cloud' }}
-            q-separator(vertical)
-            q-space
+        transition(name="horizontal-list")
+          q-btn(
+            v-if="note.id && note.isList && note.mainListItems.length"
+            @click="emit('fullscreen')"
+            :icon="mdiFullscreen"
+            color="black"
+            flat
+            round
+          )
+        transition(name="horizontal-list" tag="div")
+          q-btn(
+            v-if="note.id"
+            :icon="note.isSaving ? mdiCloudUploadOutline : mdiCloudCheckOutline"
+            color="black"
+            flat
+            round
+          )
+            ToolTip {{ note.isSaving ? 'Saving to cloud' : 'Saved to cloud' }}
         q-separator(vertical)
         UserMenu
 </template>

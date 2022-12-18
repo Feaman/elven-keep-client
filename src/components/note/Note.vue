@@ -1,6 +1,6 @@
 <template lang="pug">
 .note.q-flex.column.items-center.full-height
-  .note__content.column.no-wrap.full-width.full-height.pt-2.px-3
+  .note__content.column.no-wrap.full-width.full-height.py-2.px-3
 
     FullScreenView(
       @close="emit('fullscreen', false)"
@@ -23,10 +23,10 @@
           @click="note.completeAllChecked()"
           :disabled="!note.checkedListItems.length"
           :icon="mdiCheckAll"
-          size="xs"
+          size="sm"
           color="primary"
           glossy
-          square
+          round
         )
           ToolTip(
             anchor="center left"

@@ -48,6 +48,7 @@ export default function noteModel(noteData: TNote) {
   const isCreating = ref(false)
   const isUpdateNeeded = ref(false)
   const unSavedListItems = ref<TListItemModel[]>([])
+  const isList = computed(() => type.value?.name === TYPE_LIST)
   let logId = 0
 
   const globalStore = useGlobalStore()
@@ -73,10 +74,6 @@ export default function noteModel(noteData: TNote) {
     } else {
       type.value = foundType
     }
-  }
-
-  function isList() {
-    return type.value?.name === TYPE_LIST
   }
 
   async function createListItem(listItem: TListItemModel, logIid: number) {
@@ -209,9 +206,7 @@ export default function noteModel(noteData: TNote) {
       })
   }
 
-  const completedListItems = computed(
-    () => list.value.filter((listItem) => listItem.completed && listItem.statusId === StatusesService.active.value.id),
-  ) as Ref<TListItemModel[]>
+  const completedListItems = computed(() => filterAndSort(true)) as Ref<TListItemModel[]>
 
   const checkedListItems = computed(
     () => list.value.filter((listItem) => listItem.checked
@@ -274,6 +269,9 @@ export default function noteModel(noteData: TNote) {
     listItem.focused = false
     if (!listItem.text) {
       removeItem(listItem)
+    } else if (listItem.text !== listItem.text.trim()) {
+      listItem.text = listItem.text.trim()
+      saveListItem(listItem)
     }
   }
 
@@ -304,6 +302,7 @@ export default function noteModel(noteData: TNote) {
   handleUser(noteData.user)
 
   watch(title, () => save(10000))
+  watch(text, () => save(10000))
 
   return {
     id,
@@ -328,6 +327,7 @@ export default function noteModel(noteData: TNote) {
     isCreating,
     isUpdateNeeded,
     user,
+    isList,
     checkOrUncheckListItem,
     addCoAuthor,
     createCoAuthor,
@@ -336,7 +336,6 @@ export default function noteModel(noteData: TNote) {
     completeListItem,
     hide,
     removeItem,
-    isList,
     handleList,
     handleCoAuthors,
     completeAllChecked,

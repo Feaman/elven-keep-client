@@ -52,6 +52,7 @@
   opacity: 0;
 }
 
+// Slide-fade
 .slide-fade-enter-active {
   transition: all 0.2s ease;
 }
@@ -66,26 +67,6 @@
   opacity: 0;
 }
 
-.slide-fade-absolute-enter-active {
-  transition: all 0.2s ease;
-}
-
-.slide-fade-absolute-leave-active {
-  position: absolute !important;
-  bottom: 6px;
-  transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1), opacity 0.1s;
-}
-
-.slide-fade-absolute-enter,
-.slide-fade-absolute-leave-to {
-  transform: translateX(30px);
-  opacity: 0;
-}
-
-.slide-fade-absolute-leave-to {
-  position: absolute !important;
-  bottom: 6px;
-}
 
 .slide-fade-fast-enter-active {
   transition: all 0.1s ease;
@@ -158,6 +139,23 @@
 
 .horizontal-list-effect-move {
   transition: transform 0.3s;
+}
+
+// Horizontal list
+.horizontal-list-move,
+.horizontal-list-enter-active,
+.horizontal-list-leave-active {
+  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1), opacity 0s;
+}
+
+.horizontal-list-enter-from,
+.horizontal-list-leave-to {
+  opacity: 0;
+  transform: scaleX(0.01) translate(30px, 0);
+}
+
+.horizontal-list-leave-active {
+  position: absolute;
 }
 
 // Vertical list

@@ -1,7 +1,7 @@
 <template lang="pug">
 .index-page.full-height(ref="rootElement")
   NotesToolbar.full-width
-  transition-group.row.pr-4.pb-4.mt-2(
+  transition-group.row.pr-4.pb-4(
     name="horizontal-list-effect"
     tag="div"
   )

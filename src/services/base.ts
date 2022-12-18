@@ -22,4 +22,10 @@ export default class BaseService {
       message: error?.response?.data.message || error.message,
     }
   }
+
+  static pause(milliseconds: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, milliseconds)
+    })
+  }
 }

@@ -1,21 +1,27 @@
-import BaseService from "./base"
-import NoteModel from "~/models/note"
-import ListItemModel, { IListItem } from "~/models/list-item"
+import BaseService from './base'
+import NoteModel from '~/models/note'
+import ListItemModel, { IListItem } from '~/models/list-item'
 import NotesService from '~/services/notes'
 
 export default class SSEService extends BaseService {
   static EVENT_NOTE_ADDED = 'EVENT_NOTE_ADDED'
+
   static EVENT_NOTE_CHANGED = 'EVENT_NOTE_CHANGED'
+
   static EVENT_NOTE_REMOVED = 'EVENT_NOTE_REMOVED'
+
   static EVENT_NOTE_ORDER_SET = 'EVENT_NOTE_ORDER_SET'
+
   static EVENT_LIST_ITEM_CHANGED = 'EVENT_LIST_ITEM_CHANGED'
+
   static EVENT_LIST_ITEM_REMOVED = 'EVENT_LIST_ITEM_REMOVED'
+
   static EVENT_LIST_ITEM_ADDED = 'EVENT_LIST_ITEM_ADDED'
 
   static eventSource: EventSource | null = null
 
-  static init () {
-    this.eventSource = new EventSource(this.api.URL + `events/${this.vuex.state.user.id}/${this.vuex.state.SSESalt}`)
+  static init() {
+    this.eventSource = new EventSource(`${this.api.URL}events/${this.vuex.state.user.id}/${this.vuex.state.SSESalt}`)
 
     this.eventSource.onerror = function (event: Event) {
       const target = event.target as WebSocket
@@ -50,9 +56,9 @@ export default class SSEService extends BaseService {
       const event = sourceEvent as MessageEvent
       const noteData = JSON.parse(event.data)
       const note = this.vuex.state.notes.find((note: NoteModel) => note.id === noteData.id) as NoteModel
-      if (note && note.isList()) {
+      if (note && note.isList) {
         noteData.list.forEach((listItemData: IListItem) => {
-          const listItem = note.list.find(listItem => listItem.id === listItemData.id)
+          const listItem = note.list.find((listItem) => listItem.id === listItemData.id)
           if (listItem) {
             listItem.updateState({ order: listItemData.order })
           }

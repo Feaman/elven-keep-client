@@ -6,15 +6,17 @@ function handleListItemTextAreaHeight($textArea: HTMLTextAreaElement) {
   let textAreaHeight = 0
   const $parent = $textArea.parentElement
   $parent?.classList.remove('list-item__text--multi-line')
-  $textArea.style.height = '0'
-  textAreaHeight = $textArea.scrollHeight
+  const $clone: HTMLTextAreaElement = $textArea.cloneNode() as HTMLTextAreaElement
+  $clone.classList.remove('transition')
+  $clone.style.height = '0'
+  $parent?.appendChild($clone)
+  textAreaHeight = $clone.scrollHeight
+  $clone.remove()
   $textArea.style.height = `${textAreaHeight}px`
 
   if (textAreaHeight > 64) {
     $parent?.classList.add('list-item__text--multi-line')
   }
-
-  return $textArea
 }
 
 function handleTextAreaHeights(list: TListItemModel[]) {

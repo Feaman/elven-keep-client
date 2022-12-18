@@ -3,7 +3,7 @@ q-layout(
   view="hHh Lpr fFf"
 )
   q-page-container(v-if="isErrorShown")
-    ErrorPage(:error="{statusCode: error?.statusCode, message: error?.message}")
+    ErrorPage(:error="{statusCode: store.initError?.statusCode, message: store.initError?.message}")
   q-page-container(v-else-if="store.isInitDataLoading")
     template(
       v-if="$route.name === 'notes'"
@@ -35,7 +35,7 @@ q-layout(
             type="rect"
             height="50px"
           )
-          .column.mt-4
+          .column
             .q-flex.mt-4(
               v-for="index in 10"
               :key="index"
@@ -61,7 +61,7 @@ q-layout(
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseService from '~/services/base'
 import type { TGlobalError } from '~/services/base'
@@ -71,21 +71,31 @@ const router = useRouter()
 
 const isErrorShown = ref(false)
 const store = useGlobalStore()
-const error = ref(store.initError)
 
-if (store.initError) {
-  if (error.value?.statusCode === 401) {
-    router.push('/sign')
-  } else {
-    isErrorShown.value = true
+watch(() => store.initError, () => {
+  if (store.initError) {
+    if (store.initError?.statusCode === 401) {
+      router.push('/sign')
+    } else {
+      isErrorShown.value = true
+    }
   }
-}
+})
 
 BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
-  error.value = errorObject
+  store.initError = errorObject
   isErrorShown.value = true
 })
 
+function handleWindowResize() {
+  // Fix 100vh for mobile
+  document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)
+}
+
+onMounted(() => {
+  handleWindowResize()
+  window.addEventListener('resize', handleWindowResize)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -98,6 +108,7 @@ BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
 
 .page {
   height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
 
   .header {
     width: 100%;
