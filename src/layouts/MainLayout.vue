@@ -3,8 +3,8 @@ q-layout(
   view="hHh Lpr fFf"
 )
   q-page-container(v-if="isErrorShown")
-    ErrorPage(:error="{statusCode: store.initError?.statusCode, message: store.initError?.message}")
-  q-page-container(v-else-if="store.isInitDataLoading")
+    ErrorPage(:error="{statusCode: globalStore.initError?.statusCode, message: globalStore.initError?.message}")
+  q-page-container(v-else-if="globalStore.isInitDataLoading")
     template(
       v-if="$route.name === 'notes'"
     )
@@ -61,20 +61,23 @@ q-layout(
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseService from '~/services/base'
 import type { TGlobalError } from '~/services/base'
+import ListItemsService from '~/composables/services/list-items'
+import NotesService from '~/composables/services/notes'
 import { useGlobalStore } from '~/stores/global'
 
 const router = useRouter()
 
 const isErrorShown = ref(false)
-const store = useGlobalStore()
+const globalStore = useGlobalStore()
+let removeTimeout: ReturnType<typeof setTimeout> | null = null
 
-watch(() => store.initError, () => {
-  if (store.initError) {
-    if (store.initError?.statusCode === 401) {
+watch(() => globalStore.initError, () => {
+  if (globalStore.initError) {
+    if (globalStore.initError?.statusCode === 401) {
       router.push('/sign')
     } else {
       isErrorShown.value = true
@@ -83,7 +86,7 @@ watch(() => store.initError, () => {
 })
 
 BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
-  store.initError = errorObject
+  globalStore.initError = errorObject
   isErrorShown.value = true
 })
 
@@ -91,10 +94,23 @@ function handleWindowResize() {
   // Fix 100vh for mobile
   document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)
 }
+const removedItemsQuantity = computed(() => NotesService.removingNotes.value.length + ListItemsService.removingListItems.value.length)
 
 onMounted(() => {
   handleWindowResize()
   window.addEventListener('resize', handleWindowResize)
+})
+
+watch(removedItemsQuantity, () => {
+  if (removeTimeout) {
+    clearTimeout(removeTimeout)
+  }
+  removeTimeout = setTimeout(() => {
+    if (removedItemsQuantity.value) {
+      // NotesService.clear()
+      // $store.commit('clearRemovingEntities')
+    }
+  }, 4000)
 })
 </script>
 

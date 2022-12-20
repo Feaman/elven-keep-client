@@ -3,13 +3,13 @@ import coAuthorModel, { ICoAuthor, TCoAuthorModel } from '~/composables/models/c
 import listItemModel, { TListItem, TListItemModel, type TVariant } from '~/composables/models/list-item'
 import { TStatusModel } from '~/composables/models/status'
 import { TYPE_LIST, type TTypeModel } from '~/composables/models/type'
+import userModel, { IUser, TUserModel } from '~/composables/models/user'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
 import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
-import userModel, { IUser, TUserModel } from './user'
 
 export interface TNote {
   id?: number
@@ -239,14 +239,14 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
-  function removeItem(item: TListItemModel) {
+  function removeListItemSoft(item: TListItemModel) {
     list.value = list.value.filter((_item) => _item.id !== item.id)
   }
 
   async function removeListItem(listItem: TListItemModel, addToRestore = true) {
     if (listItem.id) {
-      listItem.statusId = StatusesService.inactive.value.id
       if (addToRestore) {
+        listItem.statusId = StatusesService.inactive.value.id
         removingItemLists.value.push(listItem as unknown as TListItemModel)
       }
       await ApiService.removeListItem(listItem)
@@ -268,7 +268,7 @@ export default function noteModel(noteData: TNote) {
   function blurListItem(listItem: TListItemModel) {
     listItem.focused = false
     if (!listItem.text) {
-      removeItem(listItem)
+      setTimeout(() => removeListItemSoft(listItem), 200)
     } else if (listItem.text !== listItem.text.trim()) {
       listItem.text = listItem.text.trim()
       saveListItem(listItem)
@@ -303,6 +303,7 @@ export default function noteModel(noteData: TNote) {
 
   watch(title, () => save(10000))
   watch(text, () => save(10000))
+  watch(isCompletedListExpanded, () => save(10000))
 
   return {
     id,
@@ -335,7 +336,7 @@ export default function noteModel(noteData: TNote) {
     save,
     completeListItem,
     hide,
-    removeItem,
+    removeListItemSoft,
     handleList,
     handleCoAuthors,
     completeAllChecked,

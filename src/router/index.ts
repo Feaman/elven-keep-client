@@ -7,7 +7,7 @@ import {
 } from 'vue-router'
 import BaseService from '~/services/base'
 
-import routes from './routes'
+import routes from '~/router/routes'
 
 /*
  * If not building with SSR mode, you can

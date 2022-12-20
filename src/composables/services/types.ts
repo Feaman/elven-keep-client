@@ -4,6 +4,7 @@ import typeModel, { IType, TTypeModel, TYPE_LIST } from '~/composables/models/ty
 const types = ref<TTypeModel[]>([])
 
 function generateTypes(typesData: IType[]) {
+  types.value = []
   typesData.forEach((typeData: IType) => {
     types.value.push(typeModel(typeData) as unknown as TTypeModel)
   })

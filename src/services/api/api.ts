@@ -4,8 +4,8 @@ import { TNote, TNoteModel } from '~/composables/models/note'
 import { IStatus } from '~/composables/models/status'
 import { IType } from '~/composables/models/type'
 import { IUser } from '~/composables/models/user'
-import BaseService from '../base'
-import AxiosApi from './axios-api'
+import AxiosApi from '~/services/api/axios-api'
+import BaseService from '~/services/base'
 
 export interface ConfigObject {
   user: IUser,
@@ -129,6 +129,14 @@ export default class ApiService extends BaseService {
 
   static async setOrder(note: TNoteModel, order: number[]) {
     const { data } = await this.api.put(`notes/${note.id}/set-order`, { order })
+    return data
+  }
+
+  static async updateUser(showChecked: boolean) {
+    const userData = {
+      showChecked,
+    }
+    const { data } = await this.api.put('users', userData)
     return data
   }
 }

@@ -42,6 +42,7 @@
               )
 
             input.list-item__checkbox.mr-1(
+              v-if="globalStore.user?.showChecked"
               @change="check($event, listItem)"
               :checked="listItem.checked"
               :class="{ 'ml-9': !listItem.text }"
@@ -105,6 +106,7 @@ import { type TVariant, type TListItemModel } from '~/composables/models/list-it
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
+import { useGlobalStore } from '~/stores/global'
 
 const props = defineProps<{
   isMain?: boolean,
@@ -119,6 +121,7 @@ const variantsMenuY = ref(0)
 const variantsMenuMaxWidth = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
 const note = unref(NotesService.currentNote as unknown as TNoteModel)
+const globalStore = useGlobalStore()
 
 // const list = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))
 const list = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))

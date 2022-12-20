@@ -2,9 +2,9 @@ import { AxiosError } from 'axios'
 import notesService from '~/composables/services/notes'
 import statusesService from '~/composables/services/statuses'
 import typesService from '~/composables/services/types'
+import BaseService from '~/services//base'
+import ApiService, { ConfigObject } from '~/services/api/api'
 import { useGlobalStore } from '~/stores/global'
-import ApiService, { ConfigObject } from './api/api'
-import BaseService from './base'
 
 export default class InitService {
   static async initApplication(data: ConfigObject | undefined = undefined): Promise<void> {

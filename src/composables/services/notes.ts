@@ -6,9 +6,11 @@ import ApiService from '~/services/api/api'
 
 const currentNote: Ref<TNoteModel | null> = ref(null)
 const notes: Ref<TNoteModel[]> = ref([])
+const removingNotes = ref<TNoteModel[]>([])
 export const searchQuery = ref('')
 
 function generateNotes(notesData: TNote[]) {
+  notes.value = []
   notesData.forEach((noteData: TNote) => {
     const note = noteModel(noteData)
     notes.value.push(note as unknown as TNoteModel)
@@ -117,7 +119,7 @@ function clear() {
   notes.value.forEach((note: TNoteModel) => {
     note.list.forEach((listItem) => {
       if (listItem.statusId === StatusesService.inactive.value.id) {
-        // listItem.removeFromState()
+        note.removeListItem(listItem)
       }
     })
     if (note.statusId === StatusesService.inactive.value.id) {
@@ -148,6 +150,7 @@ export default {
   notes,
   filtered,
   searchQuery,
+  removingNotes,
   generateMaxOrder,
   generateNotes,
   findNoteListItemVariants,

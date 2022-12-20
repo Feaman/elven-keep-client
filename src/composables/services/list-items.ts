@@ -1,6 +1,9 @@
+import { ref } from 'vue'
 import listItemModel, { TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
+
+const removingListItems = ref<TListItemModel[]>([])
 
 function handleListItemTextAreaHeight($textArea: HTMLTextAreaElement) {
   let textAreaHeight = 0
@@ -40,6 +43,7 @@ function createListItem() {
 }
 
 export default {
+  removingListItems,
   handleTextAreaHeights,
   handleListItemTextAreaHeight,
   filterCompleted,

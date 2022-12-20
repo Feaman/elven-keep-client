@@ -65,7 +65,6 @@ export const useGlobalStore = defineStore('global', () => {
     isInitDataLoading,
     mainListScrollTop,
     SSESalt,
-    // removingEntities,
     setUser,
   }
 })

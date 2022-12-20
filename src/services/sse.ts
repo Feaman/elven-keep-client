@@ -1,4 +1,4 @@
-import BaseService from './base'
+import BaseService from '~/services/base'
 import NoteModel from '~/models/note'
 import ListItemModel, { IListItem } from '~/models/list-item'
 import NotesService from '~/services/notes'

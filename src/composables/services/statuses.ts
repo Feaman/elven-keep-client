@@ -4,6 +4,7 @@ import statusModel, { IStatus, STATUS_ACTIVE, STATUS_INACTIVE, TStatusModel } fr
 export const statuses = ref<TStatusModel[]>([])
 
 export function generateStatuses(statusesData: IStatus[]) {
+  statuses.value = []
   statusesData.forEach((statusData: IStatus) => {
     statuses.value.push(statusModel(statusData) as unknown as TStatusModel)
   })
