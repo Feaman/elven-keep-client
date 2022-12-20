@@ -115,19 +115,6 @@ function setOrder(note: TNoteModel, order: number[]) {
   ApiService.setOrder(note, order)
 }
 
-function clear() {
-  notes.value.forEach((note: TNoteModel) => {
-    note.list.forEach((listItem) => {
-      if (listItem.statusId === StatusesService.inactive.value.id) {
-        note.removeListItem(listItem)
-      }
-    })
-    if (note.statusId === StatusesService.inactive.value.id) {
-      // note.removeFromState()
-    }
-  })
-}
-
 function generateMaxOrder(listItemId: number, list: TListItemModel[]) {
   let order = 0
   if (list.length) {
@@ -140,8 +127,9 @@ function generateMaxOrder(listItemId: number, list: TListItemModel[]) {
   return order + 1
 }
 
-async function removeNote(note: TNoteModel, addRemovingNote = true) {
-  note.hide(addRemovingNote)
+async function removeNote(note: TNoteModel) {
+  note.statusId = StatusesService.inactive.value.id
+  removingNotes.value.push(note as unknown as TNoteModel)
   await ApiService.removeNote(note)
 }
 
@@ -154,7 +142,6 @@ export default {
   generateMaxOrder,
   generateNotes,
   findNoteListItemVariants,
-  clear,
   setOrder,
   findListItemVariants,
   removeNote,

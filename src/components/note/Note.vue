@@ -184,31 +184,6 @@ async function addCoAuthor() {
   }
 }
 
-//   created() {
-//     NotesService.events.$on('NOTE_REMOVED', this.handleNoteRemoved)
-//     if (this.note.user) {
-//       this.noteUser = this.note.user
-//     }
-//     this.$eventBus.$on('fullscreen', () => {
-//       this.isFullscreen = true
-//     })
-//   }
-//   handleNoteRemoved(note: NoteModel) {
-//     if (note.id === this.note.id) {
-//       this.$router.push('/')
-//     }
-//   }
-//   mounted() {
-//     BaseService.events.$on('keydown', this.handleKeyDown)
-//   }
-//   beforeDestroy() {
-//     BaseService.events.$off('keydown', this.handleKeyDown)
-//     NotesService.events.$off('NOTE_REMOVED', this.handleNoteRemoved)
-//     if (this.note.checkIfClear()) {
-//       this.note.remove(false)
-//     }
-//   }
-
 //   handleKeyDown(event: KeyboardEvent) {
 //     switch (true) {
 //       case KeyboardEvents.is(event, KeyboardEvents.BACKSPACE):

@@ -63,6 +63,7 @@ q-layout(
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import BaseService from '~/services/base'
 import type { TGlobalError } from '~/services/base'
 import ListItemsService from '~/composables/services/list-items'
@@ -70,20 +71,21 @@ import NotesService from '~/composables/services/notes'
 import { useGlobalStore } from '~/stores/global'
 
 const router = useRouter()
+const $q = useQuasar()
 
 const isErrorShown = ref(false)
 const globalStore = useGlobalStore()
 let removeTimeout: ReturnType<typeof setTimeout> | null = null
-
-watch(() => globalStore.initError, () => {
-  if (globalStore.initError) {
-    if (globalStore.initError?.statusCode === 401) {
-      router.push('/sign')
-    } else {
-      isErrorShown.value = true
-    }
-  }
+const removedItemsQuantity = computed(() => NotesService.removingNotes.value.length + ListItemsService.removingListItems.value.length)
+const removedItemsMessage = computed(() => {
+  const notesQuantity = NotesService.removingNotes.value.length
+  const listItemsQuantity = ListItemsService.removingListItems.value.length
+  const notesMessage = notesQuantity ? `${notesQuantity} note${notesQuantity > 1 ? 's' : ''}` : ''
+  const middleWord = notesQuantity && listItemsQuantity ? ' and ' : ''
+  const listItemsMessage = listItemsQuantity ? `${listItemsQuantity} list item${listItemsQuantity > 1 ? 's' : ''}` : ''
+  return `${notesMessage}${middleWord}${listItemsMessage} removed`
 })
+let notification: null | ((props: object | undefined) => void) = null
 
 BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
   globalStore.initError = errorObject
@@ -94,7 +96,17 @@ function handleWindowResize() {
   // Fix 100vh for mobile
   document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)
 }
-const removedItemsQuantity = computed(() => NotesService.removingNotes.value.length + ListItemsService.removingListItems.value.length)
+
+function restoreItems() {
+  notification = null
+  NotesService.removingNotes.value.forEach((note) => note.restore())
+  ListItemsService.removingListItems.value.forEach((listItem) => listItem.restore())
+  NotesService.removingNotes.value = []
+  ListItemsService.removingListItems.value = []
+  if (removeTimeout) {
+    clearTimeout(removeTimeout)
+  }
+}
 
 onMounted(() => {
   handleWindowResize()
@@ -102,15 +114,44 @@ onMounted(() => {
 })
 
 watch(removedItemsQuantity, () => {
-  if (removeTimeout) {
-    clearTimeout(removeTimeout)
-  }
-  removeTimeout = setTimeout(() => {
-    if (removedItemsQuantity.value) {
-      // NotesService.clear()
-      // $store.commit('clearRemovingEntities')
+  if (removedItemsQuantity.value) {
+    if (!notification) {
+      notification = $q.notify({
+        group: false, // required to be updatable
+        timeout: 0, // we want to be in control when it gets dismissed
+        message: removedItemsMessage.value,
+        actions: [
+          { label: 'Restore', color: 'primary', handler: restoreItems },
+        ],
+      })
+    } else {
+      notification({
+        message: removedItemsMessage.value,
+      })
     }
-  }, 4000)
+
+    if (removeTimeout) {
+      clearTimeout(removeTimeout)
+    }
+    removeTimeout = setTimeout(() => {
+      if (notification) {
+        notification({ timeout: 1 })
+        notification = null
+      }
+    }, 4000)
+  } else if (notification) {
+    notification({ timeout: 1 })
+  }
+})
+
+watch(() => globalStore.initError, () => {
+  if (globalStore.initError) {
+    if (globalStore.initError?.statusCode === 401) {
+      router.push('/sign')
+    } else {
+      isErrorShown.value = true
+    }
+  }
 })
 </script>
 

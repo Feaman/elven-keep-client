@@ -206,13 +206,6 @@ function listItemClasses(listItem: TListItemModel) {
 //   }
 // }
 
-//   @Watch('list')
-//   onListChanged () {
-//     this.$nextTick(() => {
-//       ListItemsService.handleTextAreaHeights(this.list, this.$refs as { [key: string]: HTMLTextAreaElement [] })
-//     })
-//   }
-
 function hideVariants(event: Event) {
   if (!variantsElement.value?.$el.contains(event.target as Element)) {
     variantsShown.value = false
@@ -244,12 +237,6 @@ onUnmounted(() => document.removeEventListener('mousedown', hideVariants))
 
 //   beforeDestroy () {
 //     BaseService.events.$off('keydown', this.handleKeyDown)
-//   }
-
-//   showVariants (event: MouseEvent) {
-//     event.preventDefault()
-//     this.variantsMenuX = event.clientX
-//     this.variantsMenuY = event.clientY
 //   }
 
 // focusNextItem (event: KeyboardEvent) {

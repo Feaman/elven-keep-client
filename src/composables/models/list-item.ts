@@ -2,6 +2,8 @@ import { ref, UnwrapRef } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
+import ApiService from '~/services/api/api'
+import BaseService from '~/services/base'
 
 export type TVariant = {
   noteId: number,
@@ -46,20 +48,20 @@ export default function listItemModel(listItemData: TListItem) {
   const isUpdateNeeded = ref(false)
   const saveTimeout: ReturnType<typeof setTimeout> | null = null
 
-  // restore() {
-  //   if (this.id) {
-  //     this.setStatus(StatusesService.getActive())
-  //     return ApiService.restoreListItem(this)
-  //       .catch((error) => BaseService.error(error))
-  //   }
-  //   return Promise.resolve()
-  // }
+  async function restore() {
+    let result
+    try {
+      if (id.value) {
+        statusId.value = StatusesService.active.value.id
+        result = await ApiService.restoreListItem(id.value)
+      }
+      result = Promise.resolve()
+    } catch (error) {
+      BaseService.showError(error as Error)
+    }
 
-  // clearList() {
-  //   if (this.note?.list) {
-  //     this.note.list = this.note?.list.filter((listItem) => listItem.statusId !== StatusesService.getInActive().id)
-  //   }
-  // }
+    return result
+  }
 
   return {
     id,
@@ -78,6 +80,7 @@ export default function listItemModel(listItemData: TListItem) {
     isCreating,
     isUpdateNeeded,
     saveTimeout,
+    restore,
   }
 }
 

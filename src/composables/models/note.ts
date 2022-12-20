@@ -4,6 +4,7 @@ import listItemModel, { TListItem, TListItemModel, type TVariant } from '~/compo
 import { TStatusModel } from '~/composables/models/status'
 import { TYPE_LIST, type TTypeModel } from '~/composables/models/type'
 import userModel, { IUser, TUserModel } from '~/composables/models/user'
+import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
@@ -44,7 +45,6 @@ export default function noteModel(noteData: TNote) {
   const coAuthors = ref<TCoAuthorModel[]>([])
   const user = ref<TUserModel | null>(null)
   const isCompletedListExpanded = ref(!!noteData.isCompletedListExpanded)
-  const removingItemLists = ref<TListItemModel[]>([])
   const isCreating = ref(false)
   const isUpdateNeeded = ref(false)
   const unSavedListItems = ref<TListItemModel[]>([])
@@ -92,7 +92,6 @@ export default function noteModel(noteData: TNote) {
   }
 
   async function save(logIid: number) {
-    // NotesService.vuex.commit('clearNoteTimeout', this)
     try {
       isSaving.value = true
       if (id.value) {
@@ -160,35 +159,20 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
-  // restore() {
-  //   if (this.id) {
-  //     this.setStatus(StatusesService.getActive())
-  //     return ApiService.restoreNote(this)
-  //       .catch((error) => BaseService.error(error))
-  //   }
-  //   return Promise.resolve()
-  // }
-
-  function hide(addRemovingNote = true) {
-    statusId.value = StatusesService.inactive.value.id
-    if (addRemovingNote) {
-      // BaseService.vuex.commit('addRemovingNote', this)
+  async function restore() {
+    let result
+    try {
+      if (id.value) {
+        statusId.value = StatusesService.active.value.id
+        result = await ApiService.restoreNote(id.value)
+      }
+      result = Promise.resolve()
+    } catch (error) {
+      BaseService.showError(error as Error)
     }
+
+    return result
   }
-
-  // checkIfClear() {
-  //   const isList = this.type?.name === TypeModel.TYPE_LIST
-  //   let listIsClear = true
-  //   if (isList) {
-  //     this.list.forEach((listItem) => {
-  //       if (listItem.text) {
-  //         listIsClear = false
-  //       }
-  //     })
-  //   }
-
-  //   return this.id && !(this.title || this.text || (isList && !listIsClear))
-  // }
 
   const isMyNote = computed(() => globalStore.user?.id === userId.value)
 
@@ -245,9 +229,9 @@ export default function noteModel(noteData: TNote) {
 
   async function removeListItem(listItem: TListItemModel, addToRestore = true) {
     if (listItem.id) {
+      listItem.statusId = StatusesService.inactive.value.id
       if (addToRestore) {
-        listItem.statusId = StatusesService.inactive.value.id
-        removingItemLists.value.push(listItem as unknown as TListItemModel)
+        ListItemsService.removingListItems.value.push(listItem as unknown as TListItemModel)
       }
       await ApiService.removeListItem(listItem)
     }
@@ -265,6 +249,7 @@ export default function noteModel(noteData: TNote) {
       completeListItem(listItem, true)
     })
   }
+
   function blurListItem(listItem: TListItemModel) {
     listItem.focused = false
     if (!listItem.text) {
@@ -335,7 +320,6 @@ export default function noteModel(noteData: TNote) {
     removeCoAuthor,
     save,
     completeListItem,
-    hide,
     removeListItemSoft,
     handleList,
     handleCoAuthors,
@@ -345,6 +329,7 @@ export default function noteModel(noteData: TNote) {
     addListItem,
     selectVariant,
     blurListItem,
+    restore,
   }
 }
 

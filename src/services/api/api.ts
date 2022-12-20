@@ -66,8 +66,8 @@ export default class ApiService extends BaseService {
     return data
   }
 
-  static async restoreNote(note: TNoteModel) {
-    const { data } = await this.api.put(`notes/restore/${note.id}`)
+  static async restoreNote(noteId: number) {
+    const { data } = await this.api.put(`notes/restore/${noteId}`)
     return data
   }
 
@@ -100,8 +100,8 @@ export default class ApiService extends BaseService {
     return data
   }
 
-  static async restoreListItem(listItem: TListItemModel) {
-    const { data } = await this.api.put(`list-items/restore/${listItem.id}`)
+  static async restoreListItem(listItemId: number) {
+    const { data } = await this.api.put(`list-items/restore/${listItemId}`)
     return data
   }
 
