@@ -263,17 +263,21 @@ export default function noteModel(noteData: TNote) {
   function selectVariant(listItem: TListItemModel, variant: TVariant) {
     if (variant.noteId === listItem.noteId && variant.listItemId !== listItem.id) {
       const existentListItem = list.value.find((listItem: TListItemModel) => listItem.id === variant.listItemId)
-      if (existentListItem) {
-        existentListItem.completed = false
-        existentListItem.checked = false
-        existentListItem.order = listItem.order
-        saveListItem(existentListItem)
-        removeListItem(listItem)
+      if (!existentListItem) {
+        throw new Error('List item not found')
       }
-    } else {
-      listItem.text = variant.text
-      saveListItem(listItem)
+      existentListItem.completed = false
+      existentListItem.checked = false
+      existentListItem.order = listItem.order
+      existentListItem.$textarea = listItem.$textarea
+      saveListItem(existentListItem)
+      removeListItem(listItem, false)
+      return existentListItem
     }
+
+    listItem.text = variant.text
+    saveListItem(listItem)
+    return listItem
   }
 
   function checkOrUncheckListItem(listItem: TListItemModel, isChecked: boolean) {

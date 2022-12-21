@@ -31,8 +31,8 @@
               type="checkbox"
             )
 
-            .list-item__text.mx-1.ml-2
-              textarea.full-width.transition(
+            .list-item__text.q-flex.items-center.column.mx-1.ml-2.py-1
+              textarea.full-width.transition.pa-0(
                 @input="updateText(listItem)"
                 @keydown.enter="selectFocusedVariant($event)"
                 @focus="handleFocus(listItem)"
@@ -361,10 +361,12 @@ async function updateText(listItem: TListItemModel) {
   }
 }
 
-function selectVariant(listItem: TListItemModel | null, variant: TVariant) {
+async function selectVariant(listItem: TListItemModel | null, variant: TVariant) {
   if (listItem) {
-    note.selectVariant(listItem, variant)
+    const resultListItem = note.selectVariant(listItem, variant)
     variants.value = []
+    await nextTick()
+    ListItemsService.handleListItemTextAreaHeight(resultListItem.$textarea)
   }
 }
 
@@ -470,7 +472,7 @@ function handleBlur(listItem: TListItemModel) {
             overflow: hidden;
 
             &.transition {
-              transition: height 0.2s;
+              transition: height 0.1s;
             }
           }
         }
