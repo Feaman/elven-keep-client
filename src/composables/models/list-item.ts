@@ -33,7 +33,7 @@ export type TListItem = {
 export default function listItemModel(listItemData: TListItem) {
   const currentMilliseconds = (new Date()).getMilliseconds()
   const id = ref(listItemData.id)
-  const generatedId = `${currentMilliseconds}-${id.value}`
+  const generatedId = ref(`${currentMilliseconds}-${id.value}`)
   const text = ref(listItemData.text || '')
   const noteId = ref(listItemData.noteId)
   const order = ref(listItemData.order || 0)
@@ -44,7 +44,6 @@ export default function listItemModel(listItemData: TListItem) {
   const updated = ref(listItemData.updated ? new Date(listItemData.updated) : null)
   const statusId = ref(listItemData.statusId || StatusesService.active.value.id)
   const status = ref(StatusesService.findById(statusId.value))
-  let $textarea: HTMLTextAreaElement | undefined
   const isCreating = ref(false)
   const isUpdateNeeded = ref(false)
   let saveTimeout: ReturnType<typeof setTimeout> | undefined
@@ -65,12 +64,15 @@ export default function listItemModel(listItemData: TListItem) {
   }
 
   function generateTextareaRefName() {
-    return `textarea-${generatedId}`
+    return `textarea-${generatedId.value}`
+  }
+
+  function getTextarea() {
+    return document.querySelector(`textarea[id="${generateTextareaRefName()}"]`) as HTMLTextAreaElement
   }
 
   return {
     id,
-    $textarea,
     generatedId,
     text,
     noteId,
@@ -87,6 +89,7 @@ export default function listItemModel(listItemData: TListItem) {
     saveTimeout,
     restore,
     generateTextareaRefName,
+    getTextarea,
   }
 }
 

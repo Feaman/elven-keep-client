@@ -38,7 +38,7 @@
                 @keydown.enter="selectFocusedVariant($event)"
                 @focus="handleFocus(listItem)"
                 @blur="handleBlur(listItem)"
-                :model-value="listItem.text"
+                :value="listItem.text"
                 :id="listItem.generateTextareaRefName()"
               )
 
@@ -94,8 +94,9 @@
               @click="selectVariant(variantsListItem, variant)"
             )
               .limit-width.font-size-14(v-html="variant.highlightedText")
+              q-space
               .text-green.font-size-12.ml-2(v-if="variant.isExists") exists
-              .text-red.font-size-12.ml-2(v-if="variant.duplicatesQuantity") •&nbsp; {{ variant.duplicatesQuantity }}
+              .list-item__variant-info.text-red.font-size-12.ml-2(v-if="variant.duplicatesQuantity") •&nbsp; {{ variant.duplicatesQuantity }}
 </template>
 
 <script setup lang="ts">
@@ -143,14 +144,6 @@ const list = computed(() => {
 })
 const variantsElement = ref<QCard | null>(null)
 
-function getListItemTextarea(listItem: TListItemModel) {
-  return $root?.querySelector(`textarea[id="${listItem.generateTextareaRefName()}"]`) as HTMLTextAreaElement
-}
-
-function assignTextAreas() {
-  list.value.forEach((listItem) => listItem.$textarea = getListItemTextarea(listItem))
-}
-
 const order = computed({
   get() {
     return list.value.map((listItem) => listItem.id || 0)
@@ -178,9 +171,10 @@ function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
 
 async function checkVariants(listItem: TListItemModel) {
   variants.value = NotesService.findListItemVariants(listItem)
-  if (variants.value.length && listItem.$textarea) {
+  const $textarea = listItem.getTextarea()
+  if (variants.value.length && $textarea) {
     variantsListItem.value = listItem
-    const boundingBox = listItem.$textarea.getBoundingClientRect()
+    const boundingBox = $textarea.getBoundingClientRect()
     const menuHeight = variants.value.length * 34
     const y = calculateVariantsMenuYPosition(boundingBox.y, menuHeight)
     await nextTick()
@@ -246,9 +240,7 @@ async function init() {
   // handleTextareaKeydown($textarea as HTMLTextAreaElement)
   // })
 
-  assignTextAreas()
-  await nextTick()
-  ListItemsService.handleTextAreaHeights(list.value)
+  ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
 }
 
 onMounted(init)
@@ -337,10 +329,8 @@ async function add() {
   const listItem = ListItemsService.createListItem()
   note.addListItem(listItem as unknown as TListItemModel)
   await nextTick()
-  const $textarea = getListItemTextarea(listItem as unknown as TListItemModel)
-  listItem.$textarea = $textarea
   // handleTextareaKeydown($textarea)
-  $textarea.focus()
+  listItem.getTextarea().focus()
 }
 
 function check(event: Event, listItem: TListItemModel) {
@@ -367,15 +357,15 @@ function selectFocusedVariant(event: Event) {
 }
 
 async function updateText(listItem: TListItemModel, event: Event) {
-  if (!listItem.$textarea) {
+  const $textarea = event.target as HTMLTextAreaElement
+  if (!$textarea) {
     throw new Error('Textarea of the list item has not been found')
   }
-  const $texarea = event.target
   ListItemsService.handleListItemTextAreaHeight($textarea)
   if (listItem.saveTimeout) {
     clearTimeout(listItem.saveTimeout)
   }
-  listItem.text = (listItem.$textarea as unknown as HTMLTextAreaElement).value
+  listItem.text = ($textarea as unknown as HTMLTextAreaElement).value
   listItem.saveTimeout = setTimeout(() => {
     note.saveListItem(listItem)
     listItem.saveTimeout = undefined
@@ -391,15 +381,14 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
     const resultListItem = note.selectVariant(listItem, variant)
     variants.value = []
     await nextTick()
-    resultListItem.$textarea = getListItemTextarea(resultListItem)
-    ListItemsService.handleListItemTextAreaHeight(resultListItem.$textarea)
+    ListItemsService.handleListItemTextAreaHeight(resultListItem.getTextarea())
   }
 }
 
 function handleBlur(listItem: TListItemModel) {
-  ListItemsService.handleListItemTextAreaHeight(listItem.$textarea)
   note.blurListItem(listItem)
-  const $textArea = getListItemTextarea(listItem)
+  const $textArea = listItem.getTextarea()
+  ListItemsService.handleListItemTextAreaHeight($textArea)
   if ($textArea && $textArea.parentElement) {
     $textArea.parentElement.scrollTop = 0
   }
@@ -538,6 +527,10 @@ function handleBlur(listItem: TListItemModel) {
 
 .note-list__menu {
   .list-item__variants {
+    .list-item__variant-info {
+      min-width: 24px;
+    }
+
     .list-item__variant:not(:last-child) {
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     }

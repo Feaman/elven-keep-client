@@ -30,7 +30,7 @@ const props = defineProps<{
 }>()
 
 const statusCode = props.error.statusCode || 500
-const message = props.error.statusCode === 404 ? 'Page note found' : props.error.message
+const message = props.error.statusCode === 404 ? 'Page not found' : props.error.message
 
 function home() {
   window.location.href = '/'
