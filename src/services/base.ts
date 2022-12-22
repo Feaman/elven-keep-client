@@ -10,6 +10,8 @@ export type TEvents = {
 }
 
 export default class BaseService {
+  static URL = 'https://api.notes.pavlo.ru/'
+
   static showError: (error: Error | TGlobalError) => void
 
   static eventBus: Emitter<TEvents>

@@ -1,7 +1,8 @@
+import listItemModel, { TListItem, TListItemModel } from '~/composables/models/list-item'
+import noteModel, { TNoteModel } from '~/composables/models/note'
+import NotesService from '~/composables/services/notes'
 import BaseService from '~/services/base'
-import NoteModel from '~/models/note'
-import ListItemModel, { IListItem } from '~/models/list-item'
-import NotesService from '~/services/notes'
+import { useGlobalStore } from '~/stores/global'
 
 export default class SSEService extends BaseService {
   static EVENT_NOTE_ADDED = 'EVENT_NOTE_ADDED'
@@ -20,47 +21,48 @@ export default class SSEService extends BaseService {
 
   static eventSource: EventSource | null = null
 
+  static SSESalt = ''
+
   static init() {
-    this.eventSource = new EventSource(`${this.api.URL}events/${this.vuex.state.user.id}/${this.vuex.state.SSESalt}`)
+    const globalStore = useGlobalStore()
+    this.eventSource = new EventSource(`${BaseService.URL}events/${globalStore.user?.id}/${this.SSESalt}`)
 
-    this.eventSource.onerror = function (event: Event) {
+    this.eventSource.onerror = (event: Event) => {
       const target = event.target as WebSocket
-      switch (target.readyState) {
-        case EventSource.CONNECTING:
-          console.log('Reconnecting...')
-          break
+      if (target.readyState === EventSource.CONNECTING) {
+        console.log('Reconnecting...')
+      }
 
-        case EventSource.CLOSED:
-          console.log('Connection failed, will not reconnect')
-          break
+      if (target.readyState === EventSource.CLOSED) {
+        console.log('Connection failed, will not reconnect')
       }
     }
 
     this.eventSource.addEventListener(this.EVENT_NOTE_ADDED, (sourceEvent: Event) => {
       const event = sourceEvent as MessageEvent
       const noteData = JSON.parse(event.data)
-      const note = new NoteModel(noteData)
-      NotesService.vuex.commit('addNote', note)
+      const note = noteModel(noteData)
+      note.save()
     })
 
     this.eventSource.addEventListener(this.EVENT_NOTE_CHANGED, (sourceEvent: Event) => {
       const event = sourceEvent as MessageEvent
       const noteData = JSON.parse(event.data)
-      const note = this.vuex.state.notes.find((note: NoteModel) => note.id === noteData.id)
+      const note = NotesService.notes.value.find((note) => note.id === noteData.id)
       if (note) {
-        note.updateState({ title: noteData.title, text: noteData.text, isCompletedListExpanded: noteData.isCompletedListExpanded })
+        Object.assign(note, { title: noteData.title, text: noteData.text, isCompletedListExpanded: noteData.isCompletedListExpanded })
       }
     })
 
     this.eventSource.addEventListener(this.EVENT_NOTE_ORDER_SET, (sourceEvent: Event) => {
       const event = sourceEvent as MessageEvent
       const noteData = JSON.parse(event.data)
-      const note = this.vuex.state.notes.find((note: NoteModel) => note.id === noteData.id) as NoteModel
+      const note = NotesService.notes.value.find(() => note.id === noteData.id) as TNoteModel
       if (note && note.isList) {
-        noteData.list.forEach((listItemData: IListItem) => {
-          const listItem = note.list.find((listItem) => listItem.id === listItemData.id)
+        noteData.list.forEach((listItemData: TListItem) => {
+          const listItem = note.list.find(() => listItem.id === listItemData.id) as TListItemModel
           if (listItem) {
-            listItem.updateState({ order: listItemData.order })
+            listItem.order = Number(listItemData.order)
           }
         })
       }
@@ -69,31 +71,31 @@ export default class SSEService extends BaseService {
     this.eventSource.addEventListener(this.EVENT_NOTE_REMOVED, (sourceEvent: Event) => {
       const event = sourceEvent as MessageEvent
       const noteData = JSON.parse(event.data)
-      const note: NoteModel = this.vuex.state.notes.find((note: NoteModel) => note.id === noteData.id)
+      const note = NotesService.notes.value.find((note) => note.id === noteData.id)
       if (!note) {
         return
       }
-      note.removeFromState()
-      this.events.$emit('NOTE_REMOVED', note)
+      NotesService.notes.value = NotesService.notes.value.filter((_note) => _note.id !== note.id)
+      // this.events.$emit('NOTE_REMOVED', note)
     })
 
     this.eventSource.addEventListener(this.EVENT_LIST_ITEM_ADDED, (sourceEvent: Event) => {
       const event = sourceEvent as MessageEvent
       const listItemData = JSON.parse(event.data)
-      const note: NoteModel = this.vuex.state.notes.find((note: NoteModel) => note.id === listItemData.noteId)
+      const note = NotesService.notes.value.find((note) => note.id === listItemData.noteId)
       if (note) {
-        note.addListItem(listItemData)
+        note.addListItem(listItemModel(listItemData) as unknown as TListItemModel)
       }
     })
 
     this.eventSource.addEventListener(this.EVENT_LIST_ITEM_CHANGED, (sourceEvent: Event) => {
       const event = sourceEvent as MessageEvent
       const listItemData = JSON.parse(event.data)
-      const note: NoteModel = this.vuex.state.notes.find((note: NoteModel) => note.id === listItemData.noteId)
+      const note = NotesService.notes.value.find((note) => note.id === listItemData.noteId)
       if (note) {
-        const listItem = note.list.find((listItem: ListItemModel) => listItem.id === listItemData.id)
+        const listItem = note.list.find((listItem) => listItem.id === listItemData.id)
         if (listItem) {
-          listItem.updateState({ text: listItemData.text, checked: listItemData.checked, completed: listItemData.completed })
+          Object.assign(listItem, { text: listItemData.text, checked: listItemData.checked, completed: listItemData.completed })
         }
       }
     })
@@ -101,11 +103,11 @@ export default class SSEService extends BaseService {
     this.eventSource.addEventListener(this.EVENT_LIST_ITEM_REMOVED, (sourceEvent: Event) => {
       const event = sourceEvent as MessageEvent
       const listItemData = JSON.parse(event.data)
-      const note = this.vuex.state.notes.find((note: NoteModel) => note.id === listItemData.noteId)
+      const note = NotesService.notes.value.find((note) => note.id === listItemData.noteId)
       if (note) {
-        const listItem: ListItemModel = note.list.find((listItem: ListItemModel) => listItem.id === listItemData.id)
+        const listItem = note.list.find((listItem) => listItem.id === listItemData.id)
         if (listItem) {
-          listItem.removeFromState()
+          note.removeListItemSoft(listItem)
         }
       }
     })

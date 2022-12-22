@@ -1,4 +1,4 @@
-import { computed, ref, UnwrapRef } from 'vue'
+import { ref, UnwrapRef } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
@@ -33,7 +33,7 @@ export type TListItem = {
 export default function listItemModel(listItemData: TListItem) {
   const currentMilliseconds = (new Date()).getMilliseconds()
   const id = ref(listItemData.id)
-  const generatedId = computed(() => `${currentMilliseconds}-${id.value}`)
+  const generatedId = `${currentMilliseconds}-${id.value}`
   const text = ref(listItemData.text || '')
   const noteId = ref(listItemData.noteId)
   const order = ref(listItemData.order || 0)
@@ -44,10 +44,10 @@ export default function listItemModel(listItemData: TListItem) {
   const updated = ref(listItemData.updated ? new Date(listItemData.updated) : null)
   const statusId = ref(listItemData.statusId || StatusesService.active.value.id)
   const status = ref(StatusesService.findById(statusId.value))
-  let $textarea!: HTMLTextAreaElement
+  let $textarea: HTMLTextAreaElement | undefined
   const isCreating = ref(false)
   const isUpdateNeeded = ref(false)
-  const saveTimeout: ReturnType<typeof setTimeout> | null = null
+  let saveTimeout: ReturnType<typeof setTimeout> | undefined
 
   async function restore() {
     let result
@@ -62,6 +62,10 @@ export default function listItemModel(listItemData: TListItem) {
     }
 
     return result
+  }
+
+  function generateTextareaRefName() {
+    return `textarea-${generatedId}`
   }
 
   return {
@@ -82,6 +86,7 @@ export default function listItemModel(listItemData: TListItem) {
     isUpdateNeeded,
     saveTimeout,
     restore,
+    generateTextareaRefName,
   }
 }
 

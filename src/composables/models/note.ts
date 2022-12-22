@@ -49,7 +49,7 @@ export default function noteModel(noteData: TNote) {
   const isUpdateNeeded = ref(false)
   const unSavedListItems = ref<TListItemModel[]>([])
   const isList = computed(() => type.value?.name === TYPE_LIST)
-  let logId = 0
+  // let logId = 0
 
   const globalStore = useGlobalStore()
 
@@ -76,7 +76,8 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
-  async function createListItem(listItem: TListItemModel, logIid: number) {
+  // async function createListItem(listItem: TListItemModel, logIid: number) {
+  async function createListItem(listItem: TListItemModel) {
     listItem.noteId = id.value
     const data = await ApiService.addListItem(listItem)
     listItem.id = data.id
@@ -84,14 +85,15 @@ export default function noteModel(noteData: TNote) {
     listItem.updated = new Date(data.updated || '')
     listItem.isCreating = false
     if (listItem.isUpdateNeeded) {
-      console.log(`${logIid}: final update list item`)
+      // console.log(`${logIid}: final update list item`)
       const data = await ApiService.updateListItem(listItem)
       listItem.updated = new Date(data.updated || '')
       listItem.isUpdateNeeded = false
     }
   }
 
-  async function save(logIid: number) {
+  // async function save(logIid: number) {
+  async function save() {
     try {
       isSaving.value = true
       if (id.value) {
@@ -109,7 +111,8 @@ export default function noteModel(noteData: TNote) {
           await ApiService.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
           isUpdateNeeded.value = false
         }
-        unSavedListItems.value.forEach((listItem) => createListItem(listItem, logIid))
+        // unSavedListItems.value.forEach((listItem) => createListItem(listItem, logIid))
+        unSavedListItems.value.forEach((listItem) => createListItem(listItem))
       }
       isSaving.value = false
     } catch (error) {
@@ -130,27 +133,29 @@ export default function noteModel(noteData: TNote) {
         throw new Error(`List item with id "${listItem.id}" doesn't exists in note's with id "${id.value}" list`)
       }
       isSaving.value = true
-      logId += 1
-      const logIid = logId
+      // logId += 1
+      // const logIid = logId
       if (listItem.id) {
-        console.log(`${logIid}: update list item`)
+        // console.log(`${logIid}: update list item`)
         const data = await ApiService.updateListItem(listItem)
         listItem.updated = new Date(data.updated || '')
       } else if (listItem.isCreating) {
-        console.log(`${logIid}: need update`)
+        // console.log(`${logIid}: need update`)
         listItem.isUpdateNeeded = true
       } else {
         listItem.isCreating = true
         if (!id.value) {
           if (!isCreating.value) {
-            console.log(`${logIid}: create note`)
-            save(logIid)
+            // console.log(`${logIid}: create note`)
+            // save(logIid)
+            save()
           }
-          console.log(`${logIid}: schedule list item`)
+          // console.log(`${logIid}: schedule list item`)
           unSavedListItems.value.push(listItem)
         } else {
-          console.log(`${logIid}: create list item`)
-          await createListItem(listItem, logId)
+          // console.log(`${logIid}: create list item`)
+          // await createListItem(listItem, logId)
+          await createListItem(listItem)
         }
       }
       isSaving.value = false
@@ -269,7 +274,6 @@ export default function noteModel(noteData: TNote) {
       existentListItem.completed = false
       existentListItem.checked = false
       existentListItem.order = listItem.order
-      existentListItem.$textarea = listItem.$textarea
       saveListItem(existentListItem)
       removeListItem(listItem, false)
       return existentListItem
@@ -290,9 +294,12 @@ export default function noteModel(noteData: TNote) {
   handleType()
   handleUser(noteData.user)
 
-  watch(title, () => save(10000))
-  watch(text, () => save(10000))
-  watch(isCompletedListExpanded, () => save(10000))
+  // watch(title, () => save(10000))
+  // watch(text, () => save(10000))
+  // watch(isCompletedListExpanded, () => save(10000))
+  watch(title, () => save())
+  watch(text, () => save())
+  watch(isCompletedListExpanded, () => save())
 
   return {
     id,

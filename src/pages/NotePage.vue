@@ -1,5 +1,7 @@
 <template lang="pug">
-.note-page.full-height
+.note-page.full-height(
+  v-if="currentNote"
+)
   NoteToolbar(
     @fullscreen="fullscreen = true"
     @co-authors-clicked="showAuthors = true"
@@ -21,6 +23,7 @@ import noteModel, { type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
 import TypesService from '~/composables/services/types'
+import BaseService from '~/services/base'
 
 const { currentNote } = NotesService
 const route = useRoute()
@@ -36,7 +39,8 @@ function init() {
   } else if (/^\/note\/\d+$/.test(route.path)) {
     const foundNote = NotesService.notes.value.find((note: TNoteModel) => note.id === Number(route.params.id))
     if (!foundNote) {
-      throw new Error(`Note width id "${route.params.id}" not found`)
+      BaseService.showError({ statusCode: 404, message: `Note width id "${route.params.id}" not found` })
+      return
     }
     currentNote.value = foundNote
   }

@@ -1,6 +1,6 @@
 <template lang="pug">
 .note-list(
-  :class="{  'note-list--focused': note.isFocused }"
+  :class="{  'note-list--focused': note.isFocused, 'note-list--semi-focused': isSemiFocus }"
   ref="rootElement"
 )
   .note-list__container(
@@ -14,6 +14,7 @@
       )
         .list-item__container(
           v-for="listItem in list"
+          v-intersection.once="onIntersection"
           :key="listItem.generatedId"
           :class="{ 'list-item__container--focused': listItem.focused }"
         )
@@ -33,12 +34,12 @@
 
             .list-item__text.q-flex.items-center.column.mx-1.ml-2.py-1
               textarea.full-width.transition.pa-0(
-                @input="updateText(listItem)"
+                @input="updateText(listItem, $event)"
                 @keydown.enter="selectFocusedVariant($event)"
                 @focus="handleFocus(listItem)"
                 @blur="handleBlur(listItem)"
-                :value="listItem.text"
-                :id="generateTextareaRefName(listItem)"
+                :model-value="listItem.text"
+                :id="listItem.generateTextareaRefName()"
               )
 
             input.list-item__checkbox.mr-1(
@@ -122,17 +123,28 @@ const variantsMenuMaxWidth = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
 const note = unref(NotesService.currentNote as unknown as TNoteModel)
 const globalStore = useGlobalStore()
+const isSemiFocus = ref(false)
+let focusTimeout: ReturnType<typeof setTimeout> | undefined
+const itemsQuantityToShow = ref(1)
 
-// const list = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))
-const list = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))
-const variantsElement = ref<QCard | null>(null)
-
-function generateTextareaRefName(listItem: TListItemModel) {
-  return `textarea-${listItem.generatedId}`
+function onIntersection(entry: { isIntersecting: boolean }) {
+  if (!props.isMain && entry.isIntersecting) {
+    itemsQuantityToShow.value += 1
+  }
 }
 
+const fullList = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))
+const list = computed(() => {
+  if (!props.isMain && itemsQuantityToShow.value < fullList.value.length) {
+    return fullList.value.slice(0, itemsQuantityToShow.value)
+  }
+
+  return fullList.value
+})
+const variantsElement = ref<QCard | null>(null)
+
 function getListItemTextarea(listItem: TListItemModel) {
-  return $root?.querySelector(`textarea[id="${generateTextareaRefName(listItem)}"]`) as HTMLTextAreaElement
+  return $root?.querySelector(`textarea[id="${listItem.generateTextareaRefName()}"]`) as HTMLTextAreaElement
 }
 
 function assignTextAreas() {
@@ -166,7 +178,7 @@ function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
 
 async function checkVariants(listItem: TListItemModel) {
   variants.value = NotesService.findListItemVariants(listItem)
-  if (variants.value.length) {
+  if (variants.value.length && listItem.$textarea) {
     variantsListItem.value = listItem
     const boundingBox = listItem.$textarea.getBoundingClientRect()
     const menuHeight = variants.value.length * 34
@@ -181,8 +193,20 @@ async function checkVariants(listItem: TListItemModel) {
   }
 }
 
+function handleSemiFocus() {
+  isSemiFocus.value = false
+  if (focusTimeout) {
+    clearTimeout(focusTimeout)
+  }
+  focusTimeout = setTimeout(() => {
+    isSemiFocus.value = true
+  }, 2000)
+}
+
 function handleFocus(listItem: TListItemModel) {
   listItem.focused = true
+  isSemiFocus.value = false
+  handleSemiFocus()
   if (!listItem.checked && !listItem.completed) {
     checkVariants(listItem)
   }
@@ -214,10 +238,6 @@ function hideVariants(event: Event) {
 
 async function init() {
   $root = rootElement.value
-  if (props.isMain && list.value.length === 1 && !list.value[0].text) {
-    await nextTick()
-    list.value[0].$textarea.focus()
-  }
 
   document.addEventListener('mousedown', hideVariants)
 
@@ -346,16 +366,21 @@ function selectFocusedVariant(event: Event) {
   // }
 }
 
-async function updateText(listItem: TListItemModel) {
-  ListItemsService.handleListItemTextAreaHeight(listItem.$textarea)
+async function updateText(listItem: TListItemModel, event: Event) {
+  if (!listItem.$textarea) {
+    throw new Error('Textarea of the list item has not been found')
+  }
+  const $texarea = event.target
+  ListItemsService.handleListItemTextAreaHeight($textarea)
   if (listItem.saveTimeout) {
     clearTimeout(listItem.saveTimeout)
   }
-  listItem.text = listItem.$textarea?.value
+  listItem.text = (listItem.$textarea as unknown as HTMLTextAreaElement).value
   listItem.saveTimeout = setTimeout(() => {
     note.saveListItem(listItem)
-    listItem.saveTimeout = null
-  }, 400) as unknown as null
+    listItem.saveTimeout = undefined
+  }, 400)
+  handleSemiFocus()
   if (!listItem.checked && !listItem.completed) {
     await checkVariants(listItem)
   }
@@ -366,6 +391,7 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
     const resultListItem = note.selectVariant(listItem, variant)
     variants.value = []
     await nextTick()
+    resultListItem.$textarea = getListItemTextarea(resultListItem)
     ListItemsService.handleListItemTextAreaHeight(resultListItem.$textarea)
   }
 }
@@ -385,6 +411,12 @@ function handleBlur(listItem: TListItemModel) {
   &.note-list--focused {
     .list-item {
       opacity: 0.5;
+    }
+  }
+
+  &.note-list--semi-focused {
+    .list-item {
+      opacity: 1;
     }
   }
 

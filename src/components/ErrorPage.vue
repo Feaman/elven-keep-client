@@ -9,8 +9,15 @@
     .error-page__title.text-h3.text-weight-bold.mt-8 Awww... What the dragon?!
     .error-page__message.text-h4.text-blue-5.font-size-18.ml-1.mt-8 {{ message }}
     q-btn.mt-6(
+      v-if="statusCode !== 404"
       @click="reload"
       label="Maybe Reload?"
+      color="pink"
+    )
+    q-btn.mt-6(
+      v-else
+      @click="home"
+      label="go to the main page"
       color="pink"
     )
 </template>
@@ -24,6 +31,10 @@ const props = defineProps<{
 
 const statusCode = props.error.statusCode || 500
 const message = props.error.statusCode === 404 ? 'Page note found' : props.error.message
+
+function home() {
+  window.location.href = '/'
+}
 
 function reload() {
   window.location.reload()

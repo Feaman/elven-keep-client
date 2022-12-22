@@ -3,6 +3,7 @@ import { boot } from 'quasar/wrappers'
 import UsersService from '~/composables/services/users'
 import ApiService from '~/services/api/api'
 import AxiosApi from '~/services/api/axios-api'
+import BaseService from '~/services/base'
 import StorageService from '~/services/storage'
 
 declare module '@vue/runtime-core' {
@@ -17,7 +18,7 @@ declare module '@vue/runtime-core' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const axiosInstance = axios.create({ baseURL: 'https://api.notes.pavlo.ru/' })
+const axiosInstance = axios.create({ baseURL: BaseService.URL })
 
 export default boot(() => {
   const axiosApi = new AxiosApi(axiosInstance)
