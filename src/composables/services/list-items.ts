@@ -4,6 +4,8 @@ import { type TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 
 const removingListItems = ref<TListItemModel[]>([])
+const listItemMinHeight = 36
+const variantsListItemMinHeight = 34
 
 function handleListItemTextAreaHeight($textArea: HTMLTextAreaElement) {
   let textAreaHeight = 0
@@ -44,7 +46,9 @@ function createListItem() {
 }
 
 export default {
+  listItemMinHeight,
   removingListItems,
+  variantsListItemMinHeight,
   handleTextAreaHeights,
   handleListItemTextAreaHeight,
   filterCompleted,

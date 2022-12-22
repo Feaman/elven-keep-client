@@ -161,9 +161,9 @@ const emit = defineEmits<{
   (event: 'hide'): void
 }>()
 
-function updateListItemOrder(listItem: TListItemModel, order: number) {
-  listItem.order = order
-}
+// function updateListItemOrder(listItem: TListItemModel, order: number) {
+//   listItem.order = order
+// }
 
 async function addCoAuthor() {
   try {

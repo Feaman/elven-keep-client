@@ -6,19 +6,19 @@
     @hide="emit('close')"
     :model-value="show"
     :maximized="true"
-    transition-show="flip-right"
-    transition-hide="flip-left"
+    transition-show="slide-right"
+    transition-hide="slide-left"
     seamless
   )
     q-card.full-width.full-height.q-flex.justify-center
       q-card-section.fullscreen__card-section.full-height.column.no-wrap.pa-4.px-6
         TransitionGroup(
           name="vertical-list"
-          style="position: relative"
         )
           .list-item.q-flex.items-center(
             v-for="listItem in note.mainListItems"
             :key="listItem.generatedId"
+            :class="{ 'list-item--checked': listItem.checked}"
           )
             q-checkbox(
               @update:model-value="note.checkOrUncheckListItem(listItem, $event)"
@@ -26,15 +26,15 @@
               color="blue"
             )
             .list-item__text.ml-2 {{ listItem.text }}
-          q-space
-          .text-center.pb-4
-            q-btn(
-              @click="emit('close')"
-              :icon="mdiCheck"
-              size="lg"
-              color="green"
-              round
-            )
+        q-space
+        .text-center.pb-4
+          q-btn(
+            @click="emit('close')"
+            :icon="mdiCheck"
+            size="lg"
+            color="green"
+            round
+          )
 </template>
 
 <script setup lang="ts">
@@ -65,6 +65,12 @@ const note = unref(NotesService.currentNote as unknown as TNoteModel)
   overflow: auto;
 
   .list-item {
+    &.list-item--checked {
+      color: $grey-4;
+      text-decoration: line-through;
+      transition: color 0.2s;
+    }
+
     .list-item__text {
       overflow: auto;
     }

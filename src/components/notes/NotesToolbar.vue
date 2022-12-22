@@ -10,14 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiFormatListBulletedSquare, mdiTextBoxOutline } from '@quasar/extras/mdi-v6'
-import { useRouter } from 'vue-router'
 import CreateTools from '../CreateTools.vue'
-
-const router = useRouter()
-// function goToPage(page: string) {
-// router.push(page)
-// }
 </script>
 
 <style lang="scss" scoped>

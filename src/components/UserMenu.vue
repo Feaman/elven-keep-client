@@ -12,8 +12,10 @@
       transition-show="scale"
       transition-hide="jump-left"
     )
-      q-list
-        q-item.pa-0
+      q-list(
+        separator
+      )
+        q-item.shadow-1.pa-0
           .bg-grey-4.px-4.pt-2.pb-2.full-width
             .text-weight-bold {{ globalStore.user?.getFio() }}
             .font-size-14.text-grey-8.text--darken-1 {{globalStore.user?.email }}
@@ -31,11 +33,16 @@
           clickable
         )
           q-item-section
-            .cursor-pointer.py-1(@click="globalStore.user?.signOut()") Logout
+            .q-flex.items-center
+              q-icon(
+                :name="mdiLogout"
+                color="black"
+              )
+              .cursor-pointer.py-1.ml-2(@click="globalStore.user?.signOut()") Sign out
 </template>
 
 <script setup lang="ts">
-import { mdiAccountTie } from '@quasar/extras/mdi-v6'
+import { mdiAccountTie, mdiLogout } from '@quasar/extras/mdi-v6'
 import { useGlobalStore } from '~/stores/global'
 
 const globalStore = useGlobalStore()

@@ -257,8 +257,12 @@ export default function noteModel(noteData: TNote) {
 
   function blurListItem(listItem: TListItemModel) {
     listItem.focused = false
-    if (!listItem.text) {
-      setTimeout(() => removeListItemSoft(listItem), 200)
+    if (!listItem.text.trim()) {
+      if (listItem.id) {
+        removeListItem(listItem, false)
+      } else {
+        setTimeout(() => removeListItemSoft(listItem), 200)
+      }
     } else if (listItem.text !== listItem.text.trim()) {
       listItem.text = listItem.text.trim()
       saveListItem(listItem)

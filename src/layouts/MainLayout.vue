@@ -46,7 +46,6 @@ q-layout(
                 height="24px"
               )
   q-page-container.page.pa-0(v-else)
-    .header
     router-view.page-content(
       v-slot="{ Component }"
     )
@@ -166,13 +165,6 @@ watch(() => globalStore.initError, () => {
 .page {
   height: 100vh;
   height: calc(var(--vh, 1vh) * 100);
-
-  .header {
-    width: 100%;
-    height: 50px;
-    position: absolute;
-    background-color: #fbc02d;
-  }
 
   .page-content {
     position: relative;

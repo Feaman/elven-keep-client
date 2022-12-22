@@ -31,8 +31,8 @@
               type="checkbox"
             )
 
-            .list-item__text.q-flex.items-center.column.mx-1.ml-2.py-1
-              textarea.full-width.transition.pa-0(
+            .list-item__text.q-flex.items-center.column.mx-1.ml-2
+              textarea.full-width.transition(
                 @input="updateText(listItem, $event)"
                 @keydown.enter="selectFocusedVariant($event)"
                 @focus="handleFocus(listItem)"
@@ -60,17 +60,22 @@
         v-intersection="onIntersection"
       )
 
-    .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
-      v-if="isMain"
-      :class="{ 'note-list__create-button--alone': !list.length }"
-      @click="add"
+    transition(
+      appear
+      enter-active-class="animated zoomIn"
+      leave-active-class="animated zoomOut"
     )
-      q-icon(
-        color="grey"
-        :name="mdiPlus"
-        size="sm"
+      .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
+        v-if="isMain && !isHasNotSavedListItem"
+        :class="{ 'note-list__create-button--alone': !list.length }"
+        @click="add"
       )
-      .text-grey.ml-2 Add item
+        q-icon(
+          color="grey"
+          :name="mdiPlus"
+          size="sm"
+        )
+        .text-grey.ml-2 Add item
 
   transition(
     appear
@@ -128,11 +133,14 @@ const note = unref(NotesService.currentNote as unknown as TNoteModel)
 const globalStore = useGlobalStore()
 const isSemiFocus = ref(false)
 let focusTimeout: ReturnType<typeof setTimeout> | undefined
-const listItemsToShow = ref(Math.round((window.innerHeight - 140) / 30))
+const listItemsToShow = ref(Math.round((window.innerHeight - 140) / ListItemsService.listItemMinHeight))
 
-function onIntersection(entry: { isIntersecting: boolean }) {
+async function onIntersection(entry: { isIntersecting: boolean }) {
   if (!props.isMain && entry.isIntersecting) {
-    listItemsToShow.value += 50
+    listItemsToShow.value += 100
+    await nextTick()
+    await nextTick()
+    ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
   }
 }
 
@@ -144,25 +152,26 @@ const list = computed(() => {
 
   return fullList.value
 })
+const isHasNotSavedListItem = computed(() => list.value.find((listItem) => !listItem.id))
 const variantsElement = ref<QCard | null>(null)
 
-const order = computed({
-  get() {
-    return list.value.map((listItem) => listItem.id || 0)
-  },
-  set(order) {
-    order.forEach((listItemId, index) => {
-      const listItem = list.value.find((listItem) => listItem.id === listItemId)
-      if (!listItem) {
-        throw new Error(`List item ${listItemId} not found`)
-      }
-      // emit('update-order', listItem, index + 1)
-    })
-    if (note.id) {
-      NotesService.setOrder(note, order)
-    }
-  },
-})
+// const order = computed({
+//   get() {
+//     return list.value.map((listItem) => listItem.id || 0)
+//   },
+//   set(order) {
+//     order.forEach((listItemId, index) => {
+//       const listItem = list.value.find((listItem) => listItem.id === listItemId)
+//       if (!listItem) {
+//         throw new Error(`List item ${listItemId} not found`)
+//       }
+//       // emit('update-order', listItem, index + 1)
+//     })
+//     if (note.id) {
+//       NotesService.setOrder(note, order)
+//     }
+//   },
+// })
 
 function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
   if (yPosition - 50 > menuHeight) {
@@ -177,7 +186,7 @@ async function checkVariants(listItem: TListItemModel) {
   if (variants.value.length && $textarea) {
     variantsListItem.value = listItem
     const boundingBox = $textarea.getBoundingClientRect()
-    const menuHeight = variants.value.length * 34
+    const menuHeight = variants.value.length * ListItemsService.variantsListItemMinHeight
     const y = calculateVariantsMenuYPosition(boundingBox.y, menuHeight)
     await nextTick()
     variantsMenuX.value = boundingBox.x
@@ -237,12 +246,18 @@ async function init() {
 
   document.addEventListener('mousedown', hideVariants)
 
+  if (props.isMain) {
+    ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
+  } else {
+    setTimeout(() => {
+      ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
+    }, 100)
+  }
+
   // BaseService.events.$on('keydown', handleKeyDown)
   // $el.querySelectorAll('.list-item textarea').forEach($textarea => {
   // handleTextareaKeydown($textarea as HTMLTextAreaElement)
   // })
-
-  ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
 }
 
 onMounted(init)
@@ -448,10 +463,20 @@ function handleBlur(listItem: TListItemModel) {
         background-color: #fff;
         transition: opacity 0.5s;
 
-        &.list-item--checked .list-item__text textarea {
-          color: $grey-4;
-          text-decoration: line-through;
-          transition: color 0.2s;
+        &.list-item--checked {
+
+          .list-item__text {
+
+            &:after {
+              color: $grey-4;
+            }
+
+            textarea {
+              color: $grey-4;
+              text-decoration: line-through;
+              transition: color 0.2s;
+            }
+          }
         }
 
         .list-item__checkbox {
@@ -476,20 +501,21 @@ function handleBlur(listItem: TListItemModel) {
           &.list-item__text--multi-line:after {
             content: '...';
             width: 100%;
-            height: 20px;
-            line-height: 12px;
+            height: 18px;
+            line-height: 10px;
             position: absolute;
-            top: 42px;
+            top: 46px;
             left: 0;
             background: #fff;
             cursor: text;
           }
 
           textarea {
-            height: 24px;
+            height: 36px;
             border: none;
             color: rgba(0, 0, 0, 0.87);
             line-height: 20px;
+            padding: 8px 0;
             outline: none;
             resize: none;
             overflow: hidden;
