@@ -14,7 +14,6 @@
       )
         .list-item__container(
           v-for="listItem in list"
-          v-intersection.once="onIntersection"
           :key="listItem.generatedId"
           :class="{ 'list-item__container--focused': listItem.focused }"
         )
@@ -57,6 +56,9 @@
               flat
               round
             )
+      div(
+        v-intersection="onIntersection"
+      )
 
     .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
       v-if="isMain"
@@ -126,18 +128,18 @@ const note = unref(NotesService.currentNote as unknown as TNoteModel)
 const globalStore = useGlobalStore()
 const isSemiFocus = ref(false)
 let focusTimeout: ReturnType<typeof setTimeout> | undefined
-const itemsQuantityToShow = ref(1)
+const listItemsToShow = ref(Math.round((window.innerHeight - 140) / 30))
 
 function onIntersection(entry: { isIntersecting: boolean }) {
   if (!props.isMain && entry.isIntersecting) {
-    itemsQuantityToShow.value += 1
+    listItemsToShow.value += 50
   }
 }
 
 const fullList = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))
 const list = computed(() => {
-  if (!props.isMain && itemsQuantityToShow.value < fullList.value.length) {
-    return fullList.value.slice(0, itemsQuantityToShow.value)
+  if (!props.isMain && listItemsToShow.value < fullList.value.length) {
+    return fullList.value.slice(0, listItemsToShow.value)
   }
 
   return fullList.value
