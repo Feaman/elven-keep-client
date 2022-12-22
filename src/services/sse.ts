@@ -21,7 +21,7 @@ export default class SSEService extends BaseService {
 
   static eventSource: EventSource | null = null
 
-  static SSESalt = ''
+  static SSESalt = `_${Math.random().toString(36).substring(2, 9)}_${(new Date()).getMilliseconds()}`
 
   static init() {
     const globalStore = useGlobalStore()

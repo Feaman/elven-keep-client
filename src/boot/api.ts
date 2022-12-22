@@ -4,6 +4,7 @@ import UsersService from '~/composables/services/users'
 import ApiService from '~/services/api/api'
 import AxiosApi from '~/services/api/axios-api'
 import BaseService from '~/services/base'
+import SSEService from '~/services/sse'
 import StorageService from '~/services/storage'
 
 declare module '@vue/runtime-core' {
@@ -27,6 +28,11 @@ export default boot(() => {
     const token = StorageService.get(UsersService.AUTH_TOKEN_NAME)
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
+    }
+
+    // Set SSE salt
+    if (config.headers) {
+      config.headers['x-sse-salt'] = SSEService.SSESalt
     }
 
     // Set SSE salt
