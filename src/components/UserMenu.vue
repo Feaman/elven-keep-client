@@ -1,7 +1,7 @@
 <template lang="pug">
 .user-menu
   q-btn(
-    :icon="mdiAccountTie"
+    :icon="mdiAccountOutline"
     color="black"
     flat
     round
@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiAccountTie, mdiLogout } from '@quasar/extras/mdi-v6'
+import { mdiAccountOutline, mdiLogout } from '@quasar/extras/mdi-v6'
 import { useGlobalStore } from '~/stores/global'
 
 const globalStore = useGlobalStore()

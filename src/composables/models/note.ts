@@ -267,6 +267,11 @@ export default function noteModel(noteData: TNote) {
       listItem.text = listItem.text.trim()
       saveListItem(listItem)
     }
+    const $textArea = listItem.getTextarea()
+    ListItemsService.handleListItemTextAreaHeight($textArea)
+    if ($textArea && $textArea.parentElement) {
+      $textArea.parentElement.scrollTop = 0
+    }
   }
 
   function selectVariant(listItem: TListItemModel, variant: TVariant) {

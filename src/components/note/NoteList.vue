@@ -18,7 +18,7 @@
           :class="{ 'list-item__container--focused': listItem.focused }"
         )
           .list-item.q-flex.items-center(
-            :class="listItemClasses(listItem)"
+            :class="{ 'list-item--checked': listItem.checked, 'list-item--completed': listItem.completed }"
           )
             //- q-icon.text-grey-6(
             //-   :name="mdiDrag"
@@ -36,7 +36,7 @@
                 @input="updateText(listItem, $event)"
                 @keydown.enter="selectFocusedVariant($event)"
                 @focus="handleFocus(listItem)"
-                @blur="handleBlur(listItem)"
+                @blur="note.blurListItem(listItem)"
                 :value="listItem.text"
                 :id="listItem.generateTextareaRefName()"
               )
@@ -61,7 +61,6 @@
       )
 
     transition(
-      appear
       enter-active-class="animated zoomIn"
       leave-active-class="animated zoomOut"
     )
@@ -217,13 +216,6 @@ function handleFocus(listItem: TListItemModel) {
   }
 }
 
-function listItemClasses(listItem: TListItemModel) {
-  return {
-    'list-item--checked': listItem.checked,
-    'list-item--completed': listItem.completed,
-  }
-}
-
 // function handleTextareaKeydown($textarea: HTMLTextAreaElement) {
 //   $textarea.onkeydown = (event: KeyboardEvent) => {
 //     if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, true)) {
@@ -375,9 +367,6 @@ function selectFocusedVariant(event: Event) {
 
 async function updateText(listItem: TListItemModel, event: Event) {
   const $textarea = event.target as HTMLTextAreaElement
-  if (!$textarea) {
-    throw new Error('Textarea of the list item has not been found')
-  }
   ListItemsService.handleListItemTextAreaHeight($textarea)
   if (listItem.saveTimeout) {
     clearTimeout(listItem.saveTimeout)
@@ -399,15 +388,6 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
     variants.value = []
     await nextTick()
     ListItemsService.handleListItemTextAreaHeight(resultListItem.getTextarea())
-  }
-}
-
-function handleBlur(listItem: TListItemModel) {
-  note.blurListItem(listItem)
-  const $textArea = listItem.getTextarea()
-  ListItemsService.handleListItemTextAreaHeight($textArea)
-  if ($textArea && $textArea.parentElement) {
-    $textArea.parentElement.scrollTop = 0
   }
 }
 </script>
