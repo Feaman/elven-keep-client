@@ -3,6 +3,7 @@ import listItemModel, { TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 import KeyboardEvents from '~/helpers/keyboard-events'
+import SwipeEvents from '~/helpers/swipe-events'
 
 const removingListItems = ref<TListItemModel[]>([])
 const listItemMinHeight = 36
@@ -57,10 +58,47 @@ function addTextareaKeydownEvent($textarea: HTMLTextAreaElement, callback: (even
   }
 }
 
+function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
+  const headerHeight = 50
+  const offset = 8
+  if (yPosition - headerHeight > menuHeight) {
+    return yPosition - menuHeight
+  }
+  return headerHeight + offset
+}
+
+function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel) {
+  const $textarea = listItem.getTextarea()
+  const swiper = new SwipeEvents($textarea)
+  swiper.onMove = (xDiff: number) => {
+    if (!listItem.checked && xDiff > 0) {
+      $textarea.style.opacity = `${10 / xDiff}`
+      if (xDiff > 30) {
+        $textarea.classList.add('text-strike')
+      } else {
+        $textarea.classList.remove('text-strike')
+      }
+    }
+  }
+  swiper.onEnd = (xDiff: number) => {
+    if (!listItem.checked) {
+      $textarea.style.opacity = '1'
+      $textarea.classList.remove('text-strike')
+      if (xDiff > 30) {
+        note.checkOrUncheckListItem(listItem, true)
+      }
+    } else if (xDiff < -30) {
+      note.checkOrUncheckListItem(listItem, false)
+    }
+  }
+}
+
 export default {
   listItemMinHeight,
   removingListItems,
   variantsListItemMinHeight,
+  addTextareaSwipeEvent,
+  calculateVariantsMenuYPosition,
   handleTextAreaHeights,
   handleListItemTextAreaHeight,
   filterCompleted,

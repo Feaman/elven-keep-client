@@ -168,7 +168,7 @@
 .vertical-list-enter-from,
 .vertical-list-leave-to {
   opacity: 0;
-  transform: scaleY(0.01) translate(0, 30px);
+  transform: translate(0, 30px);
 }
 
 .vertical-list-leave-active {

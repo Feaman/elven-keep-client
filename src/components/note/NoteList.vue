@@ -102,7 +102,7 @@
 
 <script setup lang="ts">
 import { mdiDrag, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
-import { ref, unref, watch, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, unref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { QCard } from 'quasar'
 // import draggable from 'vuedraggable'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
@@ -169,13 +169,6 @@ const variantsElement = ref<QCard | null>(null)
 //   },
 // })
 
-function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
-  if (yPosition - 50 > menuHeight) {
-    return yPosition - menuHeight
-  }
-  return 58
-}
-
 async function checkVariants(listItem: TListItemModel) {
   variants.value = NotesService.findListItemVariants(listItem)
   const $textarea = listItem.getTextarea()
@@ -183,7 +176,7 @@ async function checkVariants(listItem: TListItemModel) {
     variantsListItem.value = listItem
     const boundingBox = $textarea.getBoundingClientRect()
     const menuHeight = variants.value.length * ListItemsService.variantsListItemMinHeight
-    const y = calculateVariantsMenuYPosition(boundingBox.y, menuHeight)
+    const y = ListItemsService.calculateVariantsMenuYPosition(boundingBox.y, menuHeight)
     await nextTick()
     variantsMenuX.value = boundingBox.x
     variantsMenuY.value = y
@@ -289,6 +282,8 @@ async function init() {
     }, 100)
   }
 
+  list.value.forEach((listitem) => ListItemsService.addTextareaSwipeEvent(note, listitem))
+
   $root?.querySelectorAll('.list-item textarea').forEach(($textarea) => {
     ListItemsService.addTextareaKeydownEvent($textarea as HTMLTextAreaElement, focusNextItem)
   })
@@ -331,14 +326,6 @@ onUnmounted(() => {
 //     }
 //   }
 
-function check(event: Event, listItem: TListItemModel) {
-  note.checkOrUncheckListItem(listItem, (event.target as HTMLInputElement).checked)
-}
-
-function complete(event: Event, listItem: TListItemModel) {
-  note.completeListItem(listItem, (event.target as HTMLInputElement).checked)
-}
-
 function selectFocusedVariant(event: Event) {
   console.log(event)
   // if (this.variants.length) {
@@ -352,6 +339,14 @@ function selectFocusedVariant(event: Event) {
   //     event.preventDefault()
   //   }
   // }
+}
+
+function check(event: Event, listItem: TListItemModel) {
+  note.checkOrUncheckListItem(listItem, (event.target as HTMLInputElement).checked)
+}
+
+function complete(event: Event, listItem: TListItemModel) {
+  note.completeListItem(listItem, (event.target as HTMLInputElement).checked)
 }
 
 async function updateText(listItem: TListItemModel, event: Event) {
