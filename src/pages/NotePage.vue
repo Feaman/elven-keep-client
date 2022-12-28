@@ -17,16 +17,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import noteModel, { type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
 import TypesService from '~/composables/services/types'
+import KeyboardEvents from '~/helpers/keyboard-events'
 import BaseService from '~/services/base'
 
 const { currentNote } = NotesService
 const route = useRoute()
+const router = useRouter()
 const fullscreen = ref(false)
 const showAuthors = ref(false)
 
@@ -46,6 +48,26 @@ function init() {
   }
 }
 
+function handleEscapeButton() {
+  const focusedListItem = currentNote.value?.list.find((listItem) => listItem.focused)
+  const activeElementTagName = document.activeElement?.tagName.toLowerCase()
+  if (focusedListItem) {
+    focusedListItem.focused = false
+  } else if (['input', 'textarea'].includes(activeElementTagName || '')) {
+    (document.activeElement as HTMLInputElement | HTMLTextAreaElement).blur()
+  } else {
+    router.push('/')
+  }
+}
+
+function handleKeyDown(event: KeyboardEvent) {
+  switch (true) {
+    case KeyboardEvents.is(event, KeyboardEvents.ESCAPE):
+      handleEscapeButton()
+      break
+  }
+}
+
 init()
 
 watch(
@@ -55,10 +77,15 @@ watch(
   },
 )
 
+onMounted(() => {
+  document.onkeydown = handleKeyDown
+})
+
 onBeforeUnmount(() => {
   if (!currentNote.value?.id) {
     NotesService.notes.value = NotesService.notes.value.filter((_note) => _note.id !== currentNote.value?.id)
   }
+  document.onkeydown = null
 })
 </script>
 

@@ -69,6 +69,8 @@ module.exports = {
     'no-void': 'off',
     'no-nested-ternary': 'off',
     'max-classes-per-file': 'off',
+    'default-case': 'off',
+    'no-use-before-define': 'off',
 
     'no-shadow': 'off',
     'no-return-assign': 'off',

@@ -17,8 +17,6 @@ q-layout(
           v-for="index in 4"
           :key="index"
           type="rect"
-          width="250px"
-          height="300px"
         )
     template(
       v-if="['existed-note', 'new-note'].includes(String($route.name))"
@@ -158,8 +156,15 @@ watch(() => globalStore.initError, () => {
 .note {
   min-width: 250px;
   max-width: 300px;
-  height: 260px;
+  height: 300px;
   flex: 1;
+}
+
+@media (max-width: 700px) {
+  .note {
+    min-width: 148px;
+    height: 260px;
+  }
 }
 
 .page {

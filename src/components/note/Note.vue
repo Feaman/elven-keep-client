@@ -93,7 +93,7 @@
               tag="div"
               style="position: relative"
             )
-              q-item.co-author.py-0(
+              q-item.co-author.py-0.pr-1(
                 v-for="coAuthor in note.coAuthors"
                 :key="coAuthor.id"
               )
@@ -112,7 +112,7 @@
                       round
                       flat
                     )
-        .q-flex.full-width.mt-4.px-4
+        .q-flex.full-width.mt-4.pl-4.pr-1
           q-input.col(
             @clear="coAuthorError = ''"
             v-model="coAuthorEmail"
@@ -183,39 +183,6 @@ async function addCoAuthor() {
     coAuthorError.value = (error as AxiosError)?.response?.data?.message || (error as Error).message
   }
 }
-
-//   handleKeyDown(event: KeyboardEvent) {
-//     switch (true) {
-//       case KeyboardEvents.is(event, KeyboardEvents.BACKSPACE):
-//         this.back()
-//         break
-//       case KeyboardEvents.is(event, KeyboardEvents.ESCAPE):
-//         this.handleEscapeButton()
-//         break
-//     }
-//   }
-//   back() {
-//     const focusedListItem = this.note.list.find(item => item.focused)
-//     const activeElementTagName = document.activeElement?.tagName.toLowerCase()
-//     if (!['input', 'textarea'].includes(activeElementTagName || '') && !this.coAuthorsDialogShown && !focusedListItem) {
-//       this.$router.push('/')
-//     }
-//   }
-//   handleEscapeButton() {
-//     const focusedListItem = this.note.list.find(item => item.focused)
-//     if (this.coAuthorsDialogShown) {
-//       this.coAuthorsDialogShown = false
-//     } else if (focusedListItem) {
-//       focusedListItem.updateState({ focused: false })
-//       const $noteList: HTMLElement = (this.$refs.noteList as Vue).$el as HTMLElement
-//       if ($noteList) {
-//         $noteList.querySelectorAll('textarea').forEach(($textarea: HTMLTextAreaElement) => $textarea.blur())
-//       }
-//     } else {
-//       this.$router.go(-1)
-//     }
-//   }
-// }
 </script>
 
 <style lang="scss" scoped>
@@ -283,34 +250,7 @@ async function addCoAuthor() {
     :deep(.q-focus-helper) {
       display: none;
     }
-
-    //   .co-authors-list {
-    //     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    //     z-index: 20;
-    //   }
   }
-
-  // @media (max-width: 700px) {
-  //   .note {
-  //     .note .co-authors-list {
-  //       height: 64px;
-  //       padding: 4px 16px 16px 16px !important;
-  //     }
-
-  //     .co-authors-list .co-authors-list__title {
-  //       font-size: 14px;
-  //     }
-
-  //     .co-authors-list .co-authors-list__avatars {
-  //       margin-top: 4px !important;
-  //     }
-
-  //     .co-authors-list .co-authors-list__avatars .v-avatar {
-  //       min-width: 24px !important;
-  //       width: 24px !important;
-  //       height: 24px !important;
-  //     }
-  //   }
 }
 
 .note__authors {
@@ -326,10 +266,4 @@ async function addCoAuthor() {
     }
   }
 }
-
-// .co-authors {
-// max-height: 250px;
-// overflow-x: hidden;
-// overflow-y: auto;
-// }
 </style>

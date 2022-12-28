@@ -60,21 +60,16 @@
         v-intersection="onIntersection"
       )
 
-    transition(
-      enter-active-class="animated zoomIn"
-      leave-active-class="animated zoomOut"
+    .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
+      :class="{ 'note-list__create-button--alone': !list.length, 'note-list__create-button--disabled': !isAddButtonActive }"
+      @click="add"
     )
-      .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
-        v-if="isMain && !isHasNotSavedListItem"
-        :class="{ 'note-list__create-button--alone': !list.length }"
-        @click="add"
+      q-icon(
+        color="grey"
+        :name="mdiPlus"
+        size="sm"
       )
-        q-icon(
-          color="grey"
-          :name="mdiPlus"
-          size="sm"
-        )
-        .text-grey.ml-2 Add item
+      .text-grey.ml-2 Add item
 
   transition(
     appear
@@ -107,7 +102,7 @@
 
 <script setup lang="ts">
 import { mdiDrag, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
-import { ref, unref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, unref, watch, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { QCard } from 'quasar'
 // import draggable from 'vuedraggable'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
@@ -115,6 +110,7 @@ import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
 import { useGlobalStore } from '~/stores/global'
+import KeyboardEvents from '~/helpers/keyboard-events'
 
 const props = defineProps<{
   isMain?: boolean,
@@ -133,6 +129,7 @@ const globalStore = useGlobalStore()
 const isSemiFocus = ref(false)
 let focusTimeout: ReturnType<typeof setTimeout> | undefined
 const listItemsToShow = ref(Math.round((window.innerHeight - 140) / ListItemsService.listItemMinHeight))
+const isAddButtonActive = computed(() => props.isMain && !isHasNotSavedListItem.value)
 
 async function onIntersection(entry: { isIntersecting: boolean }) {
   if (!props.isMain && entry.isIntersecting) {
@@ -216,16 +213,49 @@ function handleFocus(listItem: TListItemModel) {
   }
 }
 
-// function handleTextareaKeydown($textarea: HTMLTextAreaElement) {
-//   $textarea.onkeydown = (event: KeyboardEvent) => {
-//     if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, true)) {
-//       this.focusNextItem(event)
-//     }
-//     if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, false, true)) {
-//       this.focusNextItem(event)
-//     }
-//   }
-// }
+function focusListItem(index: number) {
+  const nextListItem = list.value[index]
+  nextListItem.focused = true
+  nextListItem.getTextarea().focus()
+}
+
+async function add() {
+  if (isAddButtonActive.value) {
+    const listItem = ListItemsService.createListItem()
+    note.addListItem(listItem as unknown as TListItemModel)
+    await nextTick()
+    ListItemsService.addTextareaKeydownEvent(listItem.getTextarea(), focusNextItem)
+    listItem.getTextarea().focus()
+  }
+}
+
+function focusNextItem(event: KeyboardEvent) {
+  variantsShown.value = false
+  const focusedListItem = list.value.find((item) => item.focused)
+  if (focusedListItem) {
+    const focusedItemIndex = list.value.indexOf(focusedListItem)
+    if (focusedItemIndex === list.value.length - 1) {
+      add()
+      // if (props.isMain && focusedListItem.text) {
+      // add()
+      // } else if (props.isMain && !focusedListItem.id) {
+      //   const $textarea = $el.querySelector('.list .px-3:last-child .list-item textarea') as HTMLTextAreaElement
+      //   if ($textarea && $textarea.value) {
+      //     setTimeout(() => {
+      //       add()
+      //     }, 400)
+      //   } else if ($textarea && !$textarea.value) {
+      //     focusListItem(0)
+      //   }
+      // } else {
+      //   focusListItem(0)
+      // }
+    } else {
+      focusListItem(focusedItemIndex + 1)
+    }
+  }
+  event.preventDefault()
+}
 
 function hideVariants(event: Event) {
   if (!variantsElement.value?.$el.contains(event.target as Element)) {
@@ -233,10 +263,23 @@ function hideVariants(event: Event) {
   }
 }
 
+function handleKeyDown(event: KeyboardEvent) {
+  variantsShown.value = false
+  switch (true) {
+    case KeyboardEvents.is(event, KeyboardEvents.ARROW_UP):
+      // this.focusVariant('up')
+      break
+    case KeyboardEvents.is(event, KeyboardEvents.ARROW_DOWN):
+      // this.focusVariant('down')
+      break
+  }
+}
+
 async function init() {
   $root = rootElement.value
 
   document.addEventListener('mousedown', hideVariants)
+  document.onkeydown = handleKeyDown
 
   if (props.isMain) {
     ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
@@ -246,55 +289,20 @@ async function init() {
     }, 100)
   }
 
-  // BaseService.events.$on('keydown', handleKeyDown)
-  // $el.querySelectorAll('.list-item textarea').forEach($textarea => {
-  // handleTextareaKeydown($textarea as HTMLTextAreaElement)
-  // })
+  $root?.querySelectorAll('.list-item textarea').forEach(($textarea) => {
+    ListItemsService.addTextareaKeydownEvent($textarea as HTMLTextAreaElement, focusNextItem)
+  })
 }
 
 onMounted(init)
 
-onUnmounted(() => document.removeEventListener('mousedown', hideVariants))
+onUnmounted(() => {
+  document.removeEventListener('mousedown', hideVariants)
+  document.onkeydown = null
+})
 
 //   beforeDestroy () {
 //     BaseService.events.$off('keydown', this.handleKeyDown)
-//   }
-
-// focusNextItem (event: KeyboardEvent) {
-//   const focusedListItem = this.list.find(item => item.focused)
-//   if (focusedListItem) {
-//     const focusedItemIndex = this.list.indexOf(focusedListItem)
-//     if (focusedItemIndex === this.list.length - 1) {
-//       if (this.isMain && focusedListItem.text) {
-//         this.addNewListItem()
-//       } else if (this.isMain && !focusedListItem.id) {
-//         const $textarea = this.$el.querySelector('.list .px-3:last-child .list-item textarea') as HTMLTextAreaElement
-//         if ($textarea && $textarea.value) {
-//           setTimeout(() => {
-//             this.addNewListItem()
-//           }, 400)
-//         } else if ($textarea && !$textarea.value) {
-//           this.focusListItem(0)
-//         }
-//       } else {
-//         this.focusListItem(0)
-//       }
-//     } else {
-//       this.focusListItem(focusedItemIndex + 1)
-//     }
-//   }
-//   event.preventDefault()
-// }
-
-//   focusListItem (index: number) {
-//     const nextListItem = this.list[index]
-//     nextListItem.updateState({ focused: true })
-//     setTimeout(() => {
-//       const $textarea = ListItemsService.getListItemTextarea(this.list, nextListItem, this.$refs as { [key: string]: HTMLTextAreaElement[] })
-//       if ($textarea) {
-//         $textarea.focus()
-//       }
-//     })
 //   }
 
 // function handleMenuInput(isMenuOpened: boolean) {
@@ -302,17 +310,6 @@ onUnmounted(() => document.removeEventListener('mousedown', hideVariants))
 //     variants.value = []
 //   }
 // }
-
-//   handleKeyDown (event: KeyboardEvent) {
-//     switch (true) {
-//       case KeyboardEvents.is(event, KeyboardEvents.ARROW_UP):
-//         this.focusVariant('up')
-//         break
-//       case KeyboardEvents.is(event, KeyboardEvents.ARROW_DOWN):
-//         this.focusVariant('down')
-//         break
-//     }
-//   }
 
 //   focusVariant (direction: string) {
 //     if (this.variants.length) {
@@ -333,14 +330,6 @@ onUnmounted(() => document.removeEventListener('mousedown', hideVariants))
 //       this.variants = variants
 //     }
 //   }
-
-async function add() {
-  const listItem = ListItemsService.createListItem()
-  note.addListItem(listItem as unknown as TListItemModel)
-  await nextTick()
-  // handleTextareaKeydown($textarea)
-  listItem.getTextarea().focus()
-}
 
 function check(event: Event, listItem: TListItemModel) {
   note.checkOrUncheckListItem(listItem, (event.target as HTMLInputElement).checked)
@@ -517,9 +506,14 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
   .note-list__create-button {
     height: 24px;
     margin-left: 23px;
+    transition: opacity 0.3s;
 
     &.note-list__create-button--alone {
       margin-left: 0;
+    }
+
+    &.note-list__create-button--disabled {
+      opacity: 0;
     }
   }
 

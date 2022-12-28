@@ -2,6 +2,7 @@ import { ref, unref } from 'vue'
 import listItemModel, { TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
+import KeyboardEvents from '~/helpers/keyboard-events'
 
 const removingListItems = ref<TListItemModel[]>([])
 const listItemMinHeight = 36
@@ -45,6 +46,17 @@ function createListItem() {
   ))
 }
 
+function addTextareaKeydownEvent($textarea: HTMLTextAreaElement, callback: (event: KeyboardEvent) => void) {
+  $textarea.onkeydown = (event: KeyboardEvent) => {
+    if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, true)) {
+      callback(event)
+    }
+    if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, false, true)) {
+      callback(event)
+    }
+  }
+}
+
 export default {
   listItemMinHeight,
   removingListItems,
@@ -53,4 +65,5 @@ export default {
   handleListItemTextAreaHeight,
   filterCompleted,
   createListItem,
+  addTextareaKeydownEvent,
 }
