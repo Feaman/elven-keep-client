@@ -108,7 +108,7 @@ function findListItemVariants(listItem: TListItemModel) {
     return []
   }
 
-  return resultVariants.slice(0, 10)
+  return resultVariants.slice(0, 15)
 }
 
 function setOrder(note: TNoteModel, order: number[]) {

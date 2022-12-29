@@ -72,11 +72,20 @@ function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel) {
   const swiper = new SwipeEvents($textarea)
   swiper.onMove = (xDiff: number) => {
     if (!listItem.checked && xDiff > 0) {
-      $textarea.style.opacity = `${10 / xDiff}`
-      if (xDiff > 30) {
+      if (xDiff >= 30) {
         $textarea.classList.add('text-strike')
       } else {
+        $textarea.style.opacity = `${10 / xDiff}`
         $textarea.classList.remove('text-strike')
+      }
+    }
+    if (listItem.checked && xDiff < 0) {
+      if (xDiff <= -30) {
+        $textarea.classList.add('text-decoration-none')
+        $textarea.classList.add('text-black')
+      } else {
+        $textarea.classList.remove('text-decoration-none')
+        $textarea.classList.remove('text-black')
       }
     }
   }
@@ -88,6 +97,8 @@ function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel) {
         note.checkOrUncheckListItem(listItem, true)
       }
     } else if (xDiff < -30) {
+      $textarea.classList.remove('text-decoration-none')
+      $textarea.classList.remove('text-black')
       note.checkOrUncheckListItem(listItem, false)
     }
   }

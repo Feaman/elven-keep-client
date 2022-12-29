@@ -78,14 +78,13 @@ watch(
 )
 
 onMounted(() => {
-  document.onkeydown = handleKeyDown
+  BaseService.eventBus.on('keydown', handleKeyDown)
 })
 
 onBeforeUnmount(() => {
   if (!currentNote.value?.id) {
     NotesService.notes.value = NotesService.notes.value.filter((_note) => _note.id !== currentNote.value?.id)
   }
-  document.onkeydown = null
 })
 </script>
 

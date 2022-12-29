@@ -30,11 +30,11 @@ export default class SSEService extends BaseService {
     this.eventSource.onerror = (event: Event) => {
       const target = event.target as WebSocket
       if (target.readyState === EventSource.CONNECTING) {
-        console.log('Reconnecting...')
+        console.error('Reconnecting...')
       }
 
       if (target.readyState === EventSource.CLOSED) {
-        console.log('Connection failed, will not reconnect')
+        console.error('Connection failed, will not reconnect')
       }
     }
 

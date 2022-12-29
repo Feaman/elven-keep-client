@@ -137,7 +137,6 @@
 import { mdiCheckAll, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
 import { AxiosError } from 'axios'
 import { ref, unref } from 'vue'
-import { type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'

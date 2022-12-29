@@ -3,7 +3,7 @@
 @import './mixins.scss';
 
 // :root {
-  // --animate-duration: 3s;
+// --animate-duration: 3s;
 // }
 
 body {
@@ -61,4 +61,8 @@ body {
 
 .border-radius-0 {
   border-radius: 0
+}
+
+.text-decoration-none {
+  text-decoration: none !important;
 }

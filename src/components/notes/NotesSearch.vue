@@ -11,9 +11,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from 'vue'
+import { onMounted } from 'vue'
 import { searchQuery } from '~/composables/services/notes'
 import KeyboardEvents from '~/helpers/keyboard-events'
+import BaseService from '~/services/base'
 
 function handleEscapeButton(event: KeyboardEvent) {
   if (KeyboardEvents.is(event, KeyboardEvents.ESCAPE)) {
@@ -22,11 +23,7 @@ function handleEscapeButton(event: KeyboardEvent) {
 }
 
 onMounted(() => {
-  document.onkeydown = handleEscapeButton
-})
-
-onBeforeUnmount(() => {
-  document.onkeydown = null
+  BaseService.eventBus.on('keydown', handleEscapeButton)
 })
 </script>
 

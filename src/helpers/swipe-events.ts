@@ -59,7 +59,7 @@ export default class SwipeEvents {
       this.onMove(this.xDiff, this.yDiff)
     }
 
-    if (Math.abs(this.xDiff) > Math.abs(this.yDiff)) { /* most significant */
+    if (Math.abs(this.xDiff) > Math.abs(this.yDiff)) { // First, check if it horizontal or vertical movement
       if (this.xDiff < 0) {
         if (this.onRight) {
           this.onRight()

@@ -87,7 +87,7 @@
         q-item.list-item__variant(
           v-for="(variant, index) in variants"
           :key="index"
-          :class="{ 'list-item__focused': variant.focused }"
+          :class="{ 'list-item__variant--focused': variant.focused }"
           clickable v-ripple
         )
           q-item-section
@@ -111,6 +111,7 @@ import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
 import { useGlobalStore } from '~/stores/global'
 import KeyboardEvents from '~/helpers/keyboard-events'
+import BaseService from '~/services/base'
 
 const props = defineProps<{
   isMain?: boolean,
@@ -256,14 +257,33 @@ function hideVariants(event: Event) {
   }
 }
 
+function focusVariant(direction: string) {
+  if (variants.value.length) {
+    const focusedVariant = variants.value.find((variant) => variant.focused)
+    const newVariants = variants.value.map((variant) => ({ ...variant, focused: false }))
+    let currentIndex = direction === 'down' ? 0 : newVariants.length - 1
+    if (focusedVariant) {
+      const adding = (direction === 'down' ? 1 : -1)
+      const currentVariantIndex = variants.value.indexOf(focusedVariant)
+      currentIndex = currentVariantIndex + adding
+      if (currentIndex < 0) {
+        currentIndex = newVariants.length - 1
+      } else if (currentIndex > variants.value.length - 1) {
+        currentIndex = 0
+      }
+    }
+    newVariants[currentIndex].focused = true
+    variants.value = newVariants
+  }
+}
+
 function handleKeyDown(event: KeyboardEvent) {
-  variantsShown.value = false
   switch (true) {
     case KeyboardEvents.is(event, KeyboardEvents.ARROW_UP):
-      // this.focusVariant('up')
+      focusVariant('up')
       break
     case KeyboardEvents.is(event, KeyboardEvents.ARROW_DOWN):
-      // this.focusVariant('down')
+      focusVariant('down')
       break
   }
 }
@@ -272,7 +292,7 @@ async function init() {
   $root = rootElement.value
 
   document.addEventListener('mousedown', hideVariants)
-  document.onkeydown = handleKeyDown
+  BaseService.eventBus.on('keydown', handleKeyDown)
 
   if (props.isMain) {
     ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
@@ -293,52 +313,20 @@ onMounted(init)
 
 onUnmounted(() => {
   document.removeEventListener('mousedown', hideVariants)
-  document.onkeydown = null
 })
 
-//   beforeDestroy () {
-//     BaseService.events.$off('keydown', this.handleKeyDown)
-//   }
-
-// function handleMenuInput(isMenuOpened: boolean) {
-//   if (!isMenuOpened) {
-//     variants.value = []
-//   }
-// }
-
-//   focusVariant (direction: string) {
-//     if (this.variants.length) {
-//       const focusedVariant = this.variants.find(variant => variant.focused)
-//       const variants = this.variants.map(variant => Object.assign({}, variant, { focused: false }))
-//       let currentIndex = direction === 'down' ? 0 : variants.length - 1
-//       if (focusedVariant) {
-//         const adding = (direction === 'down' ? 1 : -1)
-//         const currentVariantIndex = this.variants.indexOf(focusedVariant)
-//         currentIndex = currentVariantIndex + adding
-//         if (currentIndex < 0) {
-//           currentIndex = variants.length - 1
-//         } else if (currentIndex > this.variants.length - 1) {
-//           currentIndex = 0
-//         }
-//       }
-//       variants[currentIndex].focused = true
-//       this.variants = variants
-//     }
-//   }
-
 function selectFocusedVariant(event: Event) {
-  console.log(event)
-  // if (this.variants.length) {
-  //   const focusedListItem = this.list.find((item) => item.focused)
-  //   if (!focusedListItem) {
-  //     throw new Error('Focused list item not found')
-  //   }
-  //   const focusedVariant = this.variants.find((variant) => variant.focused)
-  //   if (focusedVariant) {
-  //     this.selectVariant(focusedListItem, focusedVariant)
-  //     event.preventDefault()
-  //   }
-  // }
+  if (variants.value.length) {
+    const focusedListItem = list.value.find((item) => item.focused)
+    if (!focusedListItem) {
+      throw new Error('Focused list item not found')
+    }
+    const focusedVariant = variants.value.find((variant) => variant.focused)
+    if (focusedVariant) {
+      selectVariant(focusedListItem, focusedVariant)
+      event.preventDefault()
+    }
+  }
 }
 
 function check(event: Event, listItem: TListItemModel) {
