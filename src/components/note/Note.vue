@@ -160,10 +160,6 @@ const emit = defineEmits<{
   (event: 'hide'): void
 }>()
 
-// function updateListItemOrder(listItem: TListItemModel, order: number) {
-//   listItem.order = order
-// }
-
 async function addCoAuthor() {
   try {
     const existedEmail = note.coAuthors.find((_coAuthor) => _coAuthor.user.email === coAuthorEmail.value)

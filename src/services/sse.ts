@@ -57,7 +57,7 @@ export default class SSEService extends BaseService {
     this.eventSource.addEventListener(this.EVENT_NOTE_ORDER_SET, (sourceEvent: Event) => {
       const event = sourceEvent as MessageEvent
       const noteData = JSON.parse(event.data)
-      const note = NotesService.notes.value.find(() => note.id === noteData.id) as TNoteModel
+      const note = NotesService.notes.value.find((_note) => _note.id === noteData.id) as TNoteModel
       if (note && note.isList) {
         noteData.list.forEach((listItemData: TListItem) => {
           const listItem = note.list.find(() => listItem.id === listItemData.id) as TListItemModel

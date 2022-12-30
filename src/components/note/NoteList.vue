@@ -7,58 +7,62 @@
     :class="{ 'pb-3': isMain }"
   )
     .note-list__list
-      TransitionGroup(
-        name="vertical-list"
-        tag="div"
-        style="position: relative"
+      draggable(
+        v-model="list"
+        :set-data="setDragGhostData"
+        :component-data="{ name: drag ?  null : 'vertical-list' }"
+        @start="drag = true"
+        @end="drag = false"
+        tag="transition-group"
+        handle=".handle"
+        ghost-class="sortable-ghost"
+        item-key="generatedId"
       )
-        .list-item__container(
-          v-for="listItem in list"
-          :key="listItem.generatedId"
-          :class="{ 'list-item__container--focused': listItem.focused }"
+        template(
+          #item="{element}"
         )
-          .list-item.q-flex.items-center(
-            :class="{ 'list-item--checked': listItem.checked, 'list-item--completed': listItem.completed }"
+          .list-item__container(
+            :class="{ 'list-item__container--focused': element.focused }"
           )
-            //- q-icon.text-grey-6(
-            //-   :name="mdiDrag"
-            //-   size="sm"
-            //- )
-
-            input.list-item__checkbox.complete-checkbox(
-              @change="complete($event, listItem)"
-              :checked="listItem.completed"
-              type="checkbox"
+            .list-item.q-flex.items-center(
+              :class="{ 'list-item--checked': element.checked, 'list-item--completed': element.completed }"
             )
-
-            .list-item__text.q-flex.items-center.column.mx-1.ml-2
-              textarea.full-width.transition(
-                @input="updateText(listItem, $event)"
-                @keydown.enter="selectFocusedVariant($event)"
-                @focus="handleFocus(listItem)"
-                @blur="note.blurListItem(listItem)"
-                :value="listItem.text"
-                :id="listItem.generateTextareaRefName()"
+              q-icon.handle.text-grey-6(
+                :name="mdiDrag"
+                size="sm"
               )
 
-            input.list-item__checkbox.mr-1(
-              v-if="globalStore.user?.showChecked"
-              @change="check($event, listItem)"
-              :checked="listItem.checked"
-              :class="{ 'ml-9': !listItem.text }"
-              type="checkbox"
-              color="secondary"
-            )
-            q-btn.list-item__remove-button(
-              @click="note.removeListItem(listItem)"
-              :icon="mdiClose"
-              color="grey-5"
-              flat
-              round
-            )
-      div(
-        v-intersection="onIntersection"
-      )
+              input.list-item__checkbox.complete-checkbox(
+                @change="complete($event, element)"
+                :checked="element.completed"
+                type="checkbox"
+              )
+
+              .list-item__text.q-flex.items-center.column.mx-1.ml-2
+                textarea.full-width.transition(
+                  @input="updateText(element, $event)"
+                  @keydown.enter="selectFocusedVariant($event)"
+                  @focus="handleFocus(element)"
+                  @blur="note.blurListItem(element)"
+                  :value="element.text"
+                  :id="element.generateTextareaRefName()"
+                )
+
+              input.list-item__checkbox.mr-1(
+                v-if="globalStore.user?.showChecked"
+                @change="check($event, element)"
+                :checked="element.checked"
+                :class="{ 'ml-9': !element.text }"
+                type="checkbox"
+                color="secondary"
+              )
+              q-btn.list-item__remove-button(
+                @click="note.removeListItem(element)"
+                :icon="mdiClose"
+                color="grey-5"
+                flat
+                round
+              )
 
     .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
       :class="{ 'note-list__create-button--alone': !list.length, 'note-list__create-button--disabled': !isAddButtonActive }"
@@ -104,7 +108,7 @@
 import { mdiDrag, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
 import { ref, unref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { QCard } from 'quasar'
-// import draggable from 'vuedraggable'
+import draggable from 'zhyswan-vuedraggable'
 import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
@@ -131,44 +135,31 @@ const isSemiFocus = ref(false)
 let focusTimeout: ReturnType<typeof setTimeout> | undefined
 const listItemsToShow = ref(Math.round((window.innerHeight - 140) / ListItemsService.listItemMinHeight))
 const isAddButtonActive = computed(() => props.isMain && !isHasNotSavedListItem.value)
-
-async function onIntersection(entry: { isIntersecting: boolean }) {
-  if (!props.isMain && entry.isIntersecting) {
-    listItemsToShow.value += 100
-    await nextTick()
-    await nextTick()
-    ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
-  }
-}
-
 const fullList = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))
-const list = computed(() => {
-  if (!props.isMain && listItemsToShow.value < fullList.value.length) {
-    return fullList.value.slice(0, listItemsToShow.value)
-  }
+const drag = ref(false)
+const list = computed({
+  get() {
+    if (!props.isMain && listItemsToShow.value < fullList.value.length) {
+      return fullList.value.slice(0, listItemsToShow.value)
+    }
 
-  return fullList.value
+    return fullList.value
+  },
+  set(newList: TListItemModel[]) {
+    let newWholeList = []
+    if (props.isMain) {
+      newWholeList = [...newList, ...note.completedListItems]
+    } else {
+      newWholeList = [...note.mainListItems, ...newList, ...fullList.value.slice(listItemsToShow.value)]
+    }
+    newWholeList.forEach((listItem, index) => {
+      listItem.order = index + 1
+    })
+    NotesService.setOrder(note, newWholeList.map((listItem) => Number(listItem.id)))
+  },
 })
 const isHasNotSavedListItem = computed(() => list.value.find((listItem) => !listItem.id))
 const variantsElement = ref<QCard | null>(null)
-
-// const order = computed({
-//   get() {
-//     return list.value.map((listItem) => listItem.id || 0)
-//   },
-//   set(order) {
-//     order.forEach((listItemId, index) => {
-//       const listItem = list.value.find((listItem) => listItem.id === listItemId)
-//       if (!listItem) {
-//         throw new Error(`List item ${listItemId} not found`)
-//       }
-//       // emit('update-order', listItem, index + 1)
-//     })
-//     if (note.id) {
-//       NotesService.setOrder(note, order)
-//     }
-//   },
-// })
 
 async function checkVariants(listItem: TListItemModel) {
   variants.value = NotesService.findListItemVariants(listItem)
@@ -288,6 +279,18 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 }
 
+function loadMore() {
+  setTimeout(async () => {
+    if (listItemsToShow.value < fullList.value.length) {
+      listItemsToShow.value += 100
+      await nextTick()
+      await nextTick()
+      ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
+      loadMore()
+    }
+  }, 500)
+}
+
 async function init() {
   $root = rootElement.value
 
@@ -307,6 +310,11 @@ async function init() {
   $root?.querySelectorAll('.list-item textarea').forEach(($textarea) => {
     ListItemsService.addTextareaKeydownEvent($textarea as HTMLTextAreaElement, focusNextItem)
   })
+
+  // Load all list if needed
+  if (!props.isMain) {
+    loadMore()
+  }
 }
 
 onMounted(init)
@@ -362,6 +370,10 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
     ListItemsService.handleListItemTextAreaHeight(resultListItem.getTextarea())
   }
 }
+
+function setDragGhostData(dataTransfer: DataTransfer) {
+  dataTransfer.setDragImage(document.createElement('div'), 0, 0)
+}
 </script>
 
 <style lang="scss" scoped>
@@ -379,15 +391,12 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
   }
 
   .note-list__list {
-    // .sortable-drag {
-    //   opacity: 0 !important;
-    // }
-
-    // .sortable-ghost {
-    //   background-color: #fff;
-    //   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-    //   z-index: 20;
-    // }
+    .sortable-ghost {
+      position: relative;
+      background-color: #fff;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      z-index: 200;
+    }
 
     .list-item__container {
       width: 100%;
@@ -505,10 +514,6 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
     z-index: 30;
   }
 }
-
-// .hint-menu .v-list-item {
-//   min-height: 32px;
-// }
 
 .note-list__menu {
   .list-item__variants {
