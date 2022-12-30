@@ -127,8 +127,13 @@ export default class ApiService extends BaseService {
     return data as TCoAuthorModel
   }
 
-  static async setOrder(note: TNoteModel, order: number[]) {
+  static async setListItemsOrder(note: TNoteModel, order: number[]) {
     const { data } = await this.api.put(`notes/${note.id}/set-order`, { order })
+    return data
+  }
+
+  static async setNotesOrder(order: number[]) {
+    const { data } = await this.api.put('notes/set-order', { order })
     return data
   }
 

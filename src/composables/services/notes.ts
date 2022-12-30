@@ -17,25 +17,37 @@ function generateNotes(notesData: TNote[]) {
   })
 }
 
-const filtered = computed(() => {
-  const resultNotes = notes.value.filter((note) => note.statusId === StatusesService.active.value.id)
+function setNotesOrder(order: number[]) {
+  ApiService.setNotesOrder(order)
+}
 
-  resultNotes.sort((previousItem, nextItem) => ((previousItem.id || 0) < (nextItem.id || 0) ? 1 : -1))
+const filtered = computed({
+  get() {
+    const resultNotes = notes.value.filter((note) => note.statusId === StatusesService.active.value.id)
 
-  if (!searchQuery.value) {
-    return resultNotes
-  }
+    resultNotes.sort((previousItem, nextItem) => ((previousItem.order || previousItem.id || 0) < (nextItem.order || nextItem.id || 0) ? -1 : 1))
 
-  return resultNotes.filter((note: TNoteModel) => {
-    const regExp = new RegExp(searchQuery.value, 'i')
-    let foundInLisListItems = false
-    note.list.forEach((listItem) => {
-      if (regExp.test(listItem.text || '')) {
-        foundInLisListItems = true
-      }
+    if (!searchQuery.value) {
+      return resultNotes
+    }
+
+    return resultNotes.filter((note: TNoteModel) => {
+      const regExp = new RegExp(searchQuery.value, 'i')
+      let foundInLisListItems = false
+      note.list.forEach((listItem) => {
+        if (regExp.test(listItem.text || '')) {
+          foundInLisListItems = true
+        }
+      })
+      return regExp.test(note.title || '') || regExp.test(note.text || '') || foundInLisListItems
     })
-    return regExp.test(note.title || '') || regExp.test(note.text || '') || foundInLisListItems
-  })
+  },
+  set(newList) {
+    newList.forEach((note, index) => {
+      note.order = index + 1
+    })
+    setNotesOrder(newList.map((note) => Number(note.id)))
+  },
 })
 
 function findNoteListItemVariants(note: TNoteModel, variants: TVariant[], listItem: TListItemModel, query: string) {
@@ -111,8 +123,8 @@ function findListItemVariants(listItem: TListItemModel) {
   return resultVariants.slice(0, 15)
 }
 
-function setOrder(note: TNoteModel, order: number[]) {
-  ApiService.setOrder(note, order)
+function setListItemsOrder(note: TNoteModel, order: number[]) {
+  ApiService.setListItemsOrder(note, order)
 }
 
 function generateMaxOrder(listItemId: number, list: TListItemModel[]) {
@@ -142,7 +154,7 @@ export default {
   generateMaxOrder,
   generateNotes,
   findNoteListItemVariants,
-  setOrder,
+  setOrder: setListItemsOrder,
   findListItemVariants,
   removeNote,
 }

@@ -22,6 +22,7 @@ export interface TNote {
   status?: TStatusModel
   userId?: number
   user?: IUser
+  order?: number
   isCompletedListExpanded?: boolean
   list?: TListItem[]
   coAuthors?: ICoAuthor[]
@@ -34,6 +35,7 @@ export default function noteModel(noteData: TNote) {
   const isSaving = ref(false)
   const title = ref(noteData.title || '')
   const userId = ref(noteData.userId)
+  const order = ref(noteData.order)
   const text = ref(noteData.text || '')
   const typeId = ref(noteData.typeId || TypesService.list.value.id)
   const type = ref<TTypeModel | null>(null)
@@ -334,6 +336,7 @@ export default function noteModel(noteData: TNote) {
     isUpdateNeeded,
     user,
     isList,
+    order,
     checkOrUncheckListItem,
     addCoAuthor,
     createCoAuthor,
