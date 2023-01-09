@@ -127,12 +127,10 @@ function setListItemsOrder(note: TNoteModel, order: number[]) {
   ApiService.setListItemsOrder(note, order)
 }
 
-function generateMaxOrder(listItemId: number, list: TListItemModel[]) {
+function generateMaxOrder() {
   let order = 0
-  if (list.length) {
-    const numbers = list
-      .filter((_listItem) => _listItem.id !== listItemId)
-      .map((listItem) => listItem.order)
+  if (notes.value.length) {
+    const numbers = notes.value.map((note) => note.order)
     order = Math.max(...numbers)
   }
 

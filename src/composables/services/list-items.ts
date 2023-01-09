@@ -104,10 +104,23 @@ function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel) {
   }
 }
 
+function generateMaxOrder(listItemId: number, list: TListItemModel[]) {
+  let order = 0
+  if (list.length) {
+    const numbers = list
+      .filter((_listItem) => _listItem.id !== listItemId)
+      .map((listItem) => listItem.order)
+    order = Math.max(...numbers)
+  }
+
+  return order + 1
+}
+
 export default {
   listItemMinHeight,
   removingListItems,
   variantsListItemMinHeight,
+  generateMaxOrder,
   addTextareaSwipeEvent,
   calculateVariantsMenuYPosition,
   handleTextAreaHeights,

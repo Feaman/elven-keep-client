@@ -22,7 +22,7 @@ export interface TNote {
   status?: TStatusModel
   userId?: number
   user?: IUser
-  order?: number
+  order: number
   isCompletedListExpanded?: boolean
   list?: TListItem[]
   coAuthors?: ICoAuthor[]
@@ -104,7 +104,7 @@ export default function noteModel(noteData: TNote) {
         isUpdateNeeded.value = true
       } else {
         isCreating.value = true
-        const noteData = await ApiService.addNote(list.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
+        const noteData = await ApiService.addNote(list.value, title.value, text.value, typeId.value, order.value, isCompletedListExpanded.value)
         id.value = noteData.id
         userId.value = noteData.user?.id
         window.history.replaceState({}, '', `/note/${noteData.id}`)
@@ -246,7 +246,7 @@ export default function noteModel(noteData: TNote) {
 
   function completeListItem(listItem: TListItemModel, isCompleted: boolean) {
     listItem.completed = isCompleted
-    listItem.order = NotesService.generateMaxOrder(Number(id.value), list.value)
+    listItem.order = ListItemsService.generateMaxOrder(Number(id.value), list.value)
     saveListItem(listItem)
   }
 

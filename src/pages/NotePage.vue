@@ -35,7 +35,7 @@ const showAuthors = ref(false)
 function init() {
   if (['/new/list', '/new/text'].includes(route.path)) {
     const type = route.path === '/new/list' ? TYPE_LIST : TYPE_TEXT
-    const note = noteModel({ typeId: TypesService.findByName(type).id }) as unknown as TNoteModel
+    const note = noteModel({ typeId: TypesService.findByName(type).id, order: NotesService.generateMaxOrder() }) as unknown as TNoteModel
     NotesService.notes.value.push(note as unknown as TNoteModel)
     currentNote.value = note
   } else if (/^\/note\/\d+$/.test(route.path)) {

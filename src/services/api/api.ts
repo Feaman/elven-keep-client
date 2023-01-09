@@ -28,6 +28,7 @@ export default class ApiService extends BaseService {
     title: string,
     text: string,
     typeId: number,
+    order: number,
     isCompletedListExpanded: boolean,
   ): Promise<TNote> {
     const noteData = {
@@ -35,6 +36,7 @@ export default class ApiService extends BaseService {
       text,
       typeId,
       list: [] as TListItem[],
+      order,
       isCompletedListExpanded,
     }
 
