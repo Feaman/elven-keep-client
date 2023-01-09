@@ -12,10 +12,10 @@
 </template>
 
 <script setup lang="ts">
-import type { CoAuthorModel } from '~/composables/models/co-author'
+import type { TCoAuthorModel } from '~/composables/models/co-author'
 
 defineProps<{
-  coAuthors: CoAuthorModel[],
+  coAuthors: TCoAuthorModel[],
 }>()
 </script>
 

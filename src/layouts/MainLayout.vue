@@ -14,7 +14,7 @@ q-layout(
       )
       .row.pa-4
         q-skeleton.note.bg-grey-3.ma-2(
-          v-for="index in 4"
+          v-for="index in 6"
           :key="index"
           type="rect"
         )

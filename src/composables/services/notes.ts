@@ -32,7 +32,7 @@ const filtered = computed({
     }
 
     return resultNotes.filter((note: TNoteModel) => {
-      const regExp = new RegExp(searchQuery.value, 'i')
+      const regExp = new RegExp(searchQuery.value.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&'), 'i')
       let foundInLisListItems = false
       note.list.forEach((listItem) => {
         if (regExp.test(listItem.text || '')) {
@@ -94,7 +94,7 @@ function findListItemVariants(listItem: TListItemModel) {
 
   // Duplicates and unique
   const resultVariants: TVariant[] = []
-  const regexp = new RegExp(query, 'i')
+  const regexp = new RegExp(query.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&'), 'i')
   variants.forEach((variant) => {
     if (!resultVariants.find((item) => item.text.toLowerCase() === variant.text.toLowerCase())) {
       const duplicates = variants.filter((_element) => (

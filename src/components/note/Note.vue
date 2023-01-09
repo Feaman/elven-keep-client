@@ -87,7 +87,7 @@
                 caption
               ) {{ note.user?.email  }}
           template(v-if="note.coAuthors.length")
-            q-item-label.font-size-16.py-0.pt-4(header) Co-Authors
+            q-item-label.font-size-16.py-0.pt-4(header) Co-Author{{ note.coAuthors.length > 1 ? 's' : '' }}
             TransitionGroup(
               name="vertical-list"
               tag="div"

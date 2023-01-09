@@ -245,9 +245,8 @@ export default function noteModel(noteData: TNote) {
   }
 
   function completeListItem(listItem: TListItemModel, isCompleted: boolean) {
-    const newOrder = NotesService.generateMaxOrder(Number(id.value), list.value)
     listItem.completed = isCompleted
-    listItem.order = newOrder
+    listItem.order = NotesService.generateMaxOrder(Number(id.value), list.value)
     saveListItem(listItem)
   }
 
