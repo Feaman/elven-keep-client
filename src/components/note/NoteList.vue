@@ -65,7 +65,8 @@
               )
 
     .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
-      :class="{ 'note-list__create-button--alone': !list.length, 'note-list__create-button--disabled': !isAddButtonActive }"
+      v-if="props.isMain"
+      :class="{ 'note-list__create-button--alone': !list.length }"
       @click="add"
     )
       q-icon(
@@ -121,8 +122,9 @@ const props = defineProps<{
   isMain?: boolean,
 }>()
 
-const rootElement = ref<HTMLElement | null>(null)
 let $root: HTMLElement | null
+let focusTimeout: ReturnType<typeof setTimeout> | undefined
+const rootElement = ref<HTMLElement | null>(null)
 const variants = ref<TVariant[]>([])
 const variantsMenuX = ref(0)
 const variantsShown = ref(false)
@@ -132,9 +134,8 @@ const variantsListItem = ref<TListItemModel | null>(null)
 const note = unref(NotesService.currentNote as unknown as TNoteModel)
 const globalStore = useGlobalStore()
 const isSemiFocus = ref(false)
-let focusTimeout: ReturnType<typeof setTimeout> | undefined
+const variantsElement = ref<QCard | null>(null)
 const listItemsToShow = ref(Math.round((window.innerHeight - 140) / ListItemsService.listItemMinHeight))
-const isAddButtonActive = computed(() => props.isMain && !isHasNotSavedListItem.value)
 const fullList = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))
 const drag = ref(false)
 const list = computed({
@@ -158,8 +159,6 @@ const list = computed({
     NotesService.setOrder(note, newWholeList.map((listItem) => Number(listItem.id)))
   },
 })
-const isHasNotSavedListItem = computed(() => list.value.find((listItem) => !listItem.id))
-const variantsElement = ref<QCard | null>(null)
 
 async function checkVariants(listItem: TListItemModel) {
   variants.value = NotesService.findListItemVariants(listItem)
@@ -205,13 +204,13 @@ function focusListItem(index: number) {
 }
 
 async function add() {
-  if (isAddButtonActive.value) {
-    const listItem = ListItemsService.createListItem()
-    note.addListItem(listItem as unknown as TListItemModel)
-    await nextTick()
-    ListItemsService.addTextareaKeydownEvent(listItem.getTextarea(), focusNextItem)
-    listItem.getTextarea().focus()
-  }
+  const listItem = ListItemsService.createListItem()
+  note.addListItem(listItem as unknown as TListItemModel)
+  const unRefListItem = note.list.find((_listItem) => _listItem.generatedId === listItem.generatedId.value)
+  note.saveListItem(unRefListItem as unknown as TListItemModel)
+  await nextTick()
+  ListItemsService.addTextareaKeydownEvent(listItem.getTextarea(), focusNextItem)
+  listItem.getTextarea().focus()
 }
 
 function focusNextItem(event: KeyboardEvent) {
@@ -221,20 +220,6 @@ function focusNextItem(event: KeyboardEvent) {
     const focusedItemIndex = list.value.indexOf(focusedListItem)
     if (focusedItemIndex === list.value.length - 1) {
       add()
-      // if (props.isMain && focusedListItem.text) {
-      // add()
-      // } else if (props.isMain && !focusedListItem.id) {
-      //   const $textarea = $el.querySelector('.list .px-3:last-child .list-item textarea') as HTMLTextAreaElement
-      //   if ($textarea && $textarea.value) {
-      //     setTimeout(() => {
-      //       add()
-      //     }, 400)
-      //   } else if ($textarea && !$textarea.value) {
-      //     focusListItem(0)
-      //   }
-      // } else {
-      //   focusListItem(0)
-      // }
     } else {
       focusListItem(focusedItemIndex + 1)
     }
@@ -497,15 +482,12 @@ function setDragGhostData(dataTransfer: DataTransfer) {
 
   .note-list__create-button {
     height: 24px;
+    position: relative;
     margin-left: 23px;
     transition: opacity 0.3s;
 
     &.note-list__create-button--alone {
       margin-left: 0;
-    }
-
-    &.note-list__create-button--disabled {
-      opacity: 0;
     }
   }
 

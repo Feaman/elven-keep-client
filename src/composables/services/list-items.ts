@@ -1,4 +1,4 @@
-import { ref, unref } from 'vue'
+import { ref } from 'vue'
 import listItemModel, { TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
@@ -38,13 +38,13 @@ function filterCompleted(note: TNoteModel) {
 }
 
 function createListItem() {
-  return unref(listItemModel(
+  return listItemModel(
     {
       updated: String(new Date()),
       statusId: StatusesService.active.value.id,
       text: '',
     },
-  ))
+  )
 }
 
 function addTextareaKeydownEvent($textarea: HTMLTextAreaElement, callback: (event: KeyboardEvent) => void) {
