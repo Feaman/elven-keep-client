@@ -1,6 +1,7 @@
 import { LocalStorage, WebStorageGetMethodReturnType } from 'quasar'
+import BaseService from './base'
 
-export default class StorageService {
+export default class StorageService extends BaseService {
   private static key = '__ELVEN-NOTES__'
 
   static set(data: object) {
@@ -12,7 +13,11 @@ export default class StorageService {
   }
 
   static get(key = '') {
-    const data: { [index: string]: WebStorageGetMethodReturnType } = LocalStorage.getItem(StorageService.key) || {}
+    const data: { [index: string]: WebStorageGetMethodReturnType } | string = LocalStorage.getItem(StorageService.key) || {}
+    if (typeof data === 'string') {
+      const parseData = JSON.parse(data)
+      return key ? parseData[key] : parseData
+    }
     return key ? data[key] : data
   }
 }

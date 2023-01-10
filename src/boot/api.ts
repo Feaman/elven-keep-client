@@ -24,19 +24,23 @@ const axiosInstance = axios.create({ baseURL: BaseService.URL })
 export default boot(() => {
   const axiosApi = new AxiosApi(axiosInstance)
   axiosApi.setRequestInterceptor((config) => {
-    // Auth token
-    const token = StorageService.get(UsersService.AUTH_TOKEN_NAME)
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
+    try {
+      // Auth token
+      const token = StorageService.get(UsersService.AUTH_TOKEN_NAME)
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
 
-    // Set SSE salt
-    if (config.headers) {
-      config.headers['x-sse-salt'] = SSEService.SSESalt
-    }
+      // Set SSE salt
+      if (config.headers) {
+        config.headers['x-sse-salt'] = SSEService.SSESalt
+      }
 
-    // Set SSE salt
-    // config.headers['x-sse-salt'] = this.vuex.state.SSESalt
+      // Set SSE salt
+      // config.headers['x-sse-salt'] = this.vuex.state.SSESalt
+    } catch (error) {
+      BaseService.showError(error as Error)
+    }
 
     return config
   })
