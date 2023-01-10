@@ -1,36 +1,44 @@
 import { RouteRecordRaw } from 'vue-router'
+import MainLayoutComponent from '~/layouts/MainLayout.vue'
+import IndexPageComponent from '~/pages/IndexPage.vue'
+import NotePageComponent from '~/pages/NotePage.vue'
+import SignPageComponent from '~/pages/SignPage.vue'
+import ErrorNotFoundPageComponent from '~/pages/ErrorNotFoundPage.vue'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
+    component: MainLayoutComponent,
     children: [{
       path: '',
       name: 'notes',
-      component: () => import('~/pages/IndexPage.vue'),
+      component: IndexPageComponent,
     }],
   },
   {
     path: '/sign',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('~/pages/SignPage.vue') }],
+    component: MainLayoutComponent,
+    children: [{
+      path: '',
+      component: SignPageComponent,
+    }],
   },
   {
     path: '/note/:id',
-    component: () => import('layouts/MainLayout.vue'),
+    component: MainLayoutComponent,
     children: [{
       path: '',
       name: 'existed-note',
-      component: () => import('~/pages/NotePage.vue'),
+      component: NotePageComponent,
     }],
   },
   {
     path: '/new/:id',
-    component: () => import('layouts/MainLayout.vue'),
+    component: MainLayoutComponent,
     children: [{
       path: '',
       name: 'new-note',
-      component: () => import('~/pages/NotePage.vue'),
+      component: NotePageComponent,
     }],
   },
 
@@ -38,7 +46,7 @@ const routes: RouteRecordRaw[] = [
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',
-    component: () => import('~/pages/ErrorNotFoundPage.vue'),
+    component: ErrorNotFoundPageComponent,
   },
 ]
 
