@@ -5,6 +5,8 @@ import NotePageComponent from '~/pages/NotePage.vue'
 import SignPageComponent from '~/pages/SignPage.vue'
 import ErrorNotFoundPageComponent from '~/pages/ErrorNotFoundPage.vue'
 
+export const ROUTE_EXISTED_NOTE = 'existed-note'
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -28,7 +30,7 @@ const routes: RouteRecordRaw[] = [
     component: MainLayoutComponent,
     children: [{
       path: '',
-      name: 'existed-note',
+      name: ROUTE_EXISTED_NOTE,
       component: NotePageComponent,
     }],
   },

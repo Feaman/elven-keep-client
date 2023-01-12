@@ -4,7 +4,7 @@ import UsersService from '~/composables/services/users'
 import ApiService from '~/services/api/api'
 import AxiosApi from '~/services/api/axios-api'
 import BaseService from '~/services/base'
-import SSEService from '~/services/sse'
+import SocketIOService from '~/services/socket-io'
 import StorageService from '~/services/storage'
 
 declare module '@vue/runtime-core' {
@@ -31,12 +31,10 @@ export default boot(() => {
         config.headers.Authorization = `Bearer ${token}`
       }
 
-      // Set SSE salt
+      // Set socket io identifier
       if (config.headers) {
-        config.headers['x-sse-salt'] = SSEService.SSESalt
+        config.headers['socket-io-id'] = SocketIOService.socketId
       }
-
-      // Set SSE salt
       // config.headers['x-sse-salt'] = this.vuex.state.SSESalt
     } catch (error) {
       BaseService.showError(error as Error)

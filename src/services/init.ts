@@ -5,7 +5,7 @@ import typesService from '~/composables/services/types'
 import BaseService from '~/services//base'
 import ApiService, { ConfigObject } from '~/services/api/api'
 import { useGlobalStore } from '~/stores/global'
-import SSEService from './sse'
+import SocketIOService from './socket-io'
 
 export default class InitService {
   static async initApplication(data: ConfigObject | undefined = undefined): Promise<void> {
@@ -21,7 +21,7 @@ export default class InitService {
       notesService.generateNotes(data.notes)
 
       globalStore.setUser(data.user)
-      SSEService.init()
+      SocketIOService.init()
     } catch (error) {
       globalStore.initError = BaseService.parseAxiosError(error as AxiosError)
     } finally {

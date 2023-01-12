@@ -204,7 +204,7 @@ function focusListItem(index: number) {
 }
 
 async function add() {
-  const listItem = ListItemsService.createListItem()
+  const listItem = ListItemsService.createListItem(note.list)
   note.addListItem(listItem as unknown as TListItemModel)
   const unRefListItem = note.list.find((_listItem) => _listItem.generatedId === listItem.generatedId.value)
   note.saveListItem(unRefListItem as unknown as TListItemModel)

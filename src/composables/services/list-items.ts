@@ -37,12 +37,13 @@ function filterCompleted(note: TNoteModel) {
   return note.list.filter((listItem) => listItem.completed && listItem.statusId === StatusesService.active.value.id)
 }
 
-function createListItem() {
+function createListItem(list: TListItemModel[]) {
   return listItemModel(
     {
       updated: String(new Date()),
       statusId: StatusesService.active.value.id,
       text: '',
+      order: list.length ? Math.max(...list.map((listItem) => listItem.order)) + 1 : 1,
     },
   )
 }

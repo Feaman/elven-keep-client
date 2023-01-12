@@ -123,9 +123,7 @@ export default function noteModel(noteData: TNote) {
   }
 
   function addListItem(listItem: TListItemModel) {
-    const order = list.value.length ? Math.max(...list.value.map((listItem) => listItem.order)) + 1 : 1
     listItem.noteId = id.value
-    listItem.order = order
     list.value.push(listItem as unknown as TListItemModel)
   }
 

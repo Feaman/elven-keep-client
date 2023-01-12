@@ -36,6 +36,7 @@
         v-if="note.type?.name === NOTE_TYPE_TEXT"
         v-model="note.text"
         type="textarea"
+        debounce="400"
         placeholder="Text"
       )
       template(v-if="note.type?.name === NOTE_TYPE_LIST")
