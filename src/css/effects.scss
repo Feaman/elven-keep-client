@@ -200,11 +200,19 @@
 @keyframes slideFadeIn {
   0% {
     opacity: 0.8;
-    right: 0
+    right: -30px
   }
 
-  50% {
-    right: -30px
+  70% {
+    opacity: 0.85;
+  }
+
+  80% {
+    opacity: 0.9;
+  }
+
+  90% {
+    opacity: 0.95;
   }
 
   100% {
@@ -214,5 +222,5 @@
 }
 
 .animated.slideFadeIn {
-  animation: slideFadeIn 0.3s;
+  animation: slideFadeIn 0.2s;
 }
