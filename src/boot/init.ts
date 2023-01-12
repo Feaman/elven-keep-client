@@ -2,7 +2,8 @@ import { AxiosError } from 'axios'
 import mitt from 'mitt'
 import { boot } from 'quasar/wrappers'
 import draggable from 'zhyswan-vuedraggable'
-import BaseService, { TGlobalError, type TEvents } from '~/services/base'
+import BaseService from '~/services/base'
+import { TEvents, TGlobalError } from '~/types'
 import InitService from '~/services/init'
 
 export default boot(({ app }) => {

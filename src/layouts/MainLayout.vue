@@ -62,10 +62,10 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import BaseService from '~/services/base'
-import type { TGlobalError } from '~/services/base'
 import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import { useGlobalStore } from '~/stores/global'
+import { type TGlobalError } from '~/types'
 
 const router = useRouter()
 const $q = useQuasar()

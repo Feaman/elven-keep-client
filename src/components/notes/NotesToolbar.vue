@@ -6,6 +6,8 @@
         NotesSearch
         CreateTools
         q-space
+        CloudIcon
+        q-separator(vertical)
         user-menu
 </template>
 

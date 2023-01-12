@@ -24,7 +24,6 @@
         q-separator(vertical)
         CreateTools
         q-separator(vertical)
-        q-space
         transition(name="horizontal-list")
           q-btn(
             v-if="note.id && note.isList && note.mainListItems.length"
@@ -34,15 +33,12 @@
             flat
             round
           )
+        q-space
         transition(name="horizontal-list" tag="div")
-          q-btn(
+          CloudIcon(
             v-if="note.id"
-            :icon="note.isSaving ? mdiCloudUploadOutline : mdiCloudCheckOutline"
-            color="black"
-            flat
-            round
+            :note="note"
           )
-            ToolTip {{ note.isSaving ? 'Saving to cloud' : 'Saved to cloud' }}
         q-separator(vertical)
         UserMenu
 </template>
@@ -50,8 +46,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import {
-  mdiCloudUploadOutline,
-  mdiCloudCheckOutline,
   mdiHome,
   mdiAccountGroup,
   mdiFullscreen,

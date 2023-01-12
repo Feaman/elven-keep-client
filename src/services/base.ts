@@ -1,13 +1,7 @@
 import { AxiosError } from 'axios'
 import { Emitter } from 'mitt'
 import { Router } from 'vue-router'
-
-export type TGlobalError = { statusCode: number | undefined, message: string }
-
-export type TEvents = {
-  showGlobalError: TGlobalError
-  keydown: KeyboardEvent
-}
+import { TEvents, TGlobalError } from '~/types'
 
 export default class BaseService {
   static URL = 'https://api.notes.pavlo.ru/'

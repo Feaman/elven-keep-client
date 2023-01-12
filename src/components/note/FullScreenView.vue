@@ -25,7 +25,7 @@
               :model-value="listItem.checked"
               color="blue"
             )
-            .list-item__text.ml-2 {{ listItem.text }}
+            .list-item__text.ml-1 {{ listItem.text }}
         q-space
         .text-center.pb-4
           q-btn(

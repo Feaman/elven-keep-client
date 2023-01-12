@@ -6,6 +6,7 @@ import StorageService from './storage'
 import UsersService from '~/composables/services/users'
 import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
 import { ROUTE_EXISTED_NOTE } from '~/router/routes'
+import { useGlobalStore } from '~/stores/global'
 
 export default class SocketIOService extends BaseService {
   static EVENT_NOTE_ADDED = 'EVENT_NOTE_ADDED'
@@ -31,9 +32,13 @@ export default class SocketIOService extends BaseService {
 
     socket.on('connect', () => {
       this.socketId = socket.id
+      const globalStore = useGlobalStore()
+      globalStore.isSocketError = false
     })
 
     socket.on('connect_error', (error) => {
+      const globalStore = useGlobalStore()
+      globalStore.isSocketError = true
       // eslint-disable-next-line
       console.error(error)
     })

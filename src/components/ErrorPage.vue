@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import type { TGlobalError } from '~/services/base'
+import { type TGlobalError } from '~/types'
 
 const props = defineProps<{
   error: TGlobalError,
