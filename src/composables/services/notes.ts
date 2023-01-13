@@ -1,4 +1,5 @@
 import { computed, ref, Ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { TListItemModel, type TVariant } from '~/composables/models/list-item'
 import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
@@ -15,6 +16,19 @@ function generateNotes(notesData: TNote[]) {
     const note = noteModel(noteData)
     notes.value.push(note as unknown as TNoteModel)
   })
+}
+
+function updateNotes(notesData: TNote[]) {
+  const currentNoteId = currentNote.value?.id
+  generateNotes(notesData)
+  if (currentNoteId) {
+    const newCurrentNote = notes.value.find((note) => note.id === currentNoteId)
+    if (!newCurrentNote) {
+      useRouter().push('/')
+    } else {
+      currentNote.value = newCurrentNote
+    }
+  }
 }
 
 function setNotesOrder(order: number[]) {
@@ -149,6 +163,7 @@ export default {
   filtered,
   searchQuery,
   removingNotes,
+  updateNotes,
   generateMaxOrder,
   generateNotes,
   findNoteListItemVariants,

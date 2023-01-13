@@ -10,7 +10,6 @@
   Note(
     @fullscreen="fullscreen = $event"
     @hide-authors="showAuthors = false"
-    :note="currentNote"
     :fullscreen="fullscreen"
     :show-authors="showAuthors"
   )

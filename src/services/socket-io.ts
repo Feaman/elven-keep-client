@@ -39,6 +39,7 @@ export default class SocketIOService extends BaseService {
     socket.on('connect_error', (error) => {
       const globalStore = useGlobalStore()
       globalStore.isSocketError = true
+      globalStore.isSocketErrorOnce = true
       // eslint-disable-next-line
       console.error(error)
     })

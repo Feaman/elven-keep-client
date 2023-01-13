@@ -137,7 +137,7 @@
 <script setup lang="ts">
 import { mdiCheckAll, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
 import { AxiosError } from 'axios'
-import { ref, unref } from 'vue'
+import { ref, unref, computed } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
@@ -147,7 +147,7 @@ const NOTE_TYPE_TEXT = TYPE_TEXT
 
 const coAuthorEmail = ref('')
 const coAuthorError = ref('')
-const note = unref(NotesService.currentNote as unknown as TNoteModel)
+const note = computed(() => unref(NotesService.currentNote as unknown as TNoteModel))
 
 defineProps<{
   fullscreen: boolean
@@ -163,16 +163,16 @@ const emit = defineEmits<{
 
 async function addCoAuthor() {
   try {
-    const existedEmail = note.coAuthors.find((_coAuthor) => _coAuthor.user.email === coAuthorEmail.value)
+    const existedEmail = note.value.coAuthors.find((_coAuthor) => _coAuthor.user.email === coAuthorEmail.value)
     if (existedEmail) {
       coAuthorError.value = 'Co-author with such an email is already exists'
       return
     }
-    if (coAuthorEmail.value === note.user?.email) {
+    if (coAuthorEmail.value === note.value.user?.email) {
       coAuthorError.value = 'This person is already an Author'
       return
     }
-    await note.createCoAuthor(coAuthorEmail.value)
+    await note.value.createCoAuthor(coAuthorEmail.value)
     coAuthorEmail.value = ''
     coAuthorError.value = ''
   } catch (error) {

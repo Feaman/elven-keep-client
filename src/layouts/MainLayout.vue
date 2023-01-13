@@ -66,6 +66,7 @@ import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import { useGlobalStore } from '~/stores/global'
 import { type TGlobalError } from '~/types'
+import InitService from '~/services/init'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -141,14 +142,21 @@ watch(removedItemsQuantity, () => {
   }
 })
 
-watch(() => globalStore.initError, () => {
-  if (globalStore.initError) {
-    if (globalStore.initError?.statusCode === 401) {
-      router.push('/sign')
-    } else {
-      isErrorShown.value = true
+watch(
+  () => globalStore.initError,
+  () => {
+    if (globalStore.initError) {
+      if (globalStore.initError?.statusCode === 401) {
+        router.push('/sign')
+      } else {
+        isErrorShown.value = true
+      }
     }
-  }
+  },
+)
+
+BaseService.eventBus.on('windowFocused', () => {
+  InitService.handleApplicationUpdate($q)
 })
 </script>
 

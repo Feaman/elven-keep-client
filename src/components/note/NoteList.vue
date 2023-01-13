@@ -131,12 +131,12 @@ const variantsShown = ref(false)
 const variantsMenuY = ref(0)
 const variantsMenuMaxWidth = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
-const note = unref(NotesService.currentNote as unknown as TNoteModel)
+const note = computed(() => unref(NotesService.currentNote as unknown as TNoteModel))
 const globalStore = useGlobalStore()
 const isSemiFocus = ref(false)
 const variantsElement = ref<QCard | null>(null)
 const listItemsToShow = ref(Math.round((window.innerHeight - 140) / ListItemsService.listItemMinHeight))
-const fullList = computed(() => (props.isMain ? note.mainListItems : note.completedListItems))
+const fullList = computed(() => (props.isMain ? note.value.mainListItems : note.value.completedListItems))
 const drag = ref(false)
 const list = computed({
   get() {
@@ -149,14 +149,14 @@ const list = computed({
   set(newList: TListItemModel[]) {
     let newWholeList = []
     if (props.isMain) {
-      newWholeList = [...newList, ...note.completedListItems]
+      newWholeList = [...newList, ...note.value.completedListItems]
     } else {
-      newWholeList = [...note.mainListItems, ...newList, ...fullList.value.slice(listItemsToShow.value)]
+      newWholeList = [...note.value.mainListItems, ...newList, ...fullList.value.slice(listItemsToShow.value)]
     }
     newWholeList.forEach((listItem, index) => {
       listItem.order = index + 1
     })
-    NotesService.setOrder(note, newWholeList.map((listItem) => Number(listItem.id)))
+    NotesService.setOrder(note.value, newWholeList.map((listItem) => Number(listItem.id)))
   },
 })
 
@@ -204,10 +204,10 @@ function focusListItem(index: number) {
 }
 
 async function add() {
-  const listItem = ListItemsService.createListItem(note.list)
-  note.addListItem(listItem as unknown as TListItemModel)
-  const unRefListItem = note.list.find((_listItem) => _listItem.generatedId === listItem.generatedId.value)
-  note.saveListItem(unRefListItem as unknown as TListItemModel)
+  const listItem = ListItemsService.createListItem(note.value.list)
+  note.value.addListItem(listItem as unknown as TListItemModel)
+  const unRefListItem = note.value.list.find((_listItem) => _listItem.generatedId === listItem.generatedId.value)
+  note.value.saveListItem(unRefListItem as unknown as TListItemModel)
   await nextTick()
   ListItemsService.addTextareaKeydownEvent(listItem.getTextarea(), focusNextItem)
   listItem.getTextarea().focus()
@@ -290,7 +290,7 @@ async function init() {
     }, 100)
   }
 
-  list.value.forEach((listitem) => ListItemsService.addTextareaSwipeEvent(note, listitem))
+  list.value.forEach((listitem) => ListItemsService.addTextareaSwipeEvent(note.value, listitem))
 
   $root?.querySelectorAll('.list-item textarea').forEach(($textarea) => {
     ListItemsService.addTextareaKeydownEvent($textarea as HTMLTextAreaElement, focusNextItem)
@@ -323,11 +323,11 @@ function selectFocusedVariant(event: Event) {
 }
 
 function check(event: Event, listItem: TListItemModel) {
-  note.checkOrUncheckListItem(listItem, (event.target as HTMLInputElement).checked)
+  note.value.checkOrUncheckListItem(listItem, (event.target as HTMLInputElement).checked)
 }
 
 function complete(event: Event, listItem: TListItemModel) {
-  note.completeListItem(listItem, (event.target as HTMLInputElement).checked)
+  note.value.completeListItem(listItem, (event.target as HTMLInputElement).checked)
 }
 
 async function updateText(listItem: TListItemModel, event: Event) {
@@ -338,7 +338,7 @@ async function updateText(listItem: TListItemModel, event: Event) {
   }
   listItem.text = ($textarea as unknown as HTMLTextAreaElement).value
   listItem.saveTimeout = setTimeout(() => {
-    note.saveListItem(listItem)
+    note.value.saveListItem(listItem)
     listItem.saveTimeout = undefined
   }, 400)
   handleSemiFocus()
@@ -349,7 +349,7 @@ async function updateText(listItem: TListItemModel, event: Event) {
 
 async function selectVariant(listItem: TListItemModel | null, variant: TVariant) {
   if (listItem) {
-    const resultListItem = note.selectVariant(listItem, variant)
+    const resultListItem = note.value.selectVariant(listItem, variant)
     variants.value = []
     await nextTick()
     ListItemsService.handleListItemTextAreaHeight(resultListItem.getTextarea())

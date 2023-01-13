@@ -2,6 +2,8 @@ import { AxiosError } from 'axios'
 import { Emitter } from 'mitt'
 import { Router } from 'vue-router'
 import { TEvents, TGlobalError } from '~/types'
+import ApiService from './api/api'
+import InitService from './init'
 
 export default class BaseService {
   static URL = 'https://api.notes.pavlo.ru/'

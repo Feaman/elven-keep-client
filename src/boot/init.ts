@@ -5,6 +5,7 @@ import draggable from 'zhyswan-vuedraggable'
 import BaseService from '~/services/base'
 import { TEvents, TGlobalError } from '~/types'
 import InitService from '~/services/init'
+import SocketIOService from '~/services/socket-io'
 
 export default boot(({ app }) => {
   BaseService.eventBus = mitt<TEvents>()
@@ -38,5 +39,10 @@ export default boot(({ app }) => {
 
   app.component('Draggable', draggable)
 
+  window.addEventListener('focus', () => {
+    BaseService.eventBus.emit('windowFocused', true)
+  })
+
+  SocketIOService.init()
   InitService.initApplication()
 })

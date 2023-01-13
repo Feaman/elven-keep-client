@@ -9,7 +9,7 @@ export const useGlobalStore = defineStore('global', () => {
   const isSocketError = ref<boolean | undefined>(undefined)
   const user = ref<TUserModel | null>(null)
   const mainListScrollTop = ref(0)
-  const SSESalt = ''
+  const isSocketErrorOnce = ref(false)
 
   function setUser(userData: IUser) {
     user.value = useUserStore(userData) as unknown as TUserModel
@@ -20,8 +20,8 @@ export const useGlobalStore = defineStore('global', () => {
     initError,
     isInitDataLoading,
     isSocketError,
+    isSocketErrorOnce,
     mainListScrollTop,
-    SSESalt,
     setUser,
   }
 })
