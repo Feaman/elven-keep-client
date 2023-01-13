@@ -42,7 +42,9 @@ export default boot(({ app }) => {
   window.addEventListener('focus', () => {
     BaseService.eventBus.emit('windowFocused', true)
   })
-
+  BaseService.eventBus.on('windowFocused', () => {
+    InitService.handleApplicationUpdate()
+  })
   SocketIOService.init()
   InitService.initApplication()
 })

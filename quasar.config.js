@@ -115,7 +115,6 @@ module.exports = configure((/* ctx */) => ({
       'LocalStorage',
       'Meta',
       'Notify',
-      'Loading',
     ],
   },
 

@@ -1,5 +1,4 @@
 import { AxiosError } from 'axios'
-import { QVueGlobals } from 'quasar'
 import notesService from '~/composables/services/notes'
 import statusesService from '~/composables/services/statuses'
 import typesService from '~/composables/services/types'
@@ -29,17 +28,14 @@ export default class InitService {
     }
   }
 
-  static async handleApplicationUpdate($q: QVueGlobals) {
+  static async handleApplicationUpdate() {
     const globalStore = useGlobalStore()
     if (globalStore.isSocketErrorOnce) {
-      $q.loading.show({
-        spinner: { template: '<div></div>' },
-        customClass: 'q-loading',
-      })
+      globalStore.isInitDataLoading = true
       const data = await ApiService.getConfig()
       notesService.updateNotes(data.notes)
       globalStore.isSocketErrorOnce = false
-      $q.loading.hide()
+      globalStore.isInitDataLoading = false
     }
   }
 }
