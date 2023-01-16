@@ -66,7 +66,6 @@ import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
 import { useGlobalStore } from '~/stores/global'
 import { type TGlobalError } from '~/types'
-import InitService from '~/services/init'
 
 const router = useRouter()
 const $q = useQuasar()

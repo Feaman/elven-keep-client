@@ -332,7 +332,6 @@ function complete(event: Event, listItem: TListItemModel) {
 
 async function updateText(listItem: TListItemModel, event: Event) {
   const $textarea = event.target as HTMLTextAreaElement
-  ListItemsService.handleListItemTextAreaHeight($textarea)
   if (listItem.saveTimeout) {
     clearTimeout(listItem.saveTimeout)
   }
@@ -342,6 +341,7 @@ async function updateText(listItem: TListItemModel, event: Event) {
     listItem.saveTimeout = undefined
   }, 400)
   handleSemiFocus()
+  ListItemsService.handleListItemTextAreaHeight($textarea)
   if (!listItem.checked && !listItem.completed) {
     await checkVariants(listItem)
   }

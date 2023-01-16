@@ -29,6 +29,7 @@
             )
             q-input.q-mt-lg(
               v-model="password"
+              type="password"
               label="Password"
               :maxlength="RULE_155_LENGTH"
               counter
@@ -51,6 +52,7 @@
             )
             q-input.q-mt-lg(
               v-model="password"
+              type="password"
               label="Password"
               :maxlength="RULE_155_LENGTH"
               counter

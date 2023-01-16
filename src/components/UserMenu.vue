@@ -19,6 +19,7 @@
           .bg-grey-4.px-4.pt-2.pb-2.full-width
             .text-weight-bold {{ globalStore.user?.getFio() }}
             .font-size-14.text-grey-8.text--darken-1 {{globalStore.user?.email }}
+            .text-red {{ globalStore.disconnections }}
         q-item.pl-1(
           v-if="globalStore.user"
           clickable

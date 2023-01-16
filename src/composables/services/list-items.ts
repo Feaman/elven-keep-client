@@ -13,12 +13,10 @@ function handleListItemTextAreaHeight($textArea: HTMLTextAreaElement) {
   let textAreaHeight = 0
   const $parent = $textArea.parentElement
   $parent?.classList.remove('list-item__text--multi-line')
-  const $clone: HTMLTextAreaElement = $textArea.cloneNode() as HTMLTextAreaElement
-  $clone.classList.remove('transition')
-  $clone.style.height = '0'
-  $parent?.appendChild($clone)
-  textAreaHeight = $clone.scrollHeight
-  $clone.remove()
+  $textArea.classList.remove('transition')
+  $textArea.style.height = '0'
+  $textArea.style.minHeight = '0'
+  textAreaHeight = $textArea.scrollHeight
   $textArea.style.height = `${textAreaHeight}px`
   $textArea.style.minHeight = `${textAreaHeight}px`
 
