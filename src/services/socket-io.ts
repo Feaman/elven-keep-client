@@ -26,7 +26,6 @@ export default class SocketIOService extends BaseService {
   static socketId: string
 
   static init() {
-    // const socket = io('api.notes.pavlo.ru', { auth: 'asdf', transports: ['polling'] })
     const token = StorageService.get(UsersService.AUTH_TOKEN_NAME)
     const socket = io('api.notes.pavlo.ru', { extraHeaders: { Authorization: `Bearer ${token}` } })
 
