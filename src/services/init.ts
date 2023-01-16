@@ -30,12 +30,12 @@ export default class InitService {
 
   static async handleApplicationUpdate() {
     const globalStore = useGlobalStore()
-    if (globalStore.isSocketErrorOnce) {
-      globalStore.isInitDataLoading = true
-      const data = await ApiService.getConfig()
-      notesService.updateNotes(data.notes)
-      globalStore.isSocketErrorOnce = false
-      globalStore.isInitDataLoading = false
-    }
+    // if (globalStore.isSocketErrorOnce) {
+    globalStore.isInitDataLoading = true
+    const data = await ApiService.getConfig()
+    notesService.updateNotes(data.notes)
+    globalStore.isSocketErrorOnce = false
+    globalStore.isInitDataLoading = false
+    // }
   }
 }
