@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client'
+import { nextTick } from 'vue'
 import listItemModel, { TListItem, TListItemModel } from '~/composables/models/list-item'
 import NotesService from '~/composables/services/notes'
 import BaseService from './base'
@@ -58,9 +59,10 @@ export default class SocketIOService extends BaseService {
       NotesService.notes.value.push(note as unknown as TNoteModel)
     })
 
-    socket.on(this.EVENT_NOTE_CHANGED, (noteData: TNote) => {
+    socket.on(this.EVENT_NOTE_CHANGED, async (noteData: TNote) => {
       const note = NotesService.notes.value.find((note) => note.id === noteData.id)
       if (note) {
+        note.isRawUpdate = true
         Object.assign(
           note,
           {
@@ -70,6 +72,8 @@ export default class SocketIOService extends BaseService {
             order: noteData.order,
           },
         )
+        await nextTick()
+        note.isRawUpdate = false
       }
     })
 

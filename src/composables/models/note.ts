@@ -28,6 +28,7 @@ export interface TNote {
   coAuthors?: ICoAuthor[]
   created?: string
   updated?: string
+  isRawUpdate?: boolean
 }
 
 export default function noteModel(noteData: TNote) {
@@ -51,6 +52,7 @@ export default function noteModel(noteData: TNote) {
   const isUpdateNeeded = ref(false)
   const unSavedListItems = ref<TListItemModel[]>([])
   const isList = computed(() => type.value?.name === TYPE_LIST)
+  const isRawUpdate = ref(false)
   // let logId = 0
 
   const globalStore = useGlobalStore()
@@ -290,6 +292,12 @@ export default function noteModel(noteData: TNote) {
     saveListItem(listItem)
   }
 
+  function updateOnChange(callback: () => void) {
+    if (!isRawUpdate.value) {
+      callback()
+    }
+  }
+
   handleList(noteData.list)
   handleCoAuthors(noteData.coAuthors)
   handleType()
@@ -298,9 +306,10 @@ export default function noteModel(noteData: TNote) {
   // watch(title, () => save(10000))
   // watch(text, () => save(10000))
   // watch(isCompletedListExpanded, () => save(10000))
-  watch(title, () => save())
-  watch(text, () => save())
-  watch(isCompletedListExpanded, () => save())
+  watch(title, () => updateOnChange(save))
+  watch(text, () => updateOnChange(save))
+  watch(isCompletedListExpanded, () => updateOnChange(save))
+  watch(isRawUpdate, (value) => isRawUpdate.value = value)
 
   return {
     id,
@@ -327,6 +336,7 @@ export default function noteModel(noteData: TNote) {
     user,
     isList,
     order,
+    isRawUpdate,
     checkOrUncheckListItem,
     addCoAuthor,
     createCoAuthor,
