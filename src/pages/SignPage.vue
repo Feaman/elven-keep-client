@@ -95,14 +95,14 @@
           v-if="errorText"
         ) {{ errorText }}
 
-      q-btn.mt-4(
+      q-btn.text-black.mt-4(
         @click="sign"
         :disable="!isValid"
         :label="`Sign ${isSignIn ? 'In' : 'Up'}`"
         color="primary"
       )
-      .q-mt-lg OR
-      q-btn.q-mt-md(
+      .mt-4 OR
+      q-btn.mt-2(
         @click="togglePage"
         :label="`Sign ${isSignIn ? 'Up' : 'In'}`"
         flat

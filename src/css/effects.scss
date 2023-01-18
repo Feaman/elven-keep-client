@@ -83,35 +83,11 @@
   position: absolute;
 }
 
-// Slide Fade Out
-@keyframes slideFadeOut {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  50% {
-    opacity: 0.3;
-    transform: translateX(30px);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(0px);
-  }
-}
-
-.animated.slideFadeOut {
-  position: absolute;
-  z-index: 20;
-  animation: slideFadeOut 0.2s;
-}
-
 // Slide Fade In
 @keyframes slideFadeIn {
   0% {
     opacity: 0.8;
-    right: -40px
+    left: -40px
   }
 
   70% {
@@ -128,14 +104,43 @@
 
   100% {
     opacity: 1;
-    right: 0
+    left: 0
   }
 }
 
 .animated.slideFadeIn {
   position: absolute;
-  z-index: 10;
   animation: slideFadeIn 0.2s;
+}
+
+// Slide Fade Out
+@keyframes slideFadeOut {
+  0% {
+    opacity: 1;
+    left: 0
+  }
+
+  70% {
+    opacity: 0.85;
+  }
+
+  80% {
+    opacity: 0.75;
+  }
+
+  90% {
+    opacity: 0.65;
+  }
+
+  100% {
+    opacity: 0;
+    left: -40px;
+  }
+}
+
+.animated.slideFadeOut {
+  position: absolute;
+  animation: slideFadeOut 0.2s;
 }
 
 // Scale Fade In
