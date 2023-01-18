@@ -10,23 +10,34 @@
     ToolTip {{ tooltipText }}
 
   q-dialog(
+    @hide="showDialog =false"
     :model-value="showDialog"
     transition-show="flip-up"
     transition-hide="flip-down"
   )
-    q-card.pa-6
-      .row
-        q-icon.mb-2(
-          :name="mdiAlertDecagram"
-          color="red"
-          size="sm"
+    q-card
+      q-toolbar.q-flex.bg-primary.shadow-3
+        q-toolbar-title.ml-2
+          .q-flex.items-center
+            q-icon(
+              :name="mdiAlertDecagram"
+              size="sm"
+            )
+            .font-size-18.ml-2 Connection error
+        q-btn(
+          @click="showDialog = false"
+          :icon="mdiClose"
+          color="black"
+          flat
+          round
+          dense
         )
-        .text-red.ml-2 Connection error
-      .font-size-18 There's something about your Internet connection. Check your Internet.
-      q-btn.text-black.mt-2(
-        @click="reloadPage"
-        color="primary"
-      ) Reload page
+      .pa-6
+        .font-size-18 There's something about your Internet connection. Check your Internet.
+        q-btn.text-black.mt-2(
+          @click="reloadPage"
+          color="primary"
+        ) Reload page
 </template>
 
 <script setup lang="ts">
@@ -35,6 +46,7 @@ import {
   mdiAlertDecagram,
   mdiCloudUploadOutline,
   mdiCloudCheckOutline,
+  mdiClose,
 } from '@quasar/extras/mdi-v6'
 import { type TNoteModel } from '~/composables/models/note'
 import { useGlobalStore } from '~/stores/global'

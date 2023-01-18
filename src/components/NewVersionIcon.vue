@@ -10,6 +10,7 @@
     ToolTip New version available
 
   q-dialog(
+    @hide="showDialog =false"
     :model-value="showDialog"
     transition-show="flip-up"
     transition-hide="flip-down"
