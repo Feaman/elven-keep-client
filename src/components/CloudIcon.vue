@@ -1,7 +1,7 @@
 <template lang="pug">
 .cloud-icon.row.flex-center
   q-btn(
-    @click="handleClick"
+    @click="showDialog = true"
     :icon="icon"
     :color="isSocketError ? 'red' : 'black'"
     flat
@@ -34,7 +34,7 @@
         )
       .pa-6
         .font-size-18 There's something about your Internet connection. Check your Internet.
-        q-btn.text-black.mt-2(
+        q-btn.text-black.mt-4(
           @click="reloadPage"
           color="primary"
         ) Reload page
