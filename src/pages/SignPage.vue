@@ -14,7 +14,11 @@
       .full-width(
         :class="`sign-page__sign-${isSignIn ? 'in' : 'up'}-form`"
       )
-        transition(name="slide-fade")
+        transition(
+          appear
+          enter-active-class="animated slideFadeIn"
+          leave-active-class="animated slideFadeOut"
+        )
           .sign-page__form(
             v-if="isSignIn"
           )
@@ -36,7 +40,11 @@
               clearable
               outlined
             )
-        transition(name="slide-fade")
+        transition(
+          appear
+          enter-active-class="animated slideFadeIn"
+          leave-active-class="animated slideFadeOut"
+        )
           .sign-page__form(
             v-if="!isSignIn"
           )
@@ -87,7 +95,7 @@
           v-if="errorText"
         ) {{ errorText }}
 
-      q-btn.q-mt-lg(
+      q-btn.mt-4(
         @click="sign"
         :disable="!isValid"
         :label="`Sign ${isSignIn ? 'In' : 'Up'}`"
@@ -179,8 +187,13 @@ onMounted(() => {
   .sign-page__container {
     max-width: 500px;
 
+    .sign-page__sign-in-form,
+    .sign-page__sign-up-form {
+      position: relative;
+    }
+
     .sign-page__sign-in-form {
-      height: 164px;
+      height: 208px;
     }
 
     .sign-page__sign-up-form {
@@ -189,7 +202,7 @@ onMounted(() => {
 
     .sign-page__form {
       max-width: 500px;
-      width: calc(100% - 48px);
+      width: 100%;
       position: absolute;
     }
   }

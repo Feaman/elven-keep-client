@@ -30,6 +30,7 @@
               color="blue"
             )
         q-item(
+          @click="globalStore.user?.signOut()"
           clickable
         )
           q-item-section
@@ -38,7 +39,7 @@
                 :name="mdiLogout"
                 color="black"
               )
-              .cursor-pointer.py-1.ml-2(@click="globalStore.user?.signOut()") Sign out
+              .cursor-pointer.py-1.ml-2 Sign out
 </template>
 
 <script setup lang="ts">

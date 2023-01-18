@@ -2,7 +2,7 @@
 .note-toolbar
   q-header.q-flex.flex-center(elevated)
     q-toolbar.note-toolbar__toolbar.full-width.pa-0
-      .q-flex.align-center.full-width
+      .q-flex.full-width
         q-btn(
           @click="router.push('/')"
           :icon="mdiHome"
@@ -11,7 +11,11 @@
           round
         )
         q-separator(vertical)
-        transition(name="horizontal-list")
+        transition(
+          appear
+          enter-active-class="animated scaleFadeIn"
+          leave-active-class="animated scaleFadeOut"
+        )
           q-btn(
             v-if="note.id"
             @click="emit('co-authors-clicked')"
@@ -24,7 +28,11 @@
         q-separator(vertical)
         CreateTools
         q-separator(vertical)
-        transition(name="horizontal-list")
+        transition(
+          appear
+          enter-active-class="animated scaleFadeIn"
+          leave-active-class="animated scaleFadeOut"
+        )
           q-btn(
             v-if="note.id && note.isList && note.mainListItems.length"
             @click="emit('fullscreen')"
@@ -34,7 +42,19 @@
             round
           )
         q-space
-        transition(name="horizontal-list" tag="div")
+        transition(
+          appear
+          enter-active-class="animated scaleFadeIn"
+          leave-active-class="animated scaleFadeOut"
+        )
+          NewVersionIcon(
+            v-if="globalStore.isNewVersionAvailable"
+          )
+        transition(
+          appear
+          enter-active-class="animated scaleFadeIn"
+          leave-active-class="animated scaleFadeOut"
+        )
           CloudIcon(
             v-if="note.id"
             :note="note"
@@ -50,9 +70,11 @@ import {
   mdiAccountGroup,
   mdiFullscreen,
 } from '@quasar/extras/mdi-v6'
+import { useGlobalStore } from '~/stores/global'
 import { type TNoteModel } from '~/composables/models/note'
 
 const router = useRouter()
+const globalStore = useGlobalStore()
 
 // eslint-disable-next-line
 const emit = defineEmits<{

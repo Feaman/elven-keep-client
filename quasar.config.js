@@ -15,9 +15,6 @@ const path = require('path')
 const { configure } = require('quasar/wrappers')
 
 module.exports = configure((/* ctx */) => ({
-  htmlVariables: {
-    title: 'test name',
-  },
   eslint: {
     // fix: true,
     // include = [],
@@ -76,7 +73,9 @@ module.exports = configure((/* ctx */) => ({
 
     // publicPath: '/',
     // analyze: true,
-    // env: {},
+    env: {
+      appVersion: require('./package.json').version,
+    },
     // rawDefine: {}
     // ignorePublicFolder: true,
     // minify: false,

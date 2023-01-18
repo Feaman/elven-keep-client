@@ -5,7 +5,7 @@
     draggable(
       v-model="filtered"
       :set-data="setDragGhostData"
-      :component-data="{ name: drag ?  'horizontal-list-effect'  : 'horizontal-list-effect' }"
+      :component-data="{ name: 'horizontal-list-effect' }"
       :delay="1000"
       @start="drag = true"
       @end="drag = false"

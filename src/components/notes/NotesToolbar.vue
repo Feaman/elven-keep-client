@@ -2,10 +2,18 @@
 .notes-toolbar
   q-header.notes-toolbar__header(elevated)
     q-toolbar
-      .q-flex.align-center.full-width
+      .q-flex.full-width
         NotesSearch
         CreateTools
         q-space
+        transition(
+          appear
+          enter-active-class="animated scaleFadeIn"
+          leave-active-class="animated scaleFadeOut"
+        )
+          NewVersionIcon(
+            v-if="globalStore.isNewVersionAvailable"
+          )
         CloudIcon
         q-separator(vertical)
         user-menu
@@ -13,8 +21,7 @@
 
 <script setup lang="ts">
 import CreateTools from '../CreateTools.vue'
+import { useGlobalStore } from '~/stores/global'
+
+const globalStore = useGlobalStore()
 </script>
-
-<style lang="scss" scoped>
-
-</style>

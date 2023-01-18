@@ -6,6 +6,7 @@ import SignPageComponent from '~/pages/SignPage.vue'
 import ErrorNotFoundPageComponent from '~/pages/ErrorNotFoundPage.vue'
 
 export const ROUTE_EXISTED_NOTE = 'existed-note'
+export const ROUTE_SIGN = 'sign'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -22,6 +23,7 @@ const routes: RouteRecordRaw[] = [
     component: MainLayoutComponent,
     children: [{
       path: '',
+      name: ROUTE_SIGN,
       component: SignPageComponent,
     }],
   },

@@ -2,11 +2,12 @@ import { AxiosError } from 'axios'
 import notesService from '~/composables/services/notes'
 import statusesService from '~/composables/services/statuses'
 import typesService from '~/composables/services/types'
+import { ROUTE_SIGN } from '~/router/routes'
 import BaseService from '~/services//base'
 import ApiService, { ConfigObject } from '~/services/api/api'
 import { useGlobalStore } from '~/stores/global'
 
-export default class InitService {
+export default class InitService extends BaseService {
   static async initApplication(data: ConfigObject | undefined = undefined): Promise<void> {
     const globalStore = useGlobalStore()
 
@@ -29,13 +30,14 @@ export default class InitService {
   }
 
   static async handleApplicationUpdate() {
+    if (this.router.currentRoute.value.name === ROUTE_SIGN) {
+      return
+    }
     const globalStore = useGlobalStore()
-    // if (globalStore.isSocketErrorOnce) {
     globalStore.isInitDataLoading = true
     const data = await ApiService.getConfig()
     notesService.updateNotes(data.notes)
     globalStore.isSocketErrorOnce = false
     globalStore.isInitDataLoading = false
-    // }
   }
 }

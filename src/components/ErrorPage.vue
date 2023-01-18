@@ -5,13 +5,13 @@
       src="~assets/crying-girl.jpg"
     )
   .error-page__error.column.no-wrap.text-center.full-height.pb-4
-    .error-page__status-code.text-h1.text-yellow-7.text-weight-bold {{ statusCode }}
     .error-page__title.text-h3.text-weight-bold.mt-8 Awww... What the dragon?!
-    .error-page__message.text-h4.text-blue-5.font-size-18.ml-1.mt-8 {{ message }}
+    .error-page__status-code.text-grey-7.mt-2 It's just a {{ statusCode }} error:
+    .error-page__message.text-h4.text-blue-5.font-size-18.ml-1.mt-4 {{ message }}
     q-btn.mt-6(
       v-if="statusCode !== 404"
       @click="reload"
-      label="Maybe Reload?"
+      label="Reload page"
       color="pink"
     )
     q-btn.mt-6(
@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { type TGlobalError } from '~/types'
 
 const props = defineProps<{
@@ -30,7 +31,7 @@ const props = defineProps<{
 }>()
 
 const statusCode = props.error.statusCode || 500
-const message = props.error.statusCode === 404 ? 'Page not found' : props.error.message
+const message = computed(() => (props.error.statusCode === 404 ? 'Page not found' : props.error.message))
 
 function home() {
   window.location.href = '/'
@@ -68,48 +69,25 @@ function reload() {
     align-items: center;
     justify-content: center;
 
-    .error-page__status-code {
-      line-height: 78px;
-    }
-
     .error-page__title {
-      line-height: 46px;
-    }
-
-    .error-page__message {
-      line-height: 20px;
+      line-height: normal;
     }
   }
 }
 
 @media (max-width: 700px) {
-  .error-page__status-code {
-    font-size: 60px;
-    line-height: 60px !important;
-  }
-
   .error-page__title {
     font-size: 40px;
   }
 }
 
 @media (max-width: 600px) {
-  .error-page__status-code {
-    font-size: 50px;
-    line-height: 50px !important;
-  }
-
   .error-page__title {
     font-size: 30px;
   }
 }
 
 @media (max-width: 400px) {
-  .error-page__status-code {
-    font-size: 40px;
-    line-height: 40px !important;
-  }
-
   .error-page__title {
     font-size: 24px;
   }
