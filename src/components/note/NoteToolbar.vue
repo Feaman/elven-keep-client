@@ -62,7 +62,7 @@ import {
   mdiAccountGroup,
   mdiFullscreen,
 } from '@quasar/extras/mdi-v6'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useGlobalStore } from '~/stores/global'
 import { type TNoteModel } from '~/composables/models/note'
 import { ROUTE_NEW } from '~/router/routes'

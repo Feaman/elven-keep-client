@@ -18,8 +18,7 @@
         q-item.shadow-1.pa-0
           .bg-grey-3.px-4.pt-2.pb-2.full-width
             .text-weight-bold {{ globalStore.user?.getFio() }}
-            .user-menu__email.font-size-14.text-grey-8.text--darken-1 {{globalStore.user?.email }}
-            .text-grey-5.font-size-11.mt-2 v. {{ applicationVersion }}
+            .font-size-14.text-grey-8.text--darken-1 {{globalStore.user?.email }}
         q-item.pl-1(
           v-if="globalStore.user"
           clickable
@@ -48,11 +47,4 @@ import { mdiAccountOutline, mdiLogout } from '@quasar/extras/mdi-v6'
 import { useGlobalStore } from '~/stores/global'
 
 const globalStore = useGlobalStore()
-const { applicationVersion } = process.env
 </script>
-
-<style lang="scss" scoped>
-.user-menu__email {
-  line-height: 16px;
-}
-</style>
