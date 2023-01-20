@@ -1,14 +1,14 @@
-import { ICoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
+import { TCoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
 import { TListItemModel, type TListItem } from '~/composables/models/list-item'
 import { TNote, TNoteModel } from '~/composables/models/note'
 import { IStatus } from '~/composables/models/status'
 import { IType } from '~/composables/models/type'
-import { IUser } from '~/composables/models/user'
+import { TUser } from '~/composables/models/user'
 import AxiosApi from '~/services/api/axios-api'
 import BaseService from '~/services/base'
 
 export interface ConfigObject {
-  user: IUser,
+  user: TUser,
   types: IType[],
   statuses: IStatus[],
   notes: TNote[],
@@ -49,6 +49,11 @@ export default class ApiService extends BaseService {
     }))
 
     const { data } = await this.api.post('notes', noteData)
+    return data as TNote
+  }
+
+  static async getNote(id: number): Promise<TNote> {
+    const { data } = await this.api.get(`notes/${id}`)
     return data as TNote
   }
 
@@ -119,9 +124,9 @@ export default class ApiService extends BaseService {
     return data as ConfigObject
   }
 
-  static async addNoteCoAuthor(noteId: number, email: string): Promise<ICoAuthor> {
+  static async addNoteCoAuthor(noteId: number, email: string): Promise<TCoAuthor> {
     const { data } = await this.api.post(`notes/${noteId}/co-author`, { email })
-    return data as ICoAuthor
+    return data as TCoAuthor
   }
 
   static async removeNoteCoAuthor(coAuthor: TCoAuthorModel) {

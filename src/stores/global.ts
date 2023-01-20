@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { type TGlobalError } from '~/types'
-import useUserStore, { IUser, TUserModel } from '../composables/models/user'
+import useUserStore, { TUser, TUserModel } from '../composables/models/user'
 
 export const useGlobalStore = defineStore('global', () => {
   const initError = ref<TGlobalError | undefined>(undefined)
@@ -11,13 +11,15 @@ export const useGlobalStore = defineStore('global', () => {
   const mainListScrollTop = ref(0)
   const isSocketErrorOnce = ref(false)
   const isNewVersionAvailable = ref(false)
+  const isUpdating = ref(false)
 
-  function setUser(userData: IUser) {
+  function setUser(userData: TUser) {
     user.value = useUserStore(userData) as unknown as TUserModel
   }
 
   return {
     user,
+    isUpdating,
     initError,
     isNewVersionAvailable,
     isInitDataLoading,

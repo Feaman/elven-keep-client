@@ -1,6 +1,7 @@
 <template lang="pug">
-q-layout(
+q-layout.main-layout(
   view="hHh Lpr fFf"
+  :class="{'is-updating': globalStore.isUpdating}"
 )
   q-page-container(v-if="isErrorShown")
     ErrorPage(:error="{statusCode: globalStore.initError?.statusCode, message: globalStore.initError?.message}")
@@ -29,21 +30,42 @@ q-layout(
         div(
           :style="{ maxWidth: '900px', width: '100%', }"
         )
-          q-skeleton.bg-grey-3(
-            type="rect"
-            height="50px"
-          )
-          .column
-            .q-flex.mt-4(
-              v-for="index in 10"
-              :key="index"
+          .q-flex
+            q-skeleton.col.bg-grey-3(
+              type="rect"
+              height="40px"
             )
-              q-skeleton.bg-grey-3(
+            q-skeleton.bg-grey-3.ml-2(
+              width="40px"
+              height="40px"
+              type="rect"
+            )
+          div(
+            v-for="index in 10"
+            :key="index"
+          )
+            .q-flex
+              q-skeleton.mt-4.bg-grey-3(
                 type="rect"
-                width="100%"
+                width="24px"
+                height="24px"
+              )
+              q-skeleton.bg-grey-3.mt-4.ml-2(
+                type="rect"
+                width="24px"
+                height="24px"
+              )
+              q-skeleton.col.bg-grey-3.mt-4.ml-2(
+                type="rect"
+                height="24px"
+              )
+              q-skeleton.bg-grey-3.mt-4.ml-2(
+                type="rect"
+                width="24px"
                 height="24px"
               )
   q-page-container.page.pa-0(v-else)
+    .overlay(v-if="globalStore.isUpdating")
     router-view.page-content(
       v-slot="{ Component }"
     )
@@ -156,6 +178,23 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.main-layout {
+  &.is-updating {
+    filter: blur(3px);
+  }
+
+  .overlay {
+    position: absolute;
+    width: 100%;
+    background: white;
+    top: -50px;
+    z-index: 10000000000000000;
+    height: 100vh;
+    backdrop-filter: blur(10px);
+    opacity: 0.8;
+  }
+}
+
 .note {
   min-width: 250px;
   max-width: 300px;

@@ -1,7 +1,7 @@
 <template lang="pug">
 .cloud-icon.row.flex-center
   q-btn(
-    @click="showDialog = true"
+    @click="handleClick"
     :icon="icon"
     :color="isSocketError ? 'red' : 'black'"
     flat
@@ -10,7 +10,7 @@
     ToolTip {{ tooltipText }}
 
   q-dialog(
-    @hide="showDialog =false"
+    @hide="showDialog = false"
     :model-value="showDialog"
     transition-show="flip-up"
     transition-hide="flip-down"

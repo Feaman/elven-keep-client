@@ -6,7 +6,7 @@
     )
   .error-page__error.column.no-wrap.text-center.full-height.pb-4
     .error-page__title.text-h3.text-weight-bold.mt-8 Awww... What the dragon?!
-    .error-page__status-code.text-grey-7.mt-2 It's just a {{ statusCode }} error:
+    .error-page__status-code.text-grey-7.mt-2 Calm down, it's just a {{ statusCode }} error.
     .error-page__message.text-h4.text-blue-5.font-size-18.ml-1.mt-4 {{ message }}
     q-btn.mt-6(
       v-if="statusCode !== 404"

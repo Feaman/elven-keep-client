@@ -12,9 +12,7 @@
         )
         q-separator(vertical)
         transition(
-          appear
-          enter-active-class="animated scaleFadeIn"
-          leave-active-class="animated scaleFadeOut"
+          :name="isNewNoteRoute ? 'scale-fade' : undefined"
         )
           q-btn(
             v-if="note.id"
@@ -29,9 +27,7 @@
         CreateTools
         q-separator(vertical)
         transition(
-          appear
-          enter-active-class="animated scaleFadeIn"
-          leave-active-class="animated scaleFadeOut"
+          :name="isNewNoteRoute ? 'scale-fade' : undefined"
         )
           q-btn(
             v-if="note.id && note.isList && note.mainListItems.length"
@@ -43,17 +39,13 @@
           )
         q-space
         transition(
-          appear
-          enter-active-class="animated scaleFadeIn"
-          leave-active-class="animated scaleFadeOut"
+          :name="isNewNoteRoute ? 'scale-fade' : undefined"
         )
           NewVersionIcon(
             v-if="globalStore.isNewVersionAvailable"
           )
         transition(
-          appear
-          enter-active-class="animated scaleFadeIn"
-          leave-active-class="animated scaleFadeOut"
+          :name="isNewNoteRoute ? 'scale-fade' : undefined"
         )
           CloudIcon(
             v-if="note.id"
@@ -64,17 +56,20 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   mdiHome,
   mdiAccountGroup,
   mdiFullscreen,
 } from '@quasar/extras/mdi-v6'
+import { computed, ref } from 'vue'
 import { useGlobalStore } from '~/stores/global'
 import { type TNoteModel } from '~/composables/models/note'
+import { ROUTE_NEW } from '~/router/routes'
 
 const router = useRouter()
 const globalStore = useGlobalStore()
+const route = useRoute()
 
 // eslint-disable-next-line
 const emit = defineEmits<{
@@ -85,6 +80,8 @@ const emit = defineEmits<{
 defineProps<{
   note: TNoteModel,
 }>()
+
+const isNewNoteRoute = computed(() => route.name === ROUTE_NEW)
 </script>
 
 <style lang="scss" scoped>

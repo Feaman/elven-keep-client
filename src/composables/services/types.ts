@@ -28,9 +28,19 @@ function findByName(name: string) {
   return type
 }
 
+export function findById(typeId: number) {
+  const type = types.value.find((_type: TTypeModel) => _type.id === typeId)
+  if (!type) {
+    throw new Error(`Type with id '${typeId}' not found`)
+  }
+
+  return type
+}
+
 export default {
   types,
   list,
+  findById,
   generateTypes,
   findByName,
 

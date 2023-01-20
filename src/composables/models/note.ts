@@ -1,9 +1,9 @@
 import { computed, Ref, ref, UnwrapRef, watch } from 'vue'
-import coAuthorModel, { ICoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
+import coAuthorModel, { TCoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
 import listItemModel, { TListItem, TListItemModel, type TVariant } from '~/composables/models/list-item'
 import { TStatusModel } from '~/composables/models/status'
 import { TYPE_LIST, type TTypeModel } from '~/composables/models/type'
-import userModel, { IUser, TUserModel } from '~/composables/models/user'
+import userModel, { TUser, TUserModel } from '~/composables/models/user'
 import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
@@ -12,7 +12,7 @@ import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
 
-export interface TNote {
+export type TNote = {
   id?: number
   title?: string | ''
   text?: string | ''
@@ -21,11 +21,11 @@ export interface TNote {
   statusId?: number
   status?: TStatusModel
   userId?: number
-  user?: IUser
+  user?: TUser
   order: number
   isCompletedListExpanded?: boolean
   list?: TListItem[]
-  coAuthors?: ICoAuthor[]
+  coAuthors?: TCoAuthor[]
   created?: string
   updated?: string
   isRawUpdate?: boolean
@@ -39,7 +39,7 @@ export default function noteModel(noteData: TNote) {
   const order = ref(noteData.order)
   const text = ref(noteData.text || '')
   const typeId = ref(noteData.typeId || TypesService.list.value.id)
-  const type = ref<TTypeModel | null>(null)
+  const type = computed(() => TypesService.findById(typeId.value))
   const created = ref(noteData.created ? new Date(noteData.created) : null)
   const updated = ref(noteData.updated ? new Date(noteData.updated) : null)
   const statusId = ref(noteData.statusId || StatusesService.active.value.id)
@@ -61,23 +61,14 @@ export default function noteModel(noteData: TNote) {
     listData.forEach((listItemData) => list.value.push(listItemModel(listItemData) as unknown as TListItemModel))
   }
 
-  function handleUser(userData: IUser | undefined) {
+  function handleUser(userData: TUser | undefined) {
     if (userData) {
       user.value = userModel(userData) as unknown as TUserModel
     }
   }
 
-  function handleCoAuthors(coAuthorsData: ICoAuthor[] = []) {
+  function handleCoAuthors(coAuthorsData: TCoAuthor[] = []) {
     coAuthorsData.forEach((coAuthorData) => coAuthors.value.push(coAuthorModel(coAuthorData) as unknown as TCoAuthorModel))
-  }
-
-  function handleType() {
-    const foundType = TypesService.types.value.find((_type) => _type.id === typeId.value)
-    if (!foundType) {
-      throw new Error(`Type '${typeId.value}' not found`)
-    } else {
-      type.value = foundType
-    }
   }
 
   // async function createListItem(listItem: TListItemModel, logIid: number) {
@@ -85,8 +76,7 @@ export default function noteModel(noteData: TNote) {
     listItem.noteId = id.value
     const data = await ApiService.addListItem(listItem)
     listItem.id = data.id
-    listItem.created = new Date(data.created || '')
-    listItem.updated = new Date(data.updated || '')
+    listItem.handleDataTransformation()
     listItem.isCreating = false
     if (listItem.isUpdateNeeded) {
       // console.log(`${logIid}: final update list item`)
@@ -197,8 +187,6 @@ export default function noteModel(noteData: TNote) {
       })
   }
 
-  const completedListItems = computed(() => filterAndSort(true)) as Ref<TListItemModel[]>
-
   const checkedListItems = computed(
     () => list.value.filter((listItem) => listItem.checked
       && !listItem.completed
@@ -206,6 +194,8 @@ export default function noteModel(noteData: TNote) {
   ) as Ref<TListItemModel[]>
 
   const mainListItems = computed(() => filterAndSort()) as Ref<TListItemModel[]>
+
+  const completedListItems = computed(() => filterAndSort(true)) as Ref<TListItemModel[]>
 
   function addCoAuthor(coAuthor: TCoAuthorModel) {
     coAuthors.value.push(coAuthor)
@@ -298,9 +288,22 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
+  function handleDataTransformation(userData?: TUser, coAuthorsData?: TCoAuthor[]) {
+    created.value = created.value ? new Date(created.value) : new Date()
+    updated.value = updated.value ? new Date(updated.value) : new Date()
+
+    if (userData) {
+      handleUser(userData)
+    }
+
+    if (coAuthorsData) {
+      coAuthors.value = []
+      coAuthorsData.forEach((coAuthorData) => coAuthors.value.push(coAuthorModel(coAuthorData) as unknown as TCoAuthorModel))
+    }
+  }
+
   handleList(noteData.list)
   handleCoAuthors(noteData.coAuthors)
-  handleType()
   handleUser(noteData.user)
 
   // watch(title, () => save(10000))
@@ -337,6 +340,7 @@ export default function noteModel(noteData: TNote) {
     isList,
     order,
     isRawUpdate,
+    filterAndSort,
     checkOrUncheckListItem,
     addCoAuthor,
     createCoAuthor,
@@ -353,6 +357,7 @@ export default function noteModel(noteData: TNote) {
     selectVariant,
     blurListItem,
     restore,
+    handleDataTransformation,
   }
 }
 

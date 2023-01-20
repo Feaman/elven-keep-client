@@ -1,8 +1,8 @@
 import { AxiosError } from 'axios'
-import notesService from '~/composables/services/notes'
-import statusesService from '~/composables/services/statuses'
-import typesService from '~/composables/services/types'
-import { ROUTE_SIGN } from '~/router/routes'
+import NotesService from '~/composables/services/notes'
+import StatusesService from '~/composables/services/statuses'
+import TypesService from '~/composables/services/types'
+import { ROUTE_EXISTED_NOTE, ROUTE_NOTES } from '~/router/routes'
 import BaseService from '~/services//base'
 import ApiService, { ConfigObject } from '~/services/api/api'
 import { useGlobalStore } from '~/stores/global'
@@ -17,9 +17,9 @@ export default class InitService extends BaseService {
         data = await ApiService.getConfig()
       }
 
-      typesService.generateTypes(data.types)
-      statusesService.generateStatuses(data.statuses)
-      notesService.generateNotes(data.notes)
+      TypesService.generateTypes(data.types)
+      StatusesService.generateStatuses(data.statuses)
+      NotesService.generateNotes(data.notes)
 
       globalStore.setUser(data.user)
     } catch (error) {
@@ -30,14 +30,23 @@ export default class InitService extends BaseService {
   }
 
   static async handleApplicationUpdate() {
-    if (this.router.currentRoute.value.name === ROUTE_SIGN) {
+    if (![ROUTE_NOTES, ROUTE_EXISTED_NOTE].includes(String(this.router.currentRoute.value.name))) {
       return
     }
+
     const globalStore = useGlobalStore()
-    globalStore.isInitDataLoading = true
-    const data = await ApiService.getConfig()
-    notesService.updateNotes(data.notes)
-    globalStore.isSocketErrorOnce = false
-    globalStore.isInitDataLoading = false
+    globalStore.isUpdating = true
+    try {
+      if (this.router.currentRoute.value.name === ROUTE_EXISTED_NOTE && NotesService.currentNote.value) {
+        const noteData = await ApiService.getNote(Number(NotesService.currentNote.value.id))
+        await NotesService.updateNote(NotesService.currentNote.value, noteData)
+      } else {
+        const data = await ApiService.getConfig()
+        this.initApplication(data)
+      }
+    } finally {
+      globalStore.isSocketErrorOnce = false
+      globalStore.isUpdating = false
+    }
   }
 }

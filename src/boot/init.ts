@@ -35,6 +35,8 @@ export default boot(({ app }) => {
 
   app.config.errorHandler = (error) => {
     BaseService.showError(error as Error)
+    // eslint-disable-next-line no-console
+    console.error(error)
   }
 
   app.component('Draggable', draggable)
@@ -42,8 +44,12 @@ export default boot(({ app }) => {
   window.addEventListener('focus', () => {
     BaseService.eventBus.emit('windowFocused', true)
   })
-  BaseService.eventBus.on('windowFocused', () => {
-    InitService.handleApplicationUpdate()
+  BaseService.eventBus.on('windowFocused', async () => {
+    try {
+      await InitService.handleApplicationUpdate()
+    } catch (error) {
+      BaseService.showError(error as Error)
+    }
   })
   SocketIOService.init()
   InitService.initApplication()

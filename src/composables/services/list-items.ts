@@ -1,7 +1,8 @@
-import { ref } from 'vue'
-import listItemModel, { TListItemModel } from '~/composables/models/list-item'
+import { nextTick, ref } from 'vue'
+import listItemModel, { TListItem, TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
+import NotesService from '~/composables/services/notes'
 import KeyboardEvents from '~/helpers/keyboard-events'
 import SwipeEvents from '~/helpers/swipe-events'
 
@@ -35,24 +36,68 @@ function filterCompleted(note: TNoteModel) {
   return note.list.filter((listItem) => listItem.completed && listItem.statusId === StatusesService.active.value.id)
 }
 
-function createListItem(list: TListItemModel[]) {
-  return listItemModel(
+function focusListItem(index: number, isCompletedList: boolean) {
+  const note = NotesService.currentNote.value as unknown as TNoteModel
+  const list = note.filterAndSort(isCompletedList)
+  const nextListItem = list[index]
+  nextListItem.focused = true
+  nextListItem.getTextarea().focus()
+}
+
+function focusNextItem(event: KeyboardEvent, isCompletedList: boolean) {
+  const note = NotesService.currentNote.value as unknown as TNoteModel
+  const list = note.filterAndSort(isCompletedList)
+  const focusedListItem = list.find((item) => item.focused)
+  if (focusedListItem) {
+    const focusedItemIndex = list.indexOf(focusedListItem)
+    if (focusedItemIndex === list.length - 1) {
+      addListItem(note)
+    } else {
+      focusListItem(focusedItemIndex + 1, isCompletedList)
+    }
+  }
+  event.preventDefault()
+}
+
+async function addListItem(note: TNoteModel, data: TListItem | undefined = undefined) {
+  const listItem = listItemModel(
     {
       updated: String(new Date()),
       statusId: StatusesService.active.value.id,
       text: '',
-      order: list.length ? Math.max(...list.map((listItem) => listItem.order)) + 1 : 1,
+      order: note.list.length ? Math.max(...note.list.map((listItem) => listItem.order)) + 1 : 1,
+      ...(data || {}),
     },
   )
+  note.addListItem(listItem as unknown as TListItemModel)
+  const unRefListItem = note.list.find((_listItem) => _listItem.generatedId === listItem.generatedId.value)
+
+  if (!unRefListItem) {
+    throw new Error('List item to unref it note found')
+  }
+
+  if (!data) {
+    note.saveListItem(unRefListItem as unknown as TListItemModel)
+  }
+
+  // Handle textarea events
+  await nextTick()
+  const $textarea = listItem.getTextarea()
+  handleListItemTextAreaHeight($textarea as HTMLTextAreaElement)
+  addTextareaSwipeEvent(note, unRefListItem as unknown as TListItemModel)
+  addTextareaKeydownEvent($textarea, unRefListItem.completed)
+  if (!data) {
+    $textarea.focus()
+  }
 }
 
-function addTextareaKeydownEvent($textarea: HTMLTextAreaElement, callback: (event: KeyboardEvent) => void) {
+function addTextareaKeydownEvent($textarea: HTMLTextAreaElement, isCompletedList: boolean) {
   $textarea.onkeydown = (event: KeyboardEvent) => {
     if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, true)) {
-      callback(event)
+      focusNextItem(event, isCompletedList)
     }
     if (KeyboardEvents.is(event, KeyboardEvents.ENTER, false, false, true)) {
-      callback(event)
+      focusNextItem(event, isCompletedList)
     }
   }
 }
@@ -119,12 +164,13 @@ export default {
   listItemMinHeight,
   removingListItems,
   variantsListItemMinHeight,
+  focusNextItem,
   generateMaxOrder,
   addTextareaSwipeEvent,
   calculateVariantsMenuYPosition,
   handleTextAreaHeights,
   handleListItemTextAreaHeight,
   filterCompleted,
-  createListItem,
+  addListItem,
   addTextareaKeydownEvent,
 }

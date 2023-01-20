@@ -137,10 +137,12 @@
 <script setup lang="ts">
 import { mdiCheckAll, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
 import { AxiosError } from 'axios'
-import { ref, unref, computed } from 'vue'
+import { ref, unref, computed, watch, nextTick } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
+import { useGlobalStore } from '~/stores/global'
+import ListItemsService from '~/composables/services/list-items'
 
 const NOTE_TYPE_LIST = TYPE_LIST
 const NOTE_TYPE_TEXT = TYPE_TEXT
@@ -148,6 +150,7 @@ const NOTE_TYPE_TEXT = TYPE_TEXT
 const coAuthorEmail = ref('')
 const coAuthorError = ref('')
 const note = computed(() => unref(NotesService.currentNote as unknown as TNoteModel))
+const globalStore = useGlobalStore()
 
 defineProps<{
   fullscreen: boolean
@@ -179,6 +182,11 @@ async function addCoAuthor() {
     coAuthorError.value = (error as AxiosError)?.response?.data?.message || (error as Error).message
   }
 }
+
+watch(() => globalStore.user?.showChecked, async () => {
+  await nextTick()
+  note.value.list.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
+})
 </script>
 
 <style lang="scss" scoped>

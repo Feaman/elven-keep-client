@@ -24,8 +24,10 @@ import NotesService from '~/composables/services/notes'
 import TypesService from '~/composables/services/types'
 import KeyboardEvents from '~/helpers/keyboard-events'
 import BaseService from '~/services/base'
+import { useGlobalStore } from '~/stores/global'
 
 const { currentNote } = NotesService
+const globalStore = useGlobalStore()
 const route = useRoute()
 const router = useRouter()
 const fullscreen = ref(false)
@@ -34,7 +36,13 @@ const showAuthors = ref(false)
 function init() {
   if (['/new/list', '/new/text'].includes(route.path)) {
     const type = route.path === '/new/list' ? TYPE_LIST : TYPE_TEXT
-    const note = noteModel({ typeId: TypesService.findByName(type).id, order: NotesService.generateMaxOrder() }) as unknown as TNoteModel
+    const note = noteModel({
+      typeId: TypesService.findByName(type).id,
+      userId: globalStore.user?.id,
+      order: NotesService.generateMaxOrder(),
+    }) as unknown as TNoteModel
+    note.handleDataTransformation()
+    note.user = globalStore.user
     NotesService.notes.value.push(note as unknown as TNoteModel)
     currentNote.value = note
   } else if (/^\/note\/\d+$/.test(route.path)) {

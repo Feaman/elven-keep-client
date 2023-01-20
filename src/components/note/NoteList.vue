@@ -14,7 +14,7 @@
         @start="drag = true"
         @end="drag = false"
         tag="transition-group"
-        handle=".handle"
+        handle=".list-item__handle"
         ghost-class="sortable-ghost"
         item-key="generatedId"
       )
@@ -27,7 +27,7 @@
             .list-item.q-flex.items-center(
               :class="{ 'list-item--checked': element.checked, 'list-item--completed': element.completed }"
             )
-              q-icon.handle.text-grey-6(
+              q-icon.list-item__handle.text-grey-6(
                 :name="mdiDrag"
                 size="sm"
               )
@@ -82,7 +82,7 @@
     leave-active-class="animated zoomOut"
   )
     q-card.note-list__menu.shadow-6(
-      v-if="variantsShown"
+      v-if="isVariantsShown"
       :style="{ maxWidth: `${variantsMenuMaxWidth}px`,top: `${variantsMenuY}px`, left:  `${variantsMenuX}px` }"
       ref="variantsElement"
     )
@@ -127,7 +127,7 @@ let focusTimeout: ReturnType<typeof setTimeout> | undefined
 const rootElement = ref<HTMLElement | null>(null)
 const variants = ref<TVariant[]>([])
 const variantsMenuX = ref(0)
-const variantsShown = ref(false)
+const isVariantsShown = ref(false)
 const variantsMenuY = ref(0)
 const variantsMenuMaxWidth = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
@@ -172,9 +172,9 @@ async function checkVariants(listItem: TListItemModel) {
     variantsMenuX.value = boundingBox.x
     variantsMenuY.value = y
     variantsMenuMaxWidth.value = (rootElement.value?.offsetWidth || 350) - 52
-    variantsShown.value = true
+    isVariantsShown.value = true
   } else {
-    variantsShown.value = false
+    isVariantsShown.value = false
   }
 }
 
@@ -197,39 +197,13 @@ function handleFocus(listItem: TListItemModel) {
   }
 }
 
-function focusListItem(index: number) {
-  const nextListItem = list.value[index]
-  nextListItem.focused = true
-  nextListItem.getTextarea().focus()
-}
-
 async function add() {
-  const listItem = ListItemsService.createListItem(note.value.list)
-  note.value.addListItem(listItem as unknown as TListItemModel)
-  const unRefListItem = note.value.list.find((_listItem) => _listItem.generatedId === listItem.generatedId.value)
-  note.value.saveListItem(unRefListItem as unknown as TListItemModel)
-  await nextTick()
-  ListItemsService.addTextareaKeydownEvent(listItem.getTextarea(), focusNextItem)
-  listItem.getTextarea().focus()
-}
-
-function focusNextItem(event: KeyboardEvent) {
-  variantsShown.value = false
-  const focusedListItem = list.value.find((item) => item.focused)
-  if (focusedListItem) {
-    const focusedItemIndex = list.value.indexOf(focusedListItem)
-    if (focusedItemIndex === list.value.length - 1) {
-      add()
-    } else {
-      focusListItem(focusedItemIndex + 1)
-    }
-  }
-  event.preventDefault()
+  ListItemsService.addListItem(note.value)
 }
 
 function hideVariants(event: Event) {
   if (!variantsElement.value?.$el.contains(event.target as Element)) {
-    variantsShown.value = false
+    isVariantsShown.value = false
   }
 }
 
@@ -290,10 +264,10 @@ async function init() {
     }, 100)
   }
 
-  list.value.forEach((listitem) => ListItemsService.addTextareaSwipeEvent(note.value, listitem))
+  list.value.forEach((listItem) => ListItemsService.addTextareaSwipeEvent(note.value, listItem))
 
   $root?.querySelectorAll('.list-item textarea').forEach(($textarea) => {
-    ListItemsService.addTextareaKeydownEvent($textarea as HTMLTextAreaElement, focusNextItem)
+    ListItemsService.addTextareaKeydownEvent($textarea as HTMLTextAreaElement, !props.isMain)
   })
 
   // Load all list if needed
@@ -408,6 +382,11 @@ function setDragGhostData(dataTransfer: DataTransfer) {
       .list-item {
         background-color: #fff;
         transition: opacity 0.5s;
+
+        .list-item__handle {
+          width: 30px;
+          margin-left: -8px;
+        }
 
         &.list-item--checked {
 

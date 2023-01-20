@@ -1,15 +1,15 @@
 import { ref, UnwrapRef } from 'vue'
-import userModel, { IUser, TUserModel } from '~/composables/models/user'
+import userModel, { TUser, TUserModel } from '~/composables/models/user'
 
-export interface ICoAuthor {
+export type TCoAuthor = {
   id?: number,
   noteId: number,
   userId: number,
   statusId: number,
-  user: IUser
+  user: TUser,
 }
 
-export default function coAuthorModel(coAuthorData: ICoAuthor) {
+export default function coAuthorModel(coAuthorData: TCoAuthor) {
   const id = ref(coAuthorData.id)
   const noteId = ref(coAuthorData.noteId)
   const userId = ref(coAuthorData.userId)

@@ -5,7 +5,7 @@ import BaseService from '~/services/base'
 import StorageService from '~/services/storage'
 import { useGlobalStore } from '~/stores/global'
 
-export interface IUser {
+export type TUser = {
   id: number,
   firstName: string,
   secondName: string,
@@ -13,7 +13,7 @@ export interface IUser {
   showChecked: boolean,
 }
 
-export default function userModel(userData: IUser) {
+export default function userModel(userData: TUser) {
   const id = ref(userData.id)
   const firstName = ref(userData.firstName)
   const secondName = ref(userData.secondName)

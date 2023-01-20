@@ -74,7 +74,7 @@ module.exports = configure((/* ctx */) => ({
     // publicPath: '/',
     // analyze: true,
     env: {
-      appVersion: require('./package.json').version,
+      applicationVersion: require('./package.json').version,
     },
     // rawDefine: {}
     // ignorePublicFolder: true,

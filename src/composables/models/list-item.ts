@@ -43,7 +43,6 @@ export default function listItemModel(listItemData: TListItem) {
   const created = ref(listItemData.created ? new Date(listItemData.created) : null)
   const updated = ref(listItemData.updated ? new Date(listItemData.updated) : null)
   const statusId = ref(listItemData.statusId || StatusesService.active.value.id)
-  const status = ref(StatusesService.findById(statusId.value))
   const isCreating = ref(false)
   const isUpdateNeeded = ref(false)
   let saveTimeout: ReturnType<typeof setTimeout> | undefined
@@ -71,6 +70,11 @@ export default function listItemModel(listItemData: TListItem) {
     return document.querySelector(`textarea[id="${generateTextareaRefName()}"]`) as HTMLTextAreaElement
   }
 
+  function handleDataTransformation() {
+    created.value = created.value ? new Date(created.value) : new Date()
+    updated.value = updated.value ? new Date(updated.value) : new Date()
+  }
+
   return {
     id,
     generatedId,
@@ -83,10 +87,10 @@ export default function listItemModel(listItemData: TListItem) {
     created,
     updated,
     statusId,
-    status,
     isCreating,
     isUpdateNeeded,
     saveTimeout,
+    handleDataTransformation,
     restore,
     generateTextareaRefName,
     getTextarea,

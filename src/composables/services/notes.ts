@@ -1,9 +1,11 @@
-import { computed, ref, Ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { TListItemModel, type TVariant } from '~/composables/models/list-item'
+import { computed, ref, Ref, nextTick } from 'vue'
+import ListItemsService from '~/composables/services/list-items'
+import { type TListItem, TListItemModel, type TVariant } from '~/composables/models/list-item'
 import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
+import TypesService from '~/composables/services/types'
 import ApiService from '~/services/api/api'
+import { TYPE_TEXT } from '../models/type'
 
 const currentNote: Ref<TNoteModel | null> = ref(null)
 const notes: Ref<TNoteModel[]> = ref([])
@@ -16,19 +18,6 @@ function generateNotes(notesData: TNote[]) {
     const note = noteModel(noteData)
     notes.value.push(note as unknown as TNoteModel)
   })
-}
-
-function updateNotes(notesData: TNote[]) {
-  const currentNoteId = currentNote.value?.id
-  generateNotes(notesData)
-  if (currentNoteId) {
-    const newCurrentNote = notes.value.find((note) => note.id === currentNoteId)
-    if (!newCurrentNote) {
-      useRouter().push('/')
-    } else {
-      currentNote.value = newCurrentNote
-    }
-  }
 }
 
 function setNotesOrder(order: number[]) {
@@ -157,13 +146,56 @@ async function removeNote(note: TNoteModel) {
   await ApiService.removeNote(note)
 }
 
+async function updateNote(note: TNoteModel, noteData: TNote) {
+  noteData.isCompletedListExpanded = !!noteData.isCompletedListExpanded
+  note.isRawUpdate = true
+  const listItemsToHandle: TListItemModel[] = []
+  if (noteData.typeId === TypesService.findByName(TYPE_TEXT).id) {
+    Object.assign(note, noteData)
+  } else {
+    note.title = noteData.title || ''
+    let listData: TListItem[] = []
+    if (noteData.list) {
+      listData = noteData.list
+      delete noteData.list
+    }
+    Object.assign(note, noteData)
+
+    // Handle list update
+    listData.forEach(async (listItemData) => {
+      const existedListItem = note?.list.find((listItem) => listItem.id === listItemData.id)
+      if (existedListItem) {
+        Object.assign(existedListItem, listItemData)
+        existedListItem.handleDataTransformation()
+        listItemsToHandle.push(existedListItem)
+      } else if (note) {
+        ListItemsService.addListItem(note, listItemData)
+      }
+    })
+
+    // Handle deleted list items
+    const listItemsToDelete: number[] = []
+    note.list.forEach((listItem) => {
+      const existedListItem = listData.find((listItemData) => listItem.id === listItemData.id)
+      if (!existedListItem && listItem.id) {
+        listItemsToDelete.push(listItem.id)
+      }
+    })
+    note.list = note.list.filter((listItem) => listItem.id && !listItemsToDelete.includes(listItem.id))
+  }
+  note.handleDataTransformation(noteData.user, noteData.coAuthors)
+  await nextTick()
+  listItemsToHandle.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
+  note.isRawUpdate = false
+}
+
 export default {
   currentNote,
   notes,
   filtered,
   searchQuery,
   removingNotes,
-  updateNotes,
+  updateNote,
   generateMaxOrder,
   generateNotes,
   findNoteListItemVariants,
