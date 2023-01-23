@@ -180,7 +180,7 @@ watch(
 <style lang="scss" scoped>
 .main-layout {
   &.is-updating {
-    filter: blur(3px);
+    filter: blur(2px);
   }
 
   .overlay {

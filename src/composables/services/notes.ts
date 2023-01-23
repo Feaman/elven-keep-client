@@ -185,7 +185,12 @@ async function updateNote(note: TNoteModel, noteData: TNote) {
   }
   note.handleDataTransformation(noteData.user, noteData.coAuthors)
   await nextTick()
-  listItemsToHandle.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
+  listItemsToHandle.forEach((listItem) => {
+    const $textArea = listItem.getTextarea()
+    if ($textArea) {
+      ListItemsService.handleListItemTextAreaHeight($textArea)
+    }
+  })
   note.isRawUpdate = false
 }
 
