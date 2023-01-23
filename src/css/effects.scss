@@ -62,7 +62,7 @@
 @keyframes slideFadeAppear {
   0% {
     opacity: 0.8;
-    left: 40px
+    left: 20px
   }
 
   70% {
@@ -84,8 +84,7 @@
 }
 
 .animated.slideFadeAppear {
-  position: absolute;
-  animation: slideFadeAppear 0.2s;
+  animation: slideFadeAppear 0.1s ease-out;
 }
 
 // Slide Fade In

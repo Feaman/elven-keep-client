@@ -6,8 +6,11 @@ import BaseService from '~/services/base'
 import { TEvents, TGlobalError } from '~/types'
 import InitService from '~/services/init'
 import SocketIOService from '~/services/socket-io'
+import { useGlobalStore } from '~/stores/global'
 
 export default boot(({ app }) => {
+  const globalStore = useGlobalStore()
+
   BaseService.eventBus = mitt<TEvents>()
   BaseService.showError = (error: Error | TGlobalError) => {
     let resultError: TGlobalError | Error = error
@@ -42,8 +45,21 @@ export default boot(({ app }) => {
   app.component('Draggable', draggable)
 
   window.addEventListener('focus', () => {
-    BaseService.eventBus.emit('windowFocused', true)
+    globalStore.isUpdating = true
   })
+
+  // Handle app focus
+  let prevStateIsFocused: boolean | null = null
+  setInterval(() => {
+    if (document.hasFocus()) {
+      if (prevStateIsFocused !== true) {
+        BaseService.eventBus.emit('windowFocused', true)
+      }
+      prevStateIsFocused = true
+    } else {
+      prevStateIsFocused = false
+    }
+  }, 200)
   BaseService.eventBus.on('windowFocused', async () => {
     try {
       await InitService.handleApplicationUpdate()
@@ -51,6 +67,7 @@ export default boot(({ app }) => {
       BaseService.showError(error as Error)
     }
   })
+
   SocketIOService.init()
   InitService.initApplication()
 })
