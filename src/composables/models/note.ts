@@ -71,8 +71,8 @@ export default function noteModel(noteData: TNote) {
     coAuthorsData.forEach((coAuthorData) => coAuthors.value.push(coAuthorModel(coAuthorData) as unknown as TCoAuthorModel))
   }
 
-  // async function createListItem(listItem: TListItemModel, logIid: number) {
-  async function createListItem(listItem: TListItemModel) {
+  // async function handleListItem(listItem: TListItemModel, logIid: number) {
+  async function handleListItem(listItem: TListItemModel) {
     listItem.noteId = id.value
     const data = await ApiService.addListItem(listItem)
     listItem.id = data.id
@@ -105,8 +105,8 @@ export default function noteModel(noteData: TNote) {
           await ApiService.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
           isUpdateNeeded.value = false
         }
-        // unSavedListItems.value.forEach((listItem) => createListItem(listItem, logIid))
-        unSavedListItems.value.forEach((listItem) => createListItem(listItem))
+        // unSavedListItems.value.forEach((listItem) => handleListItem(listItem, logIid))
+        unSavedListItems.value.forEach((listItem) => handleListItem(listItem))
       }
       isSaving.value = false
     } catch (error) {
@@ -146,8 +146,8 @@ export default function noteModel(noteData: TNote) {
           unSavedListItems.value.push(listItem)
         } else {
           // console.log(`${logIid}: create list item`)
-          // await createListItem(listItem, logId)
-          await createListItem(listItem)
+          // await handleListItem(listItem, logId)
+          await handleListItem(listItem)
         }
       }
       isSaving.value = false
@@ -252,7 +252,6 @@ export default function noteModel(noteData: TNote) {
       listItem.text = listItem.text.trim()
     }
     const $textArea = listItem.getTextarea()
-    ListItemsService.handleListItemTextAreaHeight($textArea)
     if ($textArea && $textArea.parentElement) {
       $textArea.parentElement.scrollTop = 0
     }
@@ -274,6 +273,7 @@ export default function noteModel(noteData: TNote) {
 
     listItem.text = variant.text
     saveListItem(listItem)
+
     return listItem
   }
 

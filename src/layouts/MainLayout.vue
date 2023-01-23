@@ -1,7 +1,6 @@
 <template lang="pug">
 q-layout.main-layout(
   view="hHh Lpr fFf"
-  :class="{'is-updating': globalStore.isUpdating}"
 )
   q-page-container(v-if="isErrorShown")
     ErrorPage(:error="{statusCode: globalStore.initError?.statusCode, message: globalStore.initError?.message}")
@@ -65,17 +64,15 @@ q-layout.main-layout(
                 height="24px"
               )
   q-page-container.page.pa-0(v-else)
-    .overlay(v-if="globalStore.isUpdating")
     router-view.page-content(
       v-slot="{ Component }"
     )
       transition(
         appear
-        enter-active-class="animated slideFadeIn"
+        enter-active-class="animated slideFadeAppear"
       )
         component(
           :is="Component"
-          :key="$route.path"
         )
 </template>
 
@@ -175,26 +172,24 @@ watch(
     }
   },
 )
+
+watch(
+  () => globalStore.isUpdating,
+  () => {
+    if (globalStore.isUpdating) {
+      const $overlay = document.createElement('div')
+      $overlay.classList.add('updating-overlay')
+      document.body.appendChild($overlay)
+      document.body.classList.add('is-updating')
+    } else {
+      (document.querySelector('.updating-overlay') as HTMLDivElement).remove()
+      document.body.classList.remove('is-updating')
+    }
+  },
+)
 </script>
 
 <style lang="scss" scoped>
-.main-layout {
-  &.is-updating {
-    filter: blur(2px);
-  }
-
-  .overlay {
-    position: absolute;
-    width: 100%;
-    background: white;
-    top: -50px;
-    z-index: 10000000000000000;
-    height: 100vh;
-    backdrop-filter: blur(10px);
-    opacity: 0.8;
-  }
-}
-
 .note {
   min-width: 250px;
   max-width: 300px;

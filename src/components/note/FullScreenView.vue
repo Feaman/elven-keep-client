@@ -27,7 +27,7 @@
             )
             .list-item__text.ml-1 {{ listItem.text }}
         q-space
-        .text-center.pb-4
+        .text-center.pt-6.pb-4
           q-btn(
             @click="emit('close')"
             :icon="mdiCheck"

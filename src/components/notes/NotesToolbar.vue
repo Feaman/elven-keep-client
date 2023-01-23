@@ -7,9 +7,7 @@
         CreateTools
         q-space
         transition(
-          appear
-          enter-active-class="animated scaleFadeIn"
-          leave-active-class="animated scaleFadeOut"
+          name="scale-fade"
         )
           NewVersionIcon(
             v-if="globalStore.isNewVersionAvailable"

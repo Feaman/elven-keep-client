@@ -241,13 +241,12 @@ function handleKeyDown(event: KeyboardEvent) {
 function loadMore() {
   setTimeout(async () => {
     if (listItemsToShow.value < fullList.value.length) {
-      listItemsToShow.value += 100
-      await nextTick()
+      loadMore()
+      listItemsToShow.value += 50
       await nextTick()
       ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
-      loadMore()
     }
-  }, 500)
+  }, 250)
 }
 
 async function init() {
@@ -315,7 +314,6 @@ async function updateText(listItem: TListItemModel, event: Event) {
     listItem.saveTimeout = undefined
   }, 400)
   handleSemiFocus()
-  ListItemsService.handleListItemTextAreaHeight($textarea)
   if (!listItem.checked && !listItem.completed) {
     await checkVariants(listItem)
   }
@@ -323,10 +321,8 @@ async function updateText(listItem: TListItemModel, event: Event) {
 
 async function selectVariant(listItem: TListItemModel | null, variant: TVariant) {
   if (listItem) {
-    const resultListItem = note.value.selectVariant(listItem, variant)
+    note.value.selectVariant(listItem, variant)
     variants.value = []
-    await nextTick()
-    ListItemsService.handleListItemTextAreaHeight(resultListItem.getTextarea())
   }
 }
 

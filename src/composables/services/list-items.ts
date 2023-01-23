@@ -83,7 +83,7 @@ async function addListItem(note: TNoteModel, data: TListItem | undefined = undef
   // Handle textarea events
   await nextTick()
   const $textarea = listItem.getTextarea()
-  handleListItemTextAreaHeight($textarea as HTMLTextAreaElement)
+  // handleListItemTextAreaHeight($textarea as HTMLTextAreaElement)
   addTextareaSwipeEvent(note, unRefListItem as unknown as TListItemModel)
   addTextareaKeydownEvent($textarea, unRefListItem.completed)
   if (!data) {

@@ -58,6 +58,36 @@
   position: absolute;
 }
 
+// Slide Fade Appear
+@keyframes slideFadeAppear {
+  0% {
+    opacity: 0.8;
+    left: 40px
+  }
+
+  70% {
+    opacity: 0.85;
+  }
+
+  80% {
+    opacity: 0.9;
+  }
+
+  90% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 1;
+    left: 0
+  }
+}
+
+.animated.slideFadeAppear {
+  position: absolute;
+  animation: slideFadeAppear 0.2s;
+}
+
 // Slide Fade In
 @keyframes slideFadeIn {
   0% {
@@ -116,40 +146,6 @@
 .animated.slideFadeOut {
   position: absolute;
   animation: slideFadeOut 0.2s;
-}
-
-// Scale Fade In
-@keyframes scaleFadeIn {
-  0% {
-    opacity: 0;
-    transform: scale(0);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animated.scaleFadeIn {
-  animation: scaleFadeIn 0.3s;
-}
-
-// Scale Fade Out
-@keyframes scaleFadeOut {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(0);
-  }
-}
-
-.animated.scaleFadeOut {
-  animation: scaleFadeOut 0.3s;
 }
 
 // Scale-fade

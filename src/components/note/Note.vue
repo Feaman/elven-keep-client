@@ -185,7 +185,11 @@ async function addCoAuthor() {
 
 watch(() => globalStore.user?.showChecked, async () => {
   await nextTick()
-  note.value.list.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
+  if (note.value.isCompletedListExpanded) {
+    note.value.list.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
+  } else {
+    note.value.mainListItems.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
+  }
 })
 </script>
 

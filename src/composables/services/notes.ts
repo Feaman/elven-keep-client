@@ -149,7 +149,6 @@ async function removeNote(note: TNoteModel) {
 async function updateNote(note: TNoteModel, noteData: TNote) {
   noteData.isCompletedListExpanded = !!noteData.isCompletedListExpanded
   note.isRawUpdate = true
-  const listItemsToHandle: TListItemModel[] = []
   if (noteData.typeId === TypesService.findByName(TYPE_TEXT).id) {
     Object.assign(note, noteData)
   } else {
@@ -163,11 +162,12 @@ async function updateNote(note: TNoteModel, noteData: TNote) {
 
     // Handle list update
     listData.forEach(async (listItemData) => {
+      listItemData.checked = !!listItemData.checked
+      listItemData.completed = !!listItemData.completed
       const existedListItem = note?.list.find((listItem) => listItem.id === listItemData.id)
       if (existedListItem) {
         Object.assign(existedListItem, listItemData)
         existedListItem.handleDataTransformation()
-        listItemsToHandle.push(existedListItem)
       } else if (note) {
         ListItemsService.addListItem(note, listItemData)
       }
@@ -185,12 +185,6 @@ async function updateNote(note: TNoteModel, noteData: TNote) {
   }
   note.handleDataTransformation(noteData.user, noteData.coAuthors)
   await nextTick()
-  listItemsToHandle.forEach((listItem) => {
-    const $textArea = listItem.getTextarea()
-    if ($textArea) {
-      ListItemsService.handleListItemTextAreaHeight($textArea)
-    }
-  })
   note.isRawUpdate = false
 }
 

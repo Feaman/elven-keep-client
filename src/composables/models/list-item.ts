@@ -1,9 +1,13 @@
-import { ref, UnwrapRef } from 'vue'
+import { nextTick, ref, UnwrapRef, watch } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
 import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
+import ListItemsService from '../services/list-items'
+
+const LAST_TEXTAREA = 'LAST_TEXTAREA'
+const FIRST_TEXTAREA = 'FIRST_TEXTAREA'
 
 export type TVariant = {
   noteId: number,
@@ -37,9 +41,9 @@ export default function listItemModel(listItemData: TListItem) {
   const text = ref(listItemData.text || '')
   const noteId = ref(listItemData.noteId)
   const order = ref(listItemData.order || 0)
-  const focused = ref(listItemData.focused || false)
+  const focused = ref(false)
   const checked = ref(!!listItemData.checked || false)
-  const completed = ref(listItemData.completed || false)
+  const completed = ref(!!listItemData.completed || false)
   const created = ref(listItemData.created ? new Date(listItemData.created) : null)
   const updated = ref(listItemData.updated ? new Date(listItemData.updated) : null)
   const statusId = ref(listItemData.statusId || StatusesService.active.value.id)
@@ -66,14 +70,32 @@ export default function listItemModel(listItemData: TListItem) {
     return `textarea-${generatedId.value}`
   }
 
-  function getTextarea() {
-    return document.querySelector(`textarea[id="${generateTextareaRefName()}"]`) as HTMLTextAreaElement
+  function getTextarea(which = LAST_TEXTAREA) {
+    const textAreas = document.querySelectorAll(`textarea[id="${generateTextareaRefName()}"]`)
+    return textAreas[which === FIRST_TEXTAREA ? 0 : textAreas.length - 1] as HTMLTextAreaElement
   }
 
   function handleDataTransformation() {
     created.value = created.value ? new Date(created.value) : new Date()
     updated.value = updated.value ? new Date(updated.value) : new Date()
   }
+
+  async function updateTextArea(which = LAST_TEXTAREA) {
+    await nextTick()
+    const $textArea = getTextarea(which)
+    if (!$textArea) {
+      throw new Error(`TextArea for list item id [${id.value}] not found`)
+    }
+    ListItemsService.handleListItemTextAreaHeight($textArea)
+  }
+
+  watch(text, () => {
+    updateTextArea()
+  })
+
+  watch(completed, () => {
+    updateTextArea(completed.value ? LAST_TEXTAREA : FIRST_TEXTAREA)
+  })
 
   return {
     id,

@@ -39,7 +39,7 @@
           )
         q-space
         transition(
-          :name="isNewNoteRoute ? 'scale-fade' : undefined"
+          name="scale-fade"
         )
           NewVersionIcon(
             v-if="globalStore.isNewVersionAvailable"
