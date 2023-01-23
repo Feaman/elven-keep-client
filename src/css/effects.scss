@@ -84,36 +84,7 @@
 }
 
 .animated.slideFadeAppear {
-  animation: slideFadeAppear 0.1s ease-out;
-}
-
-// Slide Fade Appear Long
-@keyframes slideFadeAppearLong {
-  0% {
-    opacity: 0.8;
-    left: 40px
-  }
-
-  70% {
-    opacity: 0.85;
-  }
-
-  80% {
-    opacity: 0.9;
-  }
-
-  90% {
-    opacity: 0.95;
-  }
-
-  100% {
-    opacity: 1;
-    left: 0
-  }
-}
-
-.animated.slideFadeAppearLong {
-  animation: slideFadeAppearLong 0.3s ease-out;
+  animation: slideFadeAppear 0.3s ease-out;
 }
 
 // Slide Fade In

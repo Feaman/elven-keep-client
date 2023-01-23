@@ -69,7 +69,7 @@ q-layout.main-layout(
     )
       transition(
         appear
-        :enter-active-class="`animated slideFadeAppear${$route.name === ROUTE_NOTES ? 'Long' : ''}`"
+        enter-active-class="animated slideFadeAppear"
       )
         component(
           :is="Component"
