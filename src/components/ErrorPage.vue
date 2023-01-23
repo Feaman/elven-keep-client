@@ -73,6 +73,10 @@ function reload() {
       line-height: normal;
     }
   }
+
+  .error-page__message {
+    line-height: 28px;
+  }
 }
 
 @media (max-width: 700px) {

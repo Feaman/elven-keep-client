@@ -69,7 +69,7 @@ q-layout.main-layout(
     )
       transition(
         appear
-        enter-active-class="animated slideFadeAppear"
+        :enter-active-class="`animated slideFadeAppear${$route.name === ROUTE_NOTES ? 'Long' : ''}`"
       )
         component(
           :is="Component"
@@ -85,6 +85,7 @@ import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
 import { useGlobalStore } from '~/stores/global'
 import { type TGlobalError } from '~/types'
+import { ROUTE_NOTES } from '~/router/routes'
 
 const router = useRouter()
 const $q = useQuasar()
