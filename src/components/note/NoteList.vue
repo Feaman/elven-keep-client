@@ -249,22 +249,28 @@ function loadMore() {
   }, 250)
 }
 
+function handleWindowResize() {
+  setTimeout(() => {
+    ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
+  })
+}
+
 async function init() {
   $root = rootElement.value
 
+  window.addEventListener('resize', handleWindowResize)
   document.addEventListener('mousedown', hideVariants)
   BaseService.eventBus.on('keydown', handleKeyDown)
 
   if (props.isMain) {
-    ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
+    handleWindowResize()
   } else {
     setTimeout(() => {
-      ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
+      handleWindowResize()
     }, 100)
   }
 
   list.value.forEach((listItem) => ListItemsService.addTextareaSwipeEvent(note.value, listItem))
-
   $root?.querySelectorAll('.list-item textarea').forEach(($textarea) => {
     ListItemsService.addTextareaKeydownEvent($textarea as HTMLTextAreaElement, !props.isMain)
   })
@@ -279,6 +285,7 @@ onMounted(init)
 
 onUnmounted(() => {
   document.removeEventListener('mousedown', hideVariants)
+  window.removeEventListener('resize', handleWindowResize)
 })
 
 function selectFocusedVariant(event: Event) {
