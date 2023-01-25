@@ -154,7 +154,9 @@ watch(removedItemsQuantity, () => {
         notification({ timeout: 1 })
         notification = null
       }
-    }, 4000)
+      NotesService.removingNotes.value = []
+      ListItemsService.removingListItems.value = []
+    }, 7000)
   } else if (notification) {
     notification({ timeout: 1 })
   }

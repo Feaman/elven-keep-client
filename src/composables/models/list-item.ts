@@ -2,6 +2,7 @@ import { nextTick, ref, UnwrapRef, watch } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
+import { ROUTE_EXISTED_NOTE } from '~/router/routes'
 import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
 import ListItemsService from '../services/list-items'
@@ -52,18 +53,14 @@ export default function listItemModel(listItemData: TListItem) {
   let saveTimeout: ReturnType<typeof setTimeout> | undefined
 
   async function restore() {
-    let result
     try {
       if (id.value) {
         statusId.value = StatusesService.active.value.id
-        result = await ApiService.restoreListItem(id.value)
+        await ApiService.restoreListItem(id.value)
       }
-      result = Promise.resolve()
     } catch (error) {
       BaseService.showError(error as Error)
     }
-
-    return result
   }
 
   function generateTextareaRefName() {
@@ -83,10 +80,9 @@ export default function listItemModel(listItemData: TListItem) {
   async function updateTextArea(which = LAST_TEXTAREA) {
     await nextTick()
     const $textArea = getTextarea(which)
-    if (!$textArea) {
-      throw new Error(`TextArea for list item id [${id.value}] not found`)
+    if ($textArea) {
+      ListItemsService.handleListItemTextAreaHeight($textArea)
     }
-    ListItemsService.handleListItemTextAreaHeight($textArea)
   }
 
   watch(text, () => {

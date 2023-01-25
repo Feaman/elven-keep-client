@@ -157,18 +157,14 @@ export default function noteModel(noteData: TNote) {
   }
 
   async function restore() {
-    let result
     try {
       if (id.value) {
         statusId.value = StatusesService.active.value.id
-        result = await ApiService.restoreNote(id.value)
+        await ApiService.restoreNote(id.value)
       }
-      result = Promise.resolve()
     } catch (error) {
       BaseService.showError(error as Error)
     }
-
-    return result
   }
 
   const isMyNote = computed(() => globalStore.user?.id === userId.value)
