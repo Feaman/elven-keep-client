@@ -188,12 +188,21 @@ async function updateNote(note: TNoteModel, noteData: TNote) {
   note.isRawUpdate = false
 }
 
+function find(noteId: number) {
+  const note = notes.value.find((note) => note.id === noteId)
+  if (!note) {
+    throw new Error(`Note width id "${noteId}" not found`)
+  }
+  return note
+}
+
 export default {
   currentNote,
   notes,
   filtered,
   searchQuery,
   removingNotes,
+  find,
   updateNote,
   generateMaxOrder,
   generateNotes,

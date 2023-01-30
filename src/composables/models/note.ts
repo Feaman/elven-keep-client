@@ -192,6 +192,7 @@ export default function noteModel(noteData: TNote) {
   const mainListItems = computed(() => filterAndSort()) as Ref<TListItemModel[]>
 
   const completedListItems = computed(() => filterAndSort(true)) as Ref<TListItemModel[]>
+  const activeListItems = computed(() => list.value.filter((listItem) => listItem.statusId === StatusesService.active.value.id))
 
   function addCoAuthor(coAuthor: TCoAuthorModel) {
     coAuthors.value.push(coAuthor)
@@ -298,6 +299,14 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
+  function findListItem(listItemId: number) {
+    const listItem = list.value.find((listItem) => listItem.id === listItemId)
+    if (!listItem) {
+      throw new Error(`listItem width id "${listItemId}" not found`)
+    }
+    return listItem
+  }
+
   handleList(noteData.list)
   handleCoAuthors(noteData.coAuthors)
   handleUser(noteData.user)
@@ -336,6 +345,7 @@ export default function noteModel(noteData: TNote) {
     isList,
     order,
     isRawUpdate,
+    activeListItems,
     filterAndSort,
     checkOrUncheckListItem,
     addCoAuthor,
@@ -349,6 +359,7 @@ export default function noteModel(noteData: TNote) {
     completeAllChecked,
     saveListItem,
     removeListItem,
+    findListItem,
     addListItem,
     selectVariant,
     blurListItem,

@@ -2,10 +2,10 @@ import { nextTick, ref, UnwrapRef, watch } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
-import { ROUTE_EXISTED_NOTE } from '~/router/routes'
 import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
 import ListItemsService from '../services/list-items'
+import NotesService from '../services/notes'
 
 const LAST_TEXTAREA = 'LAST_TEXTAREA'
 const FIRST_TEXTAREA = 'FIRST_TEXTAREA'
@@ -82,16 +82,15 @@ export default function listItemModel(listItemData: TListItem) {
     const $textArea = getTextarea(which)
     if ($textArea) {
       ListItemsService.handleListItemTextAreaHeight($textArea)
+      if (!completed.value && id.value && noteId.value) {
+        const note = NotesService.find(noteId.value)
+        ListItemsService.addTextareaSwipeEvent(note, note.findListItem(id.value))
+      }
     }
   }
 
-  watch(text, () => {
-    updateTextArea()
-  })
-
-  watch(completed, () => {
-    updateTextArea(completed.value ? LAST_TEXTAREA : FIRST_TEXTAREA)
-  })
+  watch(text, () => updateTextArea())
+  watch(completed, () => updateTextArea(completed.value ? LAST_TEXTAREA : FIRST_TEXTAREA))
 
   return {
     id,

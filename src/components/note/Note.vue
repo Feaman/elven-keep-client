@@ -19,7 +19,7 @@
           dense
         )
         q-btn.note__complete-checked-button.text-black(
-          v-if="note.type?.name === NOTE_TYPE_LIST"
+          v-if="note.type?.name === NOTE_TYPE_LIST && globalStore.user?.showChecked"
           @click="note.completeAllChecked()"
           :disabled="!note.checkedListItems.length"
           :icon="mdiCheckAll"
@@ -186,7 +186,7 @@ async function addCoAuthor() {
 watch(() => globalStore.user?.showChecked, async () => {
   await nextTick()
   if (note.value.isCompletedListExpanded) {
-    note.value.list.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
+    note.value.activeListItems.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
   } else {
     note.value.mainListItems.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
   }
