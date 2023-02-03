@@ -1,7 +1,7 @@
 <template lang="pug">
 .notes-toolbar
   q-header.notes-toolbar__header(elevated)
-    q-toolbar
+    q-toolbar.pr-0
       .q-flex.full-width
         NotesSearch
         CreateTools
