@@ -2,6 +2,7 @@ import { ref, UnwrapRef, watch } from 'vue'
 import UsersService from '~/composables/services/users'
 import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
+import InitService from '~/services/init'
 import StorageService from '~/services/storage'
 import { useGlobalStore } from '~/stores/global'
 
@@ -31,6 +32,7 @@ export default function userModel(userData: TUser) {
 
   function signOut() {
     StorageService.set({ [UsersService.AUTH_TOKEN_NAME]: null })
+    InitService.clearApplication()
     BaseService.router.push('/sign')
   }
 

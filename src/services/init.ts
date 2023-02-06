@@ -49,4 +49,10 @@ export default class InitService extends BaseService {
       globalStore.isUpdating = false
     }
   }
+
+  static clearApplication() {
+    const globalStore = useGlobalStore()
+    NotesService.notes.value = []
+    globalStore.user = null
+  }
 }
