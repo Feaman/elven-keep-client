@@ -19,7 +19,6 @@
           dense
         )
         q-btn.note__complete-checked-button.text-black(
-          v-if="note.type?.name === NOTE_TYPE_LIST && globalStore.user?.showChecked"
           @click="note.completeAllChecked()"
           :disabled="!note.checkedListItems.length"
           :icon="mdiCheckAll"
