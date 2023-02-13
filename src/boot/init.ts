@@ -24,6 +24,8 @@ export default boot(({ app }) => {
     BaseService.eventBus.emit('keydown', event)
   }
 
+  (new Image()).src = '/images/crying-girl.jpg'
+
   // Register all the components
   const componentsFolderFiles: { [index: string]: { default: object } } = import.meta.globEager('../components/**/*.vue')
   Object.keys(componentsFolderFiles).forEach((key: string) => {

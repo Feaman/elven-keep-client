@@ -114,8 +114,8 @@ import { AxiosError } from 'axios'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import UsersService from '~/composables/services/users'
-import KeyboardEvents from '~/helpers/keyboard-events'
 import StorageService from '~/services/storage'
+import KeyboardEvents from '~/helpers/keyboard-events'
 
 const isTokenExists = StorageService.get(UsersService.AUTH_TOKEN_NAME)
 const router = useRouter()

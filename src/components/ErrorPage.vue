@@ -2,7 +2,7 @@
 .error-page.pa-4
   .error-page__image-container.flex.flex-center
     img.error-page__image(
-      src="~assets/crying-girl.jpg"
+      src="/images/crying-girl.jpg"
     )
   .error-page__error.column.no-wrap.text-center.full-height.pb-4
     .error-page__title.text-h3.text-weight-bold.mt-8 Awww... What the dragon?!
