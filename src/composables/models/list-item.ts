@@ -84,7 +84,7 @@ export default function listItemModel(listItemData: TListItem) {
       ListItemsService.handleListItemTextAreaHeight($textArea)
       if (!completed.value && id.value && noteId.value) {
         const note = NotesService.find(noteId.value)
-        ListItemsService.addTextareaSwipeEvent(note, note.findListItem(id.value))
+        ListItemsService.addTextareaSwipeEvent(note, note.findListItem(id.value), FIRST_TEXTAREA)
       }
     }
   }

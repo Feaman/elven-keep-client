@@ -1,8 +1,8 @@
 import { nextTick, ref } from 'vue'
 import listItemModel, { TListItem, TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
-import StatusesService from '~/composables/services/statuses'
 import NotesService from '~/composables/services/notes'
+import StatusesService from '~/composables/services/statuses'
 import KeyboardEvents from '~/helpers/keyboard-events'
 import SwipeEvents from '~/helpers/swipe-events'
 
@@ -111,8 +111,8 @@ function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
   return headerHeight + offset
 }
 
-function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel) {
-  const $textarea = listItem.getTextarea()
+function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel, whichTextarea?: string) {
+  const $textarea = listItem.getTextarea(whichTextarea)
   const swiper = new SwipeEvents($textarea)
   swiper.onMove = (xDiff: number) => {
     if (!listItem.checked && xDiff > 0) {
