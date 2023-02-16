@@ -114,7 +114,18 @@ function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
 function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel, whichTextarea?: string) {
   const $textarea = listItem.getTextarea(whichTextarea)
   const swiper = new SwipeEvents($textarea)
-  swiper.onMove = (xDiff: number) => {
+  swiper.onMove = (xDiff: number, yDiff: number) => {
+    if (Math.abs(yDiff) > 60) {
+      if (listItem.checked) {
+        $textarea.classList.add('text-strike')
+        $textarea.classList.remove('text-decoration-none')
+        $textarea.classList.remove('text-black')
+      } else {
+        $textarea.style.opacity = '1'
+        $textarea.classList.remove('text-strike')
+      }
+      return
+    }
     if (!listItem.checked && xDiff > 0) {
       if (xDiff >= LEFT_SWIPE_WIDTH) {
         $textarea.classList.add('text-strike')
@@ -133,17 +144,19 @@ function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel, which
       }
     }
   }
-  swiper.onEnd = (xDiff: number) => {
-    if (!listItem.checked) {
-      $textarea.style.opacity = '1'
-      $textarea.classList.remove('text-strike')
-      if (xDiff > LEFT_SWIPE_WIDTH) {
-        note.checkOrUncheckListItem(listItem, true)
+  swiper.onEnd = (xDiff: number, yDiff: number) => {
+    if (Math.abs(yDiff) < 60) {
+      if (!listItem.checked) {
+        $textarea.style.opacity = '1'
+        $textarea.classList.remove('text-strike')
+        if (xDiff > LEFT_SWIPE_WIDTH) {
+          note.checkOrUncheckListItem(listItem, true)
+        }
+      } else if (xDiff < -LEFT_SWIPE_WIDTH) {
+        $textarea.classList.remove('text-decoration-none')
+        $textarea.classList.remove('text-black')
+        note.checkOrUncheckListItem(listItem, false)
       }
-    } else if (xDiff < -LEFT_SWIPE_WIDTH) {
-      $textarea.classList.remove('text-decoration-none')
-      $textarea.classList.remove('text-black')
-      note.checkOrUncheckListItem(listItem, false)
     }
   }
 }
