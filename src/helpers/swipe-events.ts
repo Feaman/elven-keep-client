@@ -1,3 +1,5 @@
+export const LEFT_SWIPE_WIDTH = 75
+
 export default class SwipeEvents {
   startX: number | null = null
 
@@ -64,7 +66,7 @@ export default class SwipeEvents {
         if (this.onRight) {
           this.onRight()
         }
-      } else if (this.xDiff > 30 && this.onLeft) {
+      } else if (this.xDiff > LEFT_SWIPE_WIDTH && this.onLeft) {
         this.onLeft()
       }
     } else if (this.yDiff < 0) {

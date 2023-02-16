@@ -4,7 +4,7 @@ import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import KeyboardEvents from '~/helpers/keyboard-events'
-import SwipeEvents from '~/helpers/swipe-events'
+import SwipeEvents, { LEFT_SWIPE_WIDTH } from '~/helpers/swipe-events'
 
 const removingListItems = ref<TListItemModel[]>([])
 const listItemMinHeight = 36
@@ -116,7 +116,7 @@ function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel, which
   const swiper = new SwipeEvents($textarea)
   swiper.onMove = (xDiff: number) => {
     if (!listItem.checked && xDiff > 0) {
-      if (xDiff >= 30) {
+      if (xDiff >= LEFT_SWIPE_WIDTH) {
         $textarea.classList.add('text-strike')
       } else {
         $textarea.style.opacity = `${10 / xDiff}`
@@ -124,7 +124,7 @@ function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel, which
       }
     }
     if (listItem.checked && xDiff < 0) {
-      if (xDiff <= -30) {
+      if (xDiff <= -LEFT_SWIPE_WIDTH) {
         $textarea.classList.add('text-decoration-none')
         $textarea.classList.add('text-black')
       } else {
@@ -137,10 +137,10 @@ function addTextareaSwipeEvent(note: TNoteModel, listItem: TListItemModel, which
     if (!listItem.checked) {
       $textarea.style.opacity = '1'
       $textarea.classList.remove('text-strike')
-      if (xDiff > 30) {
+      if (xDiff > LEFT_SWIPE_WIDTH) {
         note.checkOrUncheckListItem(listItem, true)
       }
-    } else if (xDiff < -30) {
+    } else if (xDiff < -LEFT_SWIPE_WIDTH) {
       $textarea.classList.remove('text-decoration-none')
       $textarea.classList.remove('text-black')
       note.checkOrUncheckListItem(listItem, false)
