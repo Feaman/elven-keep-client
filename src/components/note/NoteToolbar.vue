@@ -37,6 +37,17 @@
             flat
             round
           )
+        transition(
+          :name="isNewNoteRoute ? 'scale-fade' : undefined"
+        )
+          q-btn(
+            v-if="note.id && note.isList && note.mainListItems.length"
+            @click="emit('is-watch')"
+            :icon="mdiWatch"
+            color="black"
+            flat
+            round
+          )
         q-space
         transition(
           name="scale-fade"
@@ -67,6 +78,7 @@ import {
   mdiHome,
   mdiAccountGroup,
   mdiFullscreen,
+  mdiWatch,
 } from '@quasar/extras/mdi-v6'
 import { computed } from 'vue'
 import { useGlobalStore } from '~/stores/global'
@@ -79,6 +91,7 @@ const route = useRoute()
 
 // eslint-disable-next-line
 const emit = defineEmits<{
+  (event: 'is-watch'): void
   (event: 'fullscreen'): void
   (event: 'co-authors-clicked'): void
 }>()

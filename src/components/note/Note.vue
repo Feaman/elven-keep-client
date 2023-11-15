@@ -3,11 +3,12 @@
   .note__content.column.no-wrap.full-width.full-height.py-2.px-3
 
     FullScreenView(
-      @close="emit('fullscreen', false)"
+      @close="emit('is-watch', false); emit('fullscreen', false)"
       @list-item-check="note.checkOrUncheckListItem($event, true)"
       @list-item-uncheck="note.checkOrUncheckListItem($event, false)"
       :note="note"
-      :show="fullscreen"
+      :show="fullscreen || isWatch"
+      :is-watch="isWatch"
     )
 
     template(v-if="!fullscreen")
@@ -153,12 +154,14 @@ const globalStore = useGlobalStore()
 
 defineProps<{
   fullscreen: boolean
+  isWatch: boolean
   showAuthors: boolean
 }>()
 
 // eslint-disable-next-line
 const emit = defineEmits<{
   (event: 'fullscreen', value: boolean): void
+  (event: 'is-watch', value: boolean): void
   (event: 'hide-authors'): void
   (event: 'hide'): void
 }>()
