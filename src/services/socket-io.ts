@@ -1,13 +1,13 @@
 import { io } from 'socket.io-client'
 import { nextTick } from 'vue'
 import listItemModel, { TListItem, TListItemModel } from '~/composables/models/list-item'
-import NotesService from '~/composables/services/notes'
-import BaseService from './base'
-import StorageService from './storage'
-import UsersService from '~/composables/services/users'
 import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
+import NotesService from '~/composables/services/notes'
+import UsersService from '~/composables/services/users'
 import { ROUTE_EXISTED_NOTE } from '~/router/routes'
 import { useGlobalStore } from '~/stores/global'
+import BaseService from './base'
+import StorageService from './storage'
 
 export default class SocketIOService extends BaseService {
   static EVENT_NOTE_ADDED = 'EVENT_NOTE_ADDED'

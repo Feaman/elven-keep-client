@@ -1,0 +1,12 @@
+{
+    "name": "Elven Notes",
+    "version": "1.0.0",
+    "api_version": 1,
+    "display": "fullscreen",
+    "background_color": "#fbc02d",
+    "layout": {
+        "logo": "favicon.ico",
+        "color": "#fbc02d",
+        "show_title": "none"
+    }
+}
