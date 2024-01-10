@@ -13,7 +13,7 @@
     q-card.full-width.full-height.q-flex.justify-center(
       :class="{ 'is-watch': isWatch }"
     )
-      q-card-section.fullscreen__card-section.full-height.column.no-wrap.pb-4.px-6(
+      q-card-section.fullscreen__card-section.full-height.column.no-wrap.pb-4.px-2(
         :class="{ 'q-pt-none': isWatch }"
       )
         .watch-buttons.watch-buttons--top.text-center(
@@ -40,13 +40,15 @@
             :key="listItem.generatedId"
             :class="{ 'list-item--checked': listItem.checked}"
           )
-            q-checkbox(
+            q-checkbox.ml-1(
               v-if="!isWatch"
               @update:model-value="note.checkOrUncheckListItem(listItem, $event)"
               :model-value="listItem.checked"
               color="blue"
             )
-            .list-item__text.full-width.q-flex.items-center.ml-1 {{ listItem.text }}
+            .list-item__text.full-width.q-flex.items-center.ml-1.py-2(
+              :class="`text-grey-${listItem.checked ? '4' : '9'}`"
+            ) {{ listItem.text }}
         q-space
         .watch-buttons.watch-buttons--bottom.text-center(
           v-if="isWatch"
@@ -113,6 +115,8 @@ const note = unref(NotesService.currentNote as unknown as TNoteModel)
 
     .list-item__text {
       overflow: auto;
+      font-size: 24px;
+      line-height: 28px;
     }
 
     &:not(:last-child) {

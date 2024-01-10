@@ -1,7 +1,7 @@
-import { computed, ref, Ref, nextTick } from 'vue'
-import ListItemsService from '~/composables/services/list-items'
-import { type TListItem, TListItemModel, type TVariant } from '~/composables/models/list-item'
+import { Ref, computed, nextTick, ref } from 'vue'
+import { TListItemModel, type TListItem, type TVariant } from '~/composables/models/list-item'
 import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
+import ListItemsService from '~/composables/services/list-items'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
 import ApiService from '~/services/api/api'
@@ -95,22 +95,33 @@ function findListItemVariants(listItem: TListItemModel) {
     return previousItem.text > nextItem.text ? -1 : 1
   })
 
-  // Duplicates and unique
-  const resultVariants: TVariant[] = []
-  const regexp = new RegExp(query.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&'), 'i')
-  variants.forEach((variant) => {
-    if (!resultVariants.find((item) => item.text.toLowerCase() === variant.text.toLowerCase())) {
-      const duplicates = variants.filter((_element) => (
-        variant.listItemId !== _element.listItemId
-        && _element.text.toLowerCase() === variant.text.toLowerCase()
-        && _element.noteId === listItem.noteId
-      ))
-      variant.duplicatesQuantity = duplicates.length
-      resultVariants.push(variant)
-    }
+  // Duplicates
+  const currentNoteVariants = variants.filter((variant) => variant.noteId === listItem.noteId)
+  currentNoteVariants.forEach((variant) => {
+    const duplicates = currentNoteVariants.filter((_element) => (
+      variant.listItemId !== _element.listItemId
+      && _element.text.toLowerCase() === variant.text.toLowerCase()
+    ))
+    variant.duplicatesQuantity = duplicates.length
   })
 
+  // Unique
+  let resultVariants: TVariant[] = []
+  const resultVariantsObject: { [key: string]: TVariant } = {}
+  variants
+    .reduce((accumulator: TVariant[], item: TVariant) => {
+      if (item.noteId === listItem.noteId) {
+        return [...accumulator, item]
+      }
+      return [item, ...accumulator]
+    }, [])
+    .forEach((variant) => {
+      resultVariantsObject[variant.text.toLowerCase()] = variant
+    })
+  resultVariants = Object.values(resultVariantsObject)
+
   // Highlight
+  const regexp = new RegExp(query.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&'), 'i')
   resultVariants.forEach((variant) => {
     variant.highlightedText = variant.text.replace(regexp, (text: string) => `<span class="text-green">${text}</span>`)
   })
