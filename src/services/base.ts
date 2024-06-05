@@ -15,7 +15,7 @@ export default class BaseService {
   static parseAxiosError(error: AxiosError): TGlobalError {
     return {
       statusCode: Number(error.code) || error?.response?.status || undefined,
-      message: error?.response?.data.message || error.message,
+      message: (error?.response?.data as { message: string }).message || error.message,
     }
   }
 

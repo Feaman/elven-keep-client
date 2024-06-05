@@ -1,4 +1,5 @@
 /* eslint-env node */
+const path = require('path')
 
 /*
  * This file runs in a Node context (it's NOT transpiled by Babel), so use only
@@ -11,7 +12,7 @@
 /* eslint func-names: 0 */
 /* eslint global-require: 0 */
 
-const { configure } = require('quasar/wrappers');
+const { configure } = require('quasar/wrappers')
 
 module.exports = configure((/* ctx */) => ({
   // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
@@ -21,8 +22,8 @@ module.exports = configure((/* ctx */) => ({
   // --> boot files are part of "main.js"
   // https://v2.quasar.dev/quasar-cli-vite/boot-files
   boot: [
-
-    'axios',
+    'api',
+    'init',
   ],
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -50,8 +51,11 @@ module.exports = configure((/* ctx */) => ({
       browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
       node: 'node20',
     },
+    alias: {
+      '~': path.join(__dirname, './src/'),
+    },
 
-    vueRouterMode: 'hash', // available values: 'hash', 'history'
+    vueRouterMode: 'history', // available values: 'hash', 'history'
     // vueRouterBase,
     // vueDevtools,
     // vueOptionsAPI: false,
@@ -60,7 +64,9 @@ module.exports = configure((/* ctx */) => ({
 
     // publicPath: '/',
     // analyze: true,
-    // env: {},
+    env: {
+      applicationVersion: require('./package.json').version,
+    },
     // rawDefine: {}
     // ignorePublicFolder: true,
     // minify: false,
@@ -85,7 +91,7 @@ module.exports = configure((/* ctx */) => ({
   // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
   devServer: {
     // https: true
-    open: true, // opens browser window automatically
+    open: false, // opens browser window automatically
   },
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
@@ -103,12 +109,16 @@ module.exports = configure((/* ctx */) => ({
     // directives: [],
 
     // Quasar plugins
-    plugins: [],
+    plugins: [
+      'LocalStorage',
+      'Meta',
+      'Notify',
+    ],
   },
 
   // animations: 'all', // --- includes all animations
   // https://v2.quasar.dev/options/animations
-  animations: [],
+  animations: ['zoomIn', 'zoomOut'],
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#sourcefiles
   // sourceFiles: {
@@ -192,7 +202,7 @@ module.exports = configure((/* ctx */) => ({
     builder: {
       // https://www.electron.build/configuration/configuration
 
-      appId: 'quasar-project',
+      appId: 'elven-keep-client',
     },
   },
 
@@ -205,4 +215,4 @@ module.exports = configure((/* ctx */) => ({
     // extendBexScriptsConf (esbuildConf) {}
     // extendBexManifestJson (json) {}
   },
-}));
+}))

@@ -27,13 +27,15 @@ onMounted(() => {
 })
 </script>
 
-<style lang="stylus" scoped>
-.search
-  input
-    width 240px
-    height 40px
-    padding 0 16px
-    border none
-    border-radius 6px
-    outline none
+<style lang="scss" scoped>
+.search {
+  input {
+    width: 240px;
+    height: 40px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+  }
+}
 </style>

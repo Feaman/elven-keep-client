@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import IApi from '~/services/api/interface'
 
 export default class AxiosApi implements IApi {
@@ -8,11 +8,11 @@ export default class AxiosApi implements IApi {
     this.api = api
   }
 
-  setRequestInterceptor(requestHandler: (config: { headers?: { [index: string]: string } }) => void): void {
-    this.api.interceptors.request.use((config: AxiosRequestConfig) => requestHandler(config))
+  setRequestInterceptor(requestHandler: (config: InternalAxiosRequestConfig) => InternalAxiosRequestConfig): void {
+    this.api.interceptors.request.use((config: InternalAxiosRequestConfig) => requestHandler(config))
   }
 
-  setResponseInterceptor(responseHandler: (response: { data: object, status: number }) => void): void {
+  setResponseInterceptor(responseHandler: (response: { data: object, status: number }) => AxiosResponse): void {
     this.api.interceptors.response.use((response: AxiosResponse) => responseHandler(response))
   }
 

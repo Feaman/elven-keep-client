@@ -137,7 +137,9 @@
 <script setup lang="ts">
 import { mdiCheckAll, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
 import { AxiosError } from 'axios'
-import { ref, unref, computed, watch, nextTick } from 'vue'
+import {
+  ref, unref, computed, watch, nextTick,
+} from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
@@ -181,7 +183,7 @@ async function addCoAuthor() {
     coAuthorEmail.value = ''
     coAuthorError.value = ''
   } catch (error) {
-    coAuthorError.value = (error as AxiosError)?.response?.data?.message || (error as Error).message
+    coAuthorError.value = (error as { response: { data: { message: string }}})?.response?.data?.message || (error as Error).message
   }
 }
 

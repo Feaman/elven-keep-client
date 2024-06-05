@@ -31,7 +31,7 @@ export default class SocketIOService extends BaseService {
     const socket = io('api.notes.pavlo.ru', { extraHeaders: { Authorization: `Bearer ${token}` } })
 
     socket.on('connect', () => {
-      this.socketId = socket.id
+      this.socketId = socket.id || ''
       const globalStore = useGlobalStore()
       globalStore.isSocketError = false
     })

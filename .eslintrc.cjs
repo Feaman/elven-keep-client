@@ -9,7 +9,7 @@ module.exports = {
   // `parser: 'vue-eslint-parser'` is already included with any 'plugin:vue/**' config and should be omitted
   parserOptions: {
     parser: require.resolve('@typescript-eslint/parser'),
-    extraFileExtensions: [ '.vue' ]
+    extraFileExtensions: ['.vue']
   },
 
   env: {
@@ -35,7 +35,7 @@ module.exports = {
     // 'plugin:vue/vue3-recommended', // Priority C: Recommended (Minimizing Arbitrary Choices and Cognitive Overhead)
 
     'airbnb-base'
-    
+
   ],
 
   plugins: [
@@ -45,7 +45,7 @@ module.exports = {
     // https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-files
     // required to lint *.vue files
     'vue'
-    
+
   ],
 
   globals: {
@@ -63,7 +63,7 @@ module.exports = {
 
   // add your custom rules here
   rules: {
-    
+
     'no-plusplus': 'off',
     'no-param-reassign': 'off',
     'no-void': 'off',
@@ -71,7 +71,6 @@ module.exports = {
     'max-classes-per-file': 'off',
 
     'no-shadow': 'off',
-    '@typescript-eslint/no-shadow': 'error',
 
     'import/first': 'off',
     'import/named': 'error',
@@ -82,10 +81,19 @@ module.exports = {
     'import/no-unresolved': 'off',
     'import/no-extraneous-dependencies': 'off',
     'import/prefer-default-export': 'off',
-    
+
     'prefer-promise-reject-errors': 'off',
 
     quotes: ['warn', 'single', { avoidEscape: true }],
+    semi: ['error', 'never', { beforeStatementContinuationChars: 'never' }],
+    'max-len': ['error', { code: 350 }],
+    'vue/multi-word-component-names': 'off',
+    'default-case': 'off',
+    'no-return-assign': 'off',
+    '@typescript-eslint/no-shadow': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    'object-curly-newline': 'off',
+    'no-use-before-define': 'off',
 
     // this rule, if on, would require explicit return type on the `render` function
     '@typescript-eslint/explicit-function-return-type': 'off',
