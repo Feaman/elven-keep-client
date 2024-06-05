@@ -53,7 +53,6 @@ export default function noteModel(noteData: TNote) {
   const unSavedListItems = ref<TListItemModel[]>([])
   const isList = computed(() => type.value?.name === TYPE_LIST)
   const isRawUpdate = ref(false)
-  // let logId = 0
 
   const globalStore = useGlobalStore()
 
@@ -71,7 +70,6 @@ export default function noteModel(noteData: TNote) {
     coAuthorsData.forEach((coAuthorData) => coAuthors.value.push(coAuthorModel(coAuthorData) as unknown as TCoAuthorModel))
   }
 
-  // async function handleListItem(listItem: TListItemModel, logIid: number) {
   async function handleListItem(listItem: TListItemModel) {
     listItem.noteId = id.value
     const data = await ApiService.addListItem(listItem)
@@ -86,7 +84,6 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
-  // async function save(logIid: number) {
   async function save() {
     try {
       isSaving.value = true
@@ -105,7 +102,6 @@ export default function noteModel(noteData: TNote) {
           await ApiService.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
           isUpdateNeeded.value = false
         }
-        // unSavedListItems.value.forEach((listItem) => handleListItem(listItem, logIid))
         unSavedListItems.value.forEach((listItem) => handleListItem(listItem))
       }
       isSaving.value = false
@@ -125,28 +121,19 @@ export default function noteModel(noteData: TNote) {
         throw new Error(`List item with id "${listItem.id}" doesn't exists in note's with id "${id.value}" list`)
       }
       isSaving.value = true
-      // logId += 1
-      // const logIid = logId
       if (listItem.id) {
-        // console.log(`${logIid}: update list item`)
         const data = await ApiService.updateListItem(listItem)
         listItem.updated = new Date(data.updated || '')
       } else if (listItem.isCreating) {
-        // console.log(`${logIid}: need update`)
         listItem.isUpdateNeeded = true
       } else {
         listItem.isCreating = true
         if (!id.value) {
           if (!isCreating.value) {
-            // console.log(`${logIid}: create note`)
-            // save(logIid)
             save()
           }
-          // console.log(`${logIid}: schedule list item`)
           unSavedListItems.value.push(listItem)
         } else {
-          // console.log(`${logIid}: create list item`)
-          // await handleListItem(listItem, logId)
           await handleListItem(listItem)
         }
       }
@@ -311,9 +298,6 @@ export default function noteModel(noteData: TNote) {
   handleCoAuthors(noteData.coAuthors)
   handleUser(noteData.user)
 
-  // watch(title, () => save(10000))
-  // watch(text, () => save(10000))
-  // watch(isCompletedListExpanded, () => save(10000))
   watch(title, () => updateOnChange(save))
   watch(text, () => updateOnChange(save))
   watch(isCompletedListExpanded, () => updateOnChange(save))

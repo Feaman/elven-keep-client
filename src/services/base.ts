@@ -6,6 +6,8 @@ import { TEvents, TGlobalError } from '~/types'
 export default class BaseService {
   static URL = 'https://api.notes.pavlo.ru/'
 
+  static OFFLINE_STORE_NAME = 'offline-data'
+
   static showError: (error: Error | TGlobalError) => void
 
   static eventBus: Emitter<TEvents>

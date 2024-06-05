@@ -5,6 +5,8 @@ import useUserStore, { TUser, TUserModel } from '../composables/models/user'
 
 export const useGlobalStore = defineStore('global', () => {
   const initError = ref<TGlobalError | undefined>(undefined)
+  // const isOnline = ref<boolean>(window.navigator.onLine)
+  const isOnline = ref<boolean>(false)
   const isInitDataLoading = ref(false)
   const isSocketError = ref<boolean | undefined>(undefined)
   const user = ref<TUserModel | null>(null)
@@ -26,6 +28,7 @@ export const useGlobalStore = defineStore('global', () => {
     isSocketError,
     isSocketErrorOnce,
     mainListScrollTop,
+    isOnline,
     setUser,
   }
 })

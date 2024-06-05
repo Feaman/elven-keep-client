@@ -6,6 +6,8 @@ import { IType } from '~/composables/models/type'
 import { TUser } from '~/composables/models/user'
 import AxiosApi from '~/services/api/axios-api'
 import BaseService from '~/services/base'
+import { useGlobalStore } from '~/stores/global'
+import StorageService from '../storage'
 
 export interface ConfigObject {
   user: TUser,
@@ -19,6 +21,12 @@ export default class ApiService extends BaseService {
   static api: AxiosApi
 
   static async getConfig(): Promise<ConfigObject> {
+    const store = useGlobalStore()
+    if (!store.isOnline) {
+      const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
+      return Promise.resolve(offlineData as ConfigObject)
+    }
+
     const { data } = await this.api.get('config')
     return data as ConfigObject
   }
@@ -31,6 +39,7 @@ export default class ApiService extends BaseService {
     order: number,
     isCompletedListExpanded: boolean,
   ): Promise<TNote> {
+    const store = useGlobalStore()
     const noteData = {
       title,
       text,
@@ -38,6 +47,21 @@ export default class ApiService extends BaseService {
       list: [] as TListItem[],
       order,
       isCompletedListExpanded,
+    }
+
+    if (!store.isOnline) {
+      const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
+      const currentDateTime = new Date().toISOString()
+      StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
+      const offlineNoteData = Object.assign(noteData, {
+        id: new Date().getTime(),
+        updated: currentDateTime,
+        created: currentDateTime,
+      })
+      offlineData.notes.push(offlineNoteData)
+      StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
+
+      return Promise.resolve(offlineNoteData)
     }
 
     list.forEach((listItem: TListItemModel) => noteData.list.push({
@@ -53,6 +77,16 @@ export default class ApiService extends BaseService {
   }
 
   static async getNote(id: number): Promise<TNote> {
+    const store = useGlobalStore()
+    if (!store.isOnline) {
+      const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
+      const offlineNote = (offlineData as ConfigObject).notes.find((note) => note.id === id)
+      if (!offlineNote) {
+        throw new Error(`Note with id ${id} not found in local data`)
+      }
+      return Promise.resolve(offlineNote)
+    }
+
     const { data } = await this.api.get(`notes/${id}`)
     return data as TNote
   }
@@ -64,6 +98,21 @@ export default class ApiService extends BaseService {
       typeId,
       isCompletedListExpanded,
     }
+
+    const store = useGlobalStore()
+    if (!store.isOnline) {
+      const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
+      const offlineNote = offlineData.notes.find((note) => note.id === id)
+      if (!offlineNote) {
+        throw new Error(`Note with id ${id} not found in local data`)
+      }
+      Object.assign(offlineNote, noteData)
+      offlineNote.updated = new Date().toISOString()
+      StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
+
+      return Promise.resolve(offlineNote)
+    }
+
     const { data } = await this.api.put(`notes/${id}`, noteData)
     return data as TNote
   }

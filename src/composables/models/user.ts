@@ -31,7 +31,8 @@ export default function userModel(userData: TUser) {
   }
 
   function signOut() {
-    StorageService.set({ [UsersService.AUTH_TOKEN_NAME]: null })
+    StorageService.set({ [UsersService.AUTH_TOKEN_NAME]: undefined })
+    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: undefined })
     InitService.clearApplication()
     BaseService.router.push('/sign')
   }

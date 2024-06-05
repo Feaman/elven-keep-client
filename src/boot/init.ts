@@ -3,9 +3,10 @@ import mitt from 'mitt'
 import { boot } from 'quasar/wrappers'
 import draggable from 'zhyswan-vuedraggable'
 import BaseService from '~/services/base'
-import { TEvents, TGlobalError } from '~/types'
 import InitService from '~/services/init'
 import SocketIOService from '~/services/socket-io'
+import { useGlobalStore } from '~/stores/global'
+import { TEvents, TGlobalError } from '~/types'
 
 export default boot(({ app }) => {
   BaseService.eventBus = mitt<TEvents>()
@@ -57,10 +58,21 @@ export default boot(({ app }) => {
   }, 200)
   BaseService.eventBus.on('windowFocused', async () => {
     try {
-      await InitService.handleApplicationUpdate()
+      if (store.isOnline) {
+        await InitService.handleApplicationUpdate()
+      }
     } catch (error) {
       BaseService.showError(error as Error)
     }
+  })
+
+  const store = useGlobalStore()
+  window.addEventListener('offline', () => {
+    store.isOnline = false
+  })
+  window.addEventListener('online', () => {
+    store.isOnline = true
+    InitService.synchronizeOfflineData()
   })
 
   SocketIOService.init()

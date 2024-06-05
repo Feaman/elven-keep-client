@@ -3,11 +3,14 @@
   q-btn(
     @click="handleClick"
     :icon="icon"
-    :color="isSocketError ? 'red' : 'black'"
+    :color="isSocketError || !store.isOnline ? 'red' : 'black'"
     flat
     round
   )
     ToolTip {{ tooltipText }}
+  div(
+    @click="switchMode"
+  ) [O]
 
   q-dialog(
     @hide="showDialog = false"
@@ -50,15 +53,24 @@ import {
 } from '@quasar/extras/mdi-v6'
 import { type TNoteModel } from '~/composables/models/note'
 import { useGlobalStore } from '~/stores/global'
+import InitService from '~/services/init'
 
 const props = defineProps<{
   note?: TNoteModel,
 }>()
 
+function switchMode() {
+  store.isOnline = !store.isOnline
+  if (store.isOnline) {
+    InitService.synchronizeOfflineData()
+  }
+}
+
+const store = useGlobalStore()
 const showDialog = ref(false)
-const isSocketError = computed(() => useGlobalStore().isSocketError === true)
+const isSocketError = computed(() => store.isSocketError === true)
 const icon = computed(() => {
-  if (isSocketError.value) {
+  if (isSocketError.value || !store.isOnline) {
     return mdiAlertDecagram
   }
 
