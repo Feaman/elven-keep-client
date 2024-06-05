@@ -1,5 +1,4 @@
 /* eslint-env node */
-const path = require('path')
 
 /*
  * This file runs in a Node context (it's NOT transpiled by Babel), so use only
@@ -12,18 +11,9 @@ const path = require('path')
 /* eslint func-names: 0 */
 /* eslint global-require: 0 */
 
-const { configure } = require('quasar/wrappers')
+const { configure } = require('quasar/wrappers');
 
 module.exports = configure((/* ctx */) => ({
-  eslint: {
-    // fix: true,
-    // include = [],
-    // exclude = [],
-    // rawOptions = {},
-    warnings: true,
-    errors: true,
-  },
-
   // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
   // preFetch: true,
 
@@ -31,8 +21,8 @@ module.exports = configure((/* ctx */) => ({
   // --> boot files are part of "main.js"
   // https://v2.quasar.dev/quasar-cli-vite/boot-files
   boot: [
-    'api',
-    'init',
+
+    'axios',
   ],
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -43,14 +33,14 @@ module.exports = configure((/* ctx */) => ({
   // https://github.com/quasarframework/quasar/tree/dev/extras
   extras: [
     // 'ionicons-v4',
-    // 'mdi-v5',
+    // 'mdi-v7',
     // 'fontawesome-v6',
     // 'eva-icons',
     // 'themify',
     // 'line-awesome',
     // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
-    // 'roboto-font', // optional, you are not bound to it
+    'roboto-font', // optional, you are not bound to it
     'material-icons', // optional, you are not bound to it
   ],
 
@@ -58,13 +48,10 @@ module.exports = configure((/* ctx */) => ({
   build: {
     target: {
       browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
-      node: 'node16',
-    },
-    alias: {
-      '~': path.join(__dirname, './src/'),
+      node: 'node20',
     },
 
-    vueRouterMode: 'history', // available values: 'hash', 'history'
+    vueRouterMode: 'hash', // available values: 'hash', 'history'
     // vueRouterBase,
     // vueDevtools,
     // vueOptionsAPI: false,
@@ -73,9 +60,7 @@ module.exports = configure((/* ctx */) => ({
 
     // publicPath: '/',
     // analyze: true,
-    env: {
-      applicationVersion: require('./package.json').version,
-    },
+    // env: {},
     // rawDefine: {}
     // ignorePublicFolder: true,
     // minify: false,
@@ -85,20 +70,28 @@ module.exports = configure((/* ctx */) => ({
     // extendViteConf (viteConf) {},
     // viteVuePluginOptions: {},
 
-    // vitePlugins: [
-    //   [ 'package-name', { ..options.. } ]
-    // ]
+    vitePlugins: [
+      ['vite-plugin-checker', {
+        vueTsc: {
+          tsconfigPath: 'tsconfig.vue-tsc.json',
+        },
+        eslint: {
+          lintCommand: 'eslint "./**/*.{js,ts,mjs,cjs,vue}"',
+        },
+      }, { server: false }],
+    ],
   },
 
   // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
   devServer: {
     // https: true
-    open: false, // opens browser window automatically
+    open: true, // opens browser window automatically
   },
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
   framework: {
     config: {},
+
     // iconSet: 'material-icons', // Quasar icon set
     // lang: 'en-US', // Quasar language pack
 
@@ -110,16 +103,12 @@ module.exports = configure((/* ctx */) => ({
     // directives: [],
 
     // Quasar plugins
-    plugins: [
-      'LocalStorage',
-      'Meta',
-      'Notify',
-    ],
+    plugins: [],
   },
 
   // animations: 'all', // --- includes all animations
   // https://v2.quasar.dev/options/animations
-  animations: ['zoomIn', 'zoomOut'],
+  animations: [],
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#sourcefiles
   // sourceFiles: {
@@ -203,7 +192,7 @@ module.exports = configure((/* ctx */) => ({
     builder: {
       // https://www.electron.build/configuration/configuration
 
-      appId: 'elven-keep-client',
+      appId: 'quasar-project',
     },
   },
 
@@ -216,4 +205,4 @@ module.exports = configure((/* ctx */) => ({
     // extendBexScriptsConf (esbuildConf) {}
     // extendBexManifestJson (json) {}
   },
-}))
+}));

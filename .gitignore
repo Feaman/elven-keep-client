@@ -1,11 +1,11 @@
 .DS_Store
 .thumbs.db
 node_modules
-.yarn
 
 # Quasar core related directories
 .quasar
 /dist
+/quasar.config.*.temporary.compiled*
 
 # Cordova related directories and files
 /src-cordova/node_modules
@@ -14,7 +14,6 @@ node_modules
 /src-cordova/www
 
 # Capacitor related directories and files
-/src-capacitor
 /src-capacitor/www
 /src-capacitor/node_modules
 
@@ -33,3 +32,6 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+# local .env files
+.env.local*

@@ -9,14 +9,13 @@ module.exports = {
   // `parser: 'vue-eslint-parser'` is already included with any 'plugin:vue/**' config and should be omitted
   parserOptions: {
     parser: require.resolve('@typescript-eslint/parser'),
-    extraFileExtensions: ['.vue']
+    extraFileExtensions: [ '.vue' ]
   },
 
   env: {
     browser: true,
     es2021: true,
-    node: true,
-    'vue/setup-compiler-macros': true
+    node: true
   },
 
   // Rules order is important, please avoid shuffling them
@@ -35,8 +34,8 @@ module.exports = {
     // 'plugin:vue/vue3-strongly-recommended', // Priority B: Strongly Recommended (Improving Readability)
     // 'plugin:vue/vue3-recommended', // Priority C: Recommended (Minimizing Arbitrary Choices and Cognitive Overhead)
 
-    'airbnb-base',
-    'plugin:vue-pug/vue3-essential',
+    'airbnb-base'
+    
   ],
 
   plugins: [
@@ -45,7 +44,8 @@ module.exports = {
 
     // https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-files
     // required to lint *.vue files
-    'vue',
+    'vue'
+    
   ],
 
   globals: {
@@ -63,18 +63,15 @@ module.exports = {
 
   // add your custom rules here
   rules: {
-    'object-curly-newline': 'off',
+    
+    'no-plusplus': 'off',
     'no-param-reassign': 'off',
     'no-void': 'off',
     'no-nested-ternary': 'off',
     'max-classes-per-file': 'off',
-    'default-case': 'off',
-    'no-use-before-define': 'off',
 
     'no-shadow': 'off',
-    'no-return-assign': 'off',
-    '@typescript-eslint/no-shadow': 'off',
-    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/no-shadow': 'error',
 
     'import/first': 'off',
     'import/named': 'error',
@@ -85,13 +82,10 @@ module.exports = {
     'import/no-unresolved': 'off',
     'import/no-extraneous-dependencies': 'off',
     'import/prefer-default-export': 'off',
-    'vue/multi-word-component-names': 'off',
-
+    
     'prefer-promise-reject-errors': 'off',
 
     quotes: ['warn', 'single', { avoidEscape: true }],
-    semi: ['error', 'never', { beforeStatementContinuationChars: 'never' }],
-    'max-len': ['error', { code: 350 }],
 
     // this rule, if on, would require explicit return type on the `render` function
     '@typescript-eslint/explicit-function-return-type': 'off',
@@ -104,7 +98,6 @@ module.exports = {
     'no-unused-vars': 'off',
 
     // allow debugger during development only
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'arrow-parens': ["error", "always"],
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   }
 }

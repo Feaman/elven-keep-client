@@ -1,6 +1,6 @@
-# Elven Keep (elven-keep-client)
+# Quasar App (quasar-project)
 
-Elven Keep
+A Quasar Project
 
 ## Install the dependencies
 ```bash

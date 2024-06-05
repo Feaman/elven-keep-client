@@ -12,14 +12,5 @@
     "typescript",
     "vue"
   ],
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "[vue]": {
-    "editor.defaultFormatter": "Vue.volar"
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
-  },
-  "[scss]": {
-    "editor.defaultFormatter": "vscode.css-language-features"
-  }
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
