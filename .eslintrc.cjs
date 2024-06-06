@@ -94,6 +94,7 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 'off',
     'object-curly-newline': 'off',
     'no-use-before-define': 'off',
+    'class-methods-use-this': 'off',
 
     // this rule, if on, would require explicit return type on the `render` function
     '@typescript-eslint/explicit-function-return-type': 'off',

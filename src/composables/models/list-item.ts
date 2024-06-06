@@ -2,7 +2,6 @@ import { nextTick, ref, UnwrapRef, watch } from 'vue'
 import { type TNoteModel } from '~/composables/models/note'
 import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
-import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
 import ListItemsService from '../services/list-items'
 import NotesService from '../services/notes'
@@ -56,7 +55,7 @@ export default function listItemModel(listItemData: TListItem) {
     try {
       if (id.value) {
         statusId.value = StatusesService.active.value.id
-        await ApiService.restoreListItem(id.value)
+        await BaseService.api.restoreListItem(noteId.value || 0, id.value)
       }
     } catch (error) {
       BaseService.showError(error as Error)

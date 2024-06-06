@@ -1,4 +1,5 @@
-import ApiService, { ConfigObject } from '~/services/api/api'
+import { ConfigObject } from '~/services/api/interface'
+import BaseService from '~/services/base'
 import InitService from '~/services/init'
 import StorageService from '~/services/storage'
 
@@ -10,12 +11,12 @@ function auth(data: ConfigObject) {
 }
 
 async function signIn(email: string, password: string) {
-  const data = await ApiService.signIn(email, password)
+  const data = await BaseService.api.signIn(email, password)
   auth(data)
 }
 
 async function register(email: string, password: string, firstName: string, secondName: string) {
-  const data = await ApiService.signUp(email, password, firstName, secondName)
+  const data = await BaseService.api.signUp(email, password, firstName, secondName)
   auth(data)
 }
 

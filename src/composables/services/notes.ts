@@ -4,7 +4,7 @@ import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
 import ListItemsService from '~/composables/services/list-items'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
-import ApiService from '~/services/api/api'
+import BaseService from '~/services/base'
 import { TYPE_TEXT } from '../models/type'
 
 const currentNote: Ref<TNoteModel | null> = ref(null)
@@ -21,7 +21,7 @@ function generateNotes(notesData: TNote[]) {
 }
 
 function setNotesOrder(order: number[]) {
-  ApiService.setNotesOrder(order)
+  BaseService.api.setNotesOrder(order)
 }
 
 const filtered = computed({
@@ -138,7 +138,7 @@ function findListItemVariants(listItem: TListItemModel) {
 }
 
 function setListItemsOrder(note: TNoteModel, order: number[]) {
-  ApiService.setListItemsOrder(note, order)
+  BaseService.api.setListItemsOrder(note, order)
 }
 
 function generateMaxOrder() {
@@ -154,7 +154,7 @@ function generateMaxOrder() {
 async function removeNote(note: TNoteModel) {
   note.statusId = StatusesService.inactive.value.id
   removingNotes.value.push(note as unknown as TNoteModel)
-  await ApiService.removeNote(note)
+  await BaseService.api.removeNote(note)
 }
 
 async function updateNote(note: TNoteModel, noteData: TNote) {

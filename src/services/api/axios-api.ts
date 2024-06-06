@@ -1,7 +1,7 @@
 import { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import IApi from '~/services/api/interface'
+import IAxiosApi from './axios-interface'
 
-export default class AxiosApi implements IApi {
+export default class AxiosApi implements IAxiosApi {
   api: AxiosInstance
 
   constructor(api: AxiosInstance) {

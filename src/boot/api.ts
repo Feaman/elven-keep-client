@@ -1,8 +1,8 @@
 import axios, { AxiosInstance } from 'axios'
 import { boot } from 'quasar/wrappers'
 import UsersService from '~/composables/services/users'
-import ApiService from '~/services/api/api'
 import AxiosApi from '~/services/api/axios-api'
+import OnlineApi from '~/services/api/online-api'
 import BaseService from '~/services/base'
 import SocketIOService from '~/services/socket-io'
 import StorageService from '~/services/storage'
@@ -42,5 +42,5 @@ export default boot(() => {
 
     return config
   })
-  ApiService.api = axiosApi
+  OnlineApi.axiosApi = axiosApi
 })

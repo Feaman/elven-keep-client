@@ -8,7 +8,6 @@ import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
-import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
 
@@ -72,13 +71,13 @@ export default function noteModel(noteData: TNote) {
 
   async function handleListItem(listItem: TListItemModel) {
     listItem.noteId = id.value
-    const data = await ApiService.addListItem(listItem)
+    const data = await BaseService.api.addListItem(listItem)
     listItem.id = data.id
     listItem.handleDataTransformation()
     listItem.isCreating = false
     if (listItem.isUpdateNeeded) {
       // console.log(`${logIid}: final update list item`)
-      const data = await ApiService.updateListItem(listItem)
+      const data = await BaseService.api.updateListItem(listItem)
       listItem.updated = new Date(data.updated || '')
       listItem.isUpdateNeeded = false
     }
@@ -88,18 +87,18 @@ export default function noteModel(noteData: TNote) {
     try {
       isSaving.value = true
       if (id.value) {
-        await ApiService.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
+        await BaseService.api.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
       } else if (isCreating.value) {
         isUpdateNeeded.value = true
       } else {
         isCreating.value = true
-        const noteData = await ApiService.addNote(list.value, title.value, text.value, typeId.value, order.value, isCompletedListExpanded.value)
+        const noteData = await BaseService.api.addNote(list.value, title.value, text.value, typeId.value, order.value, isCompletedListExpanded.value)
         id.value = noteData.id
         userId.value = noteData.user?.id
         window.history.replaceState({}, '', `/note/${noteData.id}`)
         isCreating.value = false
         if (isUpdateNeeded.value && id.value) {
-          await ApiService.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
+          await BaseService.api.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
           isUpdateNeeded.value = false
         }
         unSavedListItems.value.forEach((listItem) => handleListItem(listItem))
@@ -122,7 +121,7 @@ export default function noteModel(noteData: TNote) {
       }
       isSaving.value = true
       if (listItem.id) {
-        const data = await ApiService.updateListItem(listItem)
+        const data = await BaseService.api.updateListItem(listItem)
         listItem.updated = new Date(data.updated || '')
       } else if (listItem.isCreating) {
         listItem.isUpdateNeeded = true
@@ -147,7 +146,7 @@ export default function noteModel(noteData: TNote) {
     try {
       if (id.value) {
         statusId.value = StatusesService.active.value.id
-        await ApiService.restoreNote(id.value)
+        await BaseService.api.restoreNote(id.value)
       }
     } catch (error) {
       BaseService.showError(error as Error)
@@ -186,7 +185,7 @@ export default function noteModel(noteData: TNote) {
   }
 
   async function createCoAuthor(email: string) {
-    const noteCoAuthorData = await ApiService.addNoteCoAuthor(Number(id.value), email)
+    const noteCoAuthorData = await BaseService.api.addNoteCoAuthor(Number(id.value), email)
     addCoAuthor(coAuthorModel(noteCoAuthorData) as unknown as TCoAuthorModel)
   }
 
@@ -198,7 +197,7 @@ export default function noteModel(noteData: TNote) {
       } else {
         coAuthors.value = coAuthors.value.filter((_coAuthor) => _coAuthor.id !== coAuthor.id)
       }
-      await ApiService.removeNoteCoAuthor(coAuthor)
+      await BaseService.api.removeNoteCoAuthor(coAuthor)
     } catch (error) {
       BaseService.showError(error as Error)
     }
@@ -214,7 +213,7 @@ export default function noteModel(noteData: TNote) {
       if (addToRestore) {
         ListItemsService.removingListItems.value.push(listItem as unknown as TListItemModel)
       }
-      await ApiService.removeListItem(listItem)
+      await BaseService.api.removeListItem(listItem)
     }
   }
 
