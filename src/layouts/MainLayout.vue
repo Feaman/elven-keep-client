@@ -108,6 +108,10 @@ BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
   isErrorShown.value = true
 })
 
+if (globalStore.initError) {
+  isErrorShown.value = true
+}
+
 function handleWindowResize() {
   // Fix 100vh for mobile
   document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)

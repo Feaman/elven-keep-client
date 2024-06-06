@@ -15,7 +15,7 @@
           :name="isNewNoteRoute ? 'scale-fade' : undefined"
         )
           q-btn(
-            v-if="note.id"
+            v-if="note.id && globalStore.isOnline"
             @click="emit('co-authors-clicked')"
             :icon="mdiAccountGroup"
             color="black"
@@ -65,7 +65,7 @@
           :name="isNewNoteRoute ? 'scale-fade' : undefined"
         )
           CloudIcon(
-            v-if="note.id"
+            v-if="note.id || !globalStore.isOnline"
             :note="note"
           )
         q-separator(vertical)

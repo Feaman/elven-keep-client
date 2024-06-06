@@ -165,7 +165,7 @@ async function sign() {
       }
       router.push('/')
     } catch (error) {
-      errorText.value = (error as { response: { data: { message: string }}}).response?.data?.message || 'Unexpected error'
+      errorText.value = (error as Error).message || (error as { response: { data: { message: string }}}).response?.data?.message || 'Unexpected error'
       isLoading.value = false
     }
   }

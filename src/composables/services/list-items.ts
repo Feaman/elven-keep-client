@@ -73,11 +73,11 @@ async function addListItem(note: TNoteModel, data: TListItem | undefined = undef
   const unRefListItem = note.list.find((_listItem) => _listItem.generatedId === listItem.generatedId.value)
 
   if (!unRefListItem) {
-    throw new Error('List item to unref it note found')
+    throw new Error('List item to unref not found')
   }
 
   if (!data) {
-    note.saveListItem(unRefListItem as unknown as TListItemModel)
+    await note.saveListItem(unRefListItem as unknown as TListItemModel)
   }
 
   // Handle textarea events
@@ -89,6 +89,8 @@ async function addListItem(note: TNoteModel, data: TListItem | undefined = undef
   if (!data) {
     $textarea.focus()
   }
+
+  return listItem
 }
 
 function addTextareaKeydownEvent($textarea: HTMLTextAreaElement, isCompletedList: boolean) {

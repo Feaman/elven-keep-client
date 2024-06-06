@@ -83,7 +83,7 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
-  async function save() {
+  async function save(replaceHistory = true) {
     try {
       isSaving.value = true
       if (id.value) {
@@ -95,7 +95,9 @@ export default function noteModel(noteData: TNote) {
         const noteData = await BaseService.api.addNote(list.value, title.value, text.value, typeId.value, order.value, isCompletedListExpanded.value)
         id.value = noteData.id
         userId.value = noteData.user?.id
-        window.history.replaceState({}, '', `/note/${noteData.id}`)
+        if (replaceHistory) {
+          window.history.replaceState({}, '', `/note/${noteData.id}`)
+        }
         isCreating.value = false
         if (isUpdateNeeded.value && id.value) {
           await BaseService.api.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
@@ -122,6 +124,7 @@ export default function noteModel(noteData: TNote) {
       isSaving.value = true
       if (listItem.id) {
         const data = await BaseService.api.updateListItem(listItem)
+        listItem.id = data.id
         listItem.updated = new Date(data.updated || '')
       } else if (listItem.isCreating) {
         listItem.isUpdateNeeded = true

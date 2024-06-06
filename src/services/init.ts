@@ -5,7 +5,7 @@ import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
-import { ROUTE_EXISTED_NOTE, ROUTE_NOTES } from '~/router/routes'
+import { ROUTE_EXISTED_NOTE, ROUTE_NEW, ROUTE_NOTES } from '~/router/routes'
 import BaseService from '~/services//base'
 import { useGlobalStore } from '~/stores/global'
 import { ConfigObject } from './api/interface'
@@ -76,17 +76,35 @@ export default class InitService extends BaseService {
         StatusesService.generateStatuses(offlineData.statuses)
         TypesService.generateTypes(offlineData.types)
 
-        // Handle notes
-        offlineData.notes.forEach((offlineNote: TNote) => {
+        // Handle offline notes
+        for (let noteIndex = 0; noteIndex < offlineData.notes.length; noteIndex++) {
+          const offlineNote = offlineData.notes[noteIndex] as TNote
+
           // Handle Note entity
           const note = NotesService.notes.value.find((note) => note.id === offlineNote.id)
           if (!note) {
             throw new Error(`Note with offline id ${offlineNote.id} not found`)
           }
-          const serverNote = serverData.notes.find((serverNote) => serverNote.id === note.id)
+          let serverNote = serverData.notes.find((serverNote) => serverNote.id === note.id)
+
+          // If only offline notes marked as deleted
+          if (!serverNote && offlineNote.statusId === StatusesService.inactive.value.id) {
+            offlineData.notes.splice(noteIndex, 1)
+            // eslint-disable-next-line no-continue
+            continue
+          }
+
           if (!serverNote) {
             note.id = undefined
-            note.save()
+            // eslint-disable-next-line no-await-in-loop
+            await note.save(this.router.currentRoute.value.name === ROUTE_NEW)
+            if (note.id) {
+              offlineNote.id = note.id
+            }
+            serverNote = { ...offlineNote }
+            serverNote.list = []
+            serverData.notes.push(serverNote)
+            offlineData.notes.push(offlineNote)
           } else {
             if (!offlineNote.updated || !serverNote.updated) {
               throw new Error('"updated" or "created" field not found in offline note')
@@ -95,55 +113,64 @@ export default class InitService extends BaseService {
               Object.assign(note, serverNote)
               Object.assign(offlineNote, serverNote)
             } else if ((new Date(offlineNote.updated)) > (new Date(serverNote.updated))) {
-              note.save()
+              // eslint-disable-next-line no-await-in-loop
+              await note.save()
             }
             serverData.notes.splice(serverData.notes.indexOf(serverNote), 1)
           }
 
-          // Handle List_Items entity
-          let listData: TListItem[] = []
+          // Handle offline list items
           if (offlineNote.list) {
-            listData = offlineNote.list
-            delete offlineNote.list
+            for (let listItemIndex = 0; listItemIndex < offlineNote.list.length; listItemIndex++) {
+              const offlineListItem = offlineNote.list[listItemIndex]
+              offlineListItem.checked = !!offlineListItem.checked
+              offlineListItem.completed = !!offlineListItem.completed
+              const listItem = note.list.find((listItem) => listItem.id === offlineListItem.id)
+              if (!listItem) {
+                throw new Error(`List item with id ${offlineListItem.id} not found`)
+              }
+              const serverListItemData = serverNote?.list && serverNote.list.find((listItem) => listItem.id === offlineListItem.id)
+              if (serverListItemData) {
+                if (!offlineListItem.updated || !serverListItemData.updated) {
+                  throw new Error('"updated" or "created" field not found in offline note')
+                }
+                // Object.assign(existedListItem, listItemData)
+                if ((new Date(offlineListItem.updated)) < (new Date(serverListItemData.updated))) {
+                  Object.assign(listItem, serverListItemData)
+                  Object.assign(offlineListItem, serverListItemData)
+                  listItem.handleDataTransformation()
+                } else if ((new Date(offlineListItem.updated)) > (new Date(serverListItemData.updated))) {
+                  offlineListItem.id = undefined
+                  // eslint-disable-next-line no-await-in-loop
+                  const newListItem = await ListItemsService.addListItem(note, offlineListItem)
+                  offlineListItem.id = newListItem.id.value
+                }
+              } else if (note) {
+                ListItemsService.addListItem(note, offlineListItem)
+                // note.saveListItem(listItem)
+              }
+            }
+
+            // Handle online list items
+            if (serverNote?.list) {
+              const offlineListItemsIds = offlineNote.list.map((offlineNoteListItem: TListItem) => offlineNoteListItem.id)
+              const newListItems = serverNote.list.filter((serverNoteListItem) => !offlineListItemsIds.includes(serverNoteListItem.id))
+              newListItems.forEach((newListItem) => {
+                if (offlineNote.list) {
+                  offlineNote.list.push(newListItem)
+                }
+              })
+            }
           }
-          // Object.assign(note, noteData)
+          notes.push(offlineNote)
+        }
 
-          // Handle list update
-          listData.forEach(async (offlineListItemData) => {
-            offlineListItemData.checked = !!offlineListItemData.checked
-            offlineListItemData.completed = !!offlineListItemData.completed
-            const listItem = note.list.find((listItem) => listItem.id === offlineListItemData.id)
-            if (!listItem) {
-              throw new Error(`List item with id ${offlineListItemData.id} not found`)
-            }
-            const serverListItemData = serverNote?.list && serverNote.list.find((listItem) => listItem.id === offlineListItemData.id)
-            if (serverListItemData) {
-              if (!offlineListItemData.updated || !serverListItemData.updated) {
-                throw new Error('"updated" or "created" field not found in offline note')
-              }
-              // Object.assign(existedListItem, listItemData)
-              if ((new Date(offlineListItemData.updated)) < (new Date(serverListItemData.updated))) {
-                Object.assign(listItem, serverListItemData)
-                Object.assign(offlineListItemData, serverListItemData)
-                listItem.handleDataTransformation()
-              } else if ((new Date(offlineListItemData.updated)) > (new Date(serverListItemData.updated))) {
-                note.save()
-              }
-            } else if (note) {
-              ListItemsService.addListItem(note, offlineListItemData)
-              note.saveListItem(listItem)
-            }
-          })
-
-          // Handle deleted list items
-          // const listItemsToDelete: number[] = []
-          // note.list.forEach((listItem) => {
-          //   const existedListItem = listData.find((listItemData) => listItem.id === listItemData.id)
-          //   if (!existedListItem && listItem.id) {
-          //     listItemsToDelete.push(listItem.id)
-          //   }
-          // })
-          // note.list = note.list.filter((listItem) => listItem.id && !listItemsToDelete.includes(listItem.id))
+        // Handle online notes
+        const offlineNoteIds = offlineData.notes.map((offlineNote: TNote) => offlineNote.id)
+        const newNotes = serverData.notes.filter((serverNote) => !offlineNoteIds.includes(serverNote.id))
+        newNotes.forEach((serverNote) => {
+          offlineData.notes.push(serverNote)
+          notes.push(serverNote)
         })
 
         NotesService.generateNotes(notes)

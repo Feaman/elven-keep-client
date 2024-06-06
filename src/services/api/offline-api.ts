@@ -1,8 +1,10 @@
 import { TCoAuthor } from '~/composables/models/co-author'
-import listItemModel, { TListItemModel, type TListItem } from '~/composables/models/list-item'
+import { TListItemModel, type TListItem } from '~/composables/models/list-item'
 import { TNote, TNoteModel } from '~/composables/models/note'
+import { TUser } from '~/composables/models/user'
 import StatusesService from '~/composables/services/statuses'
 import BaseService from '~/services/base'
+import { useGlobalStore } from '~/stores/global'
 import StorageService from '../storage'
 import IApi, { ConfigObject } from './interface'
 
@@ -35,6 +37,8 @@ export default class OfflineApiService implements IApi {
       id: new Date().getTime(),
       updated: currentDateTime,
       created: currentDateTime,
+      userId: useGlobalStore().user?.id,
+      user: useGlobalStore().user as TUser,
     })
 
     list.forEach((listItem: TListItemModel) => offlineNoteData.list.push({
@@ -144,19 +148,21 @@ export default class OfflineApiService implements IApi {
       checked: listItem.checked,
       order: listItem.order,
       completed: listItem.completed,
-    }
+      statusId: StatusesService.active.value.id,
+    } as TListItem
 
-    const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === listItem.noteId) as TNoteModel | undefined
+    const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === listItem.noteId)
     if (!offlineNote) {
       throw new Error(`Offline note with id ${listItem.noteId} not found in offline data`)
     }
 
-    const offlineNoteListItem = listItemModel(listItemData) as unknown as TListItemModel
-    offlineNote.list.push(offlineNoteListItem)
+    if (offlineNote.list) {
+      offlineNote.list.push(listItemData)
+    }
 
     StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
 
-    return Promise.resolve(offlineNoteListItem as unknown as TListItem)
+    return Promise.resolve(listItemData)
   }
 
   async removeListItem(listItem: TListItemModel) {
