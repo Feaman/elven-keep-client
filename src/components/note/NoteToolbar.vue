@@ -52,12 +52,6 @@
         transition(
           name="scale-fade"
         )
-          UpdateIcon(
-            v-if="globalStore.isUpdating"
-          )
-        transition(
-          name="scale-fade"
-        )
           NewVersionIcon(
             v-if="globalStore.isNewVersionAvailable"
           )

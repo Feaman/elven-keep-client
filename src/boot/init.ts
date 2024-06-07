@@ -77,6 +77,6 @@ export default boot(({ app }) => {
     InitService.synchronizeOfflineData()
   })
 
-  SocketIOService.init()
+  // SocketIOService.init()
   InitService.initApplication()
 })

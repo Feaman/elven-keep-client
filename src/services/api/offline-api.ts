@@ -29,25 +29,21 @@ export default class OfflineApiService implements IApi {
       list: [] as TListItem[],
       order,
       isCompletedListExpanded,
+      statusId: StatusesService.active.value.id,
     }
 
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
     const currentDateTime = new Date().toISOString()
-    const offlineNoteData = Object.assign(noteData, {
-      id: new Date().getTime(),
-      updated: currentDateTime,
-      created: currentDateTime,
-      userId: useGlobalStore().user?.id,
-      user: useGlobalStore().user as TUser,
-    })
-
-    list.forEach((listItem: TListItemModel) => offlineNoteData.list.push({
-      text: listItem.text,
-      noteId: listItem.noteId,
-      checked: listItem.checked,
-      order: listItem.order,
-      completed: listItem.completed,
-    }))
+    const offlineNoteData = Object.assign(
+      noteData,
+      {
+        id: new Date().getTime(),
+        updated: currentDateTime,
+        created: currentDateTime,
+        userId: useGlobalStore().user?.id,
+        user: useGlobalStore().user as TUser,
+      },
+    )
 
     offlineData.notes.push(offlineNoteData)
     StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
@@ -116,6 +112,7 @@ export default class OfflineApiService implements IApi {
       text: listItem.text,
       checked: listItem.checked,
       order: listItem.order,
+      updated: new Date().toISOString(),
       completed: listItem.completed,
     }
 

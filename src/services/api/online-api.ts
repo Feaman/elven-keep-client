@@ -14,13 +14,13 @@ export default class OnlineApiService implements IApi {
     this.api = OnlineApiService.axiosApi
   }
 
-  async getConfig(): Promise<ConfigObject> {
-    const { data } = await this.api.get('config')
+  async getConfig(includeRemoved = false): Promise<ConfigObject> {
+    const { data } = await this.api.get('config', { data: { includeRemoved } })
     return data as ConfigObject
   }
 
   async addNote(
-    list: TListItemModel[],
+    list: TListItemModel[] | TListItem[],
     title: string,
     text: string,
     typeId: number,
@@ -36,7 +36,7 @@ export default class OnlineApiService implements IApi {
       isCompletedListExpanded,
     }
 
-    list.forEach((listItem: TListItemModel) => noteData.list.push({
+    list.forEach((listItem: TListItemModel | TListItem) => noteData.list.push({
       text: listItem.text,
       noteId: listItem.noteId,
       checked: listItem.checked,
@@ -75,7 +75,7 @@ export default class OnlineApiService implements IApi {
     return data
   }
 
-  async updateListItem(listItem: TListItemModel): Promise<TListItem> {
+  async updateListItem(listItem: TListItemModel | TListItem): Promise<TListItem> {
     const listItemData = {
       text: listItem.text,
       checked: listItem.checked,
@@ -86,7 +86,7 @@ export default class OnlineApiService implements IApi {
     return data as TListItem
   }
 
-  async addListItem(listItem: TListItemModel): Promise<TListItem> {
+  async addListItem(listItem: TListItemModel | TListItem): Promise<TListItem> {
     const listItemData = {
       text: listItem.text,
       noteId: listItem.noteId,

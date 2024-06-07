@@ -1,7 +1,6 @@
 import { AxiosError } from 'axios'
 import { TListItem } from '~/composables/models/list-item'
 import { TNote } from '~/composables/models/note'
-import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
@@ -9,6 +8,7 @@ import { ROUTE_EXISTED_NOTE, ROUTE_NEW, ROUTE_NOTES } from '~/router/routes'
 import BaseService from '~/services//base'
 import { useGlobalStore } from '~/stores/global'
 import { ConfigObject } from './api/interface'
+import OnlineApiService from './api/online-api'
 import StorageService from './storage'
 
 export default class InitService extends BaseService {
@@ -64,90 +64,83 @@ export default class InitService extends BaseService {
 
   static async synchronizeOfflineData() {
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
+    const onlineApi = new OnlineApiService()
 
     if (offlineData) {
       const globalStore = useGlobalStore()
       globalStore.isUpdating = true
       try {
-        const serverData = await BaseService.api.getConfig()
-        const notes: TNote[] = []
+        const serverData = await BaseService.api.getConfig(true)
 
         // Apply statuses and types without checking
-        StatusesService.generateStatuses(offlineData.statuses)
-        TypesService.generateTypes(offlineData.types)
+        offlineData.statuses = serverData.statuses
+        offlineData.types = serverData.types
 
         // Handle offline notes
         for (let noteIndex = 0; noteIndex < offlineData.notes.length; noteIndex++) {
           const offlineNote = offlineData.notes[noteIndex] as TNote
 
           // Handle Note entity
-          const note = NotesService.notes.value.find((note) => note.id === offlineNote.id)
-          if (!note) {
-            throw new Error(`Note with offline id ${offlineNote.id} not found`)
-          }
-          let serverNote = serverData.notes.find((serverNote) => serverNote.id === note.id)
-
-          // If only offline notes marked as deleted
-          if (!serverNote && offlineNote.statusId === StatusesService.inactive.value.id) {
-            offlineData.notes.splice(noteIndex, 1)
+          const serverNote = serverData.notes.find((serverNote) => serverNote.id === offlineNote.id)
+          if (!serverNote) {
+            // eslint-disable-next-line no-await-in-loop
+            const newNote = await onlineApi.addNote(
+              offlineNote.list || [],
+              offlineNote.title || '',
+              offlineNote.text || '',
+              offlineNote.typeId || 0,
+              offlineNote.order,
+              !!offlineNote.isCompletedListExpanded,
+            )
+            offlineNote.id = newNote.id
+            if ([ROUTE_EXISTED_NOTE, ROUTE_NEW].includes(String(this.router.currentRoute.value.name))) {
+              window.history.replaceState({}, '', `/note/${newNote.id}`)
+              if (NotesService.currentNote.value?.id) {
+                NotesService.currentNote.value.id = newNote.id
+              }
+            }
             // eslint-disable-next-line no-continue
             continue
-          }
-
-          if (!serverNote) {
-            note.id = undefined
-            // eslint-disable-next-line no-await-in-loop
-            await note.save(this.router.currentRoute.value.name === ROUTE_NEW)
-            if (note.id) {
-              offlineNote.id = note.id
-            }
-            serverNote = { ...offlineNote }
-            serverNote.list = []
-            serverData.notes.push(serverNote)
-            offlineData.notes.push(offlineNote)
           } else {
             if (!offlineNote.updated || !serverNote.updated) {
               throw new Error('"updated" or "created" field not found in offline note')
             }
+            console.log((new Date(offlineNote.updated)), (new Date(serverNote.updated)))
             if ((new Date(offlineNote.updated)) < (new Date(serverNote.updated))) {
-              Object.assign(note, serverNote)
               Object.assign(offlineNote, serverNote)
             } else if ((new Date(offlineNote.updated)) > (new Date(serverNote.updated))) {
               // eslint-disable-next-line no-await-in-loop
-              await note.save()
+              await onlineApi.updateNote(
+                Number(offlineNote.id),
+                offlineNote.title || '',
+                offlineNote.text || '',
+                Number(offlineNote.typeId),
+                !!offlineNote.isCompletedListExpanded,
+              )
             }
-            serverData.notes.splice(serverData.notes.indexOf(serverNote), 1)
           }
 
           // Handle offline list items
           if (offlineNote.list) {
             for (let listItemIndex = 0; listItemIndex < offlineNote.list.length; listItemIndex++) {
               const offlineListItem = offlineNote.list[listItemIndex]
-              offlineListItem.checked = !!offlineListItem.checked
-              offlineListItem.completed = !!offlineListItem.completed
-              const listItem = note.list.find((listItem) => listItem.id === offlineListItem.id)
-              if (!listItem) {
-                throw new Error(`List item with id ${offlineListItem.id} not found`)
-              }
-              const serverListItemData = serverNote?.list && serverNote.list.find((listItem) => listItem.id === offlineListItem.id)
-              if (serverListItemData) {
-                if (!offlineListItem.updated || !serverListItemData.updated) {
+              const serverListItem = serverNote?.list && serverNote.list.find((listItem) => listItem.id === offlineListItem.id)
+              if (!serverListItem) {
+                // eslint-disable-next-line no-await-in-loop
+                const newListItem = await onlineApi.addListItem(offlineListItem)
+                offlineListItem.id = newListItem.id
+              } else {
+                if (!offlineListItem.updated || !serverListItem.updated) {
                   throw new Error('"updated" or "created" field not found in offline note')
                 }
-                // Object.assign(existedListItem, listItemData)
-                if ((new Date(offlineListItem.updated)) < (new Date(serverListItemData.updated))) {
-                  Object.assign(listItem, serverListItemData)
-                  Object.assign(offlineListItem, serverListItemData)
-                  listItem.handleDataTransformation()
-                } else if ((new Date(offlineListItem.updated)) > (new Date(serverListItemData.updated))) {
+                if ((new Date(offlineListItem.updated)) < (new Date(serverListItem.updated))) {
+                  Object.assign(offlineListItem, serverListItem)
+                } else if ((new Date(offlineListItem.updated)) > (new Date(serverListItem.updated))) {
                   offlineListItem.id = undefined
                   // eslint-disable-next-line no-await-in-loop
-                  const newListItem = await ListItemsService.addListItem(note, offlineListItem)
-                  offlineListItem.id = newListItem.id.value
+                  const newListItem = await onlineApi.updateListItem(offlineListItem)
+                  offlineListItem.id = newListItem.id
                 }
-              } else if (note) {
-                ListItemsService.addListItem(note, offlineListItem)
-                // note.saveListItem(listItem)
               }
             }
 
@@ -162,7 +155,6 @@ export default class InitService extends BaseService {
               })
             }
           }
-          notes.push(offlineNote)
         }
 
         // Handle online notes
@@ -170,13 +162,14 @@ export default class InitService extends BaseService {
         const newNotes = serverData.notes.filter((serverNote) => !offlineNoteIds.includes(serverNote.id))
         newNotes.forEach((serverNote) => {
           offlineData.notes.push(serverNote)
-          notes.push(serverNote)
         })
 
-        NotesService.generateNotes(notes)
         StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
+        window.location.reload()
       } finally {
-        globalStore.isUpdating = false
+        setTimeout(() => {
+          globalStore.isUpdating = false
+        }, 1000)
       }
     }
   }

@@ -29,4 +29,9 @@ export default class BaseService {
       setTimeout(resolve, milliseconds)
     })
   }
+
+  static clearRemovedOfflineNotesAndListItems() {
+    const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
+    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
+  }
 }

@@ -80,11 +80,15 @@ q-layout.main-layout(
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { TemplateMiddle } from 'typescript'
 import BaseService from '~/services/base'
 import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
 import { useGlobalStore } from '~/stores/global'
 import { type TGlobalError } from '~/types'
+import StorageService from '~/services/storage'
+import { type TNote } from '~/composables/models/note'
+import { type TListItemModel } from '~/composables/models/list-item'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -158,9 +162,26 @@ watch(removedItemsQuantity, () => {
         notification({ timeout: 1 })
         notification = null
       }
+
+      // Remove offline notes
+      const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
+      NotesService.removingNotes.value.forEach((removingNote) => {
+        const offlineNoteIndex = offlineData.notes.find((offlineNote: TNote) => offlineNote.id === removingNote.id)
+        offlineData.notes.splice(offlineNoteIndex, 1)
+      })
+      ListItemsService.removingListItems.value.forEach((removingListItem: TListItemModel) => {
+        const offlineNote = offlineData.notes.find((offlineNote: TNote) => offlineNote.id === removingListItem.noteId)
+        if (!offlineNote) {
+          throw new Error(`Offline note with id "${removingListItem.noteId}" not found`)
+        }
+        const offlineListItemIndex = offlineNote.list.find((offlineListItem: TNote) => offlineListItem.id === removingListItem.id)
+        offlineNote.list.splice(offlineListItemIndex, 1)
+      })
+      StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
+
       NotesService.removingNotes.value = []
       ListItemsService.removingListItems.value = []
-    }, 7000)
+    }, 5000)
   } else if (notification) {
     notification({ timeout: 1 })
   }
