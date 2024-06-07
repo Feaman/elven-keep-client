@@ -56,6 +56,7 @@ import { type TNoteModel } from '~/composables/models/note'
 import { useGlobalStore } from '~/stores/global'
 import InitService from '~/services/init'
 import BaseService from '~/services/base'
+import SyncService from '~/services/sync'
 
 const props = defineProps<{
   note?: TNoteModel,
@@ -66,7 +67,7 @@ async function switchMode() {
   const route = useRoute()
   if (store.isOnline) {
     try {
-      await InitService.synchronizeOfflineData()
+      await SyncService.synchronizeOfflineData()
     } catch (error) {
       BaseService.showError(error as Error)
     }

@@ -5,10 +5,10 @@ import {
   createWebHashHistory,
   createWebHistory,
 } from 'vue-router'
-import BaseService from '~/services/base'
 import UsersService from '~/composables/services/users'
-import StorageService from '~/services/storage'
 import routes, { ROUTE_SIGN } from '~/router/routes'
+import BaseService from '~/services/base'
+import StorageService from '~/services/storage'
 
 /*
  * If not building with SSR mode, you can

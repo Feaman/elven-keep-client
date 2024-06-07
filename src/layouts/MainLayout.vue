@@ -2,7 +2,29 @@
 q-layout.main-layout(
   view="hHh Lpr fFf"
 )
-  q-page-container(v-if="isErrorShown")
+  q-page-container(v-if="isNoOfflineDataError")
+    .offline-data-error.q-flex.flex-center.pa-8
+      q-card
+        q-toolbar.q-flex.bg-primary.shadow-3
+          q-toolbar-title.ml-2
+            .q-flex.items-center
+              q-icon(
+                :name="mdiAlertDecagram"
+                size="sm"
+                color="red"
+              )
+              .font-size-18.ml-2 Connection error
+          q-btn(
+            @click="showDialog = false"
+            :icon="mdiClose"
+            color="black"
+            flat
+            round
+            dense
+          )
+        .pa-6
+          .font-size-18 Looks like there is no Internet here. To use this app in offline mode you should be authorized and start the app online at least once.
+  q-page-container(v-else-if="isErrorShown")
     ErrorPage(:error="{statusCode: globalStore.initError?.statusCode, message: globalStore.initError?.message}")
   q-page-container(v-else-if="globalStore.isInitDataLoading")
     template(
@@ -80,6 +102,10 @@ q-layout.main-layout(
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import {
+  mdiAlertDecagram,
+  mdiClose,
+} from '@quasar/extras/mdi-v6'
 import { TemplateMiddle } from 'typescript'
 import BaseService from '~/services/base'
 import NotesService from '~/composables/services/notes'
@@ -89,10 +115,12 @@ import { type TGlobalError } from '~/types'
 import StorageService from '~/services/storage'
 import { type TNote } from '~/composables/models/note'
 import { type TListItemModel } from '~/composables/models/list-item'
+import { ROUTE_SIGN } from '~/router/routes'
 
 const router = useRouter()
 const $q = useQuasar()
 
+let isNoOfflineDataError = false
 const isErrorShown = ref(false)
 const globalStore = useGlobalStore()
 let removeTimeout: ReturnType<typeof setTimeout> | null = null
@@ -114,6 +142,10 @@ BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
 
 if (globalStore.initError) {
   isErrorShown.value = true
+}
+
+if (globalStore.isNoOfflineDataError) {
+  isNoOfflineDataError = true
 }
 
 function handleWindowResize() {
@@ -192,7 +224,7 @@ watch(
   () => {
     if (globalStore.initError) {
       if (globalStore.initError?.statusCode === 401) {
-        router.push('/sign')
+        router.push({ name: ROUTE_SIGN })
       } else {
         isErrorShown.value = true
       }
@@ -217,6 +249,14 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.offline-data-error {
+  height: 100vh;
+
+  .q-card {
+    width: 500px;
+  }
+}
+
 .note {
   min-width: 250px;
   max-width: 300px;

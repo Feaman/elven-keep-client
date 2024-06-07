@@ -1,11 +1,8 @@
-import { Ref, computed, nextTick, ref } from 'vue'
-import { TListItemModel, type TListItem, type TVariant } from '~/composables/models/list-item'
+import { Ref, computed, ref } from 'vue'
+import { TListItemModel, type TVariant } from '~/composables/models/list-item'
 import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
-import ListItemsService from '~/composables/services/list-items'
 import StatusesService from '~/composables/services/statuses'
-import TypesService from '~/composables/services/types'
 import BaseService from '~/services/base'
-import { TYPE_TEXT } from '../models/type'
 
 const currentNote: Ref<TNoteModel | null> = ref(null)
 const notes: Ref<TNoteModel[]> = ref([])
@@ -157,48 +154,6 @@ async function removeNote(note: TNoteModel) {
   await BaseService.api.removeNote(note)
 }
 
-async function updateNote(note: TNoteModel, noteData: TNote) {
-  noteData.isCompletedListExpanded = !!noteData.isCompletedListExpanded
-  note.isRawUpdate = true
-  if (noteData.typeId === TypesService.findByName(TYPE_TEXT).id) {
-    Object.assign(note, noteData)
-  } else {
-    note.title = noteData.title || ''
-    let listData: TListItem[] = []
-    if (noteData.list) {
-      listData = noteData.list
-      delete noteData.list
-    }
-    Object.assign(note, noteData)
-
-    // Handle list update
-    listData.forEach(async (listItemData) => {
-      listItemData.checked = !!listItemData.checked
-      listItemData.completed = !!listItemData.completed
-      const existedListItem = note?.list.find((listItem) => listItem.id === listItemData.id)
-      if (existedListItem) {
-        Object.assign(existedListItem, listItemData)
-        existedListItem.handleDataTransformation()
-      } else if (note) {
-        ListItemsService.addListItem(note, listItemData)
-      }
-    })
-
-    // Handle deleted list items
-    const listItemsToDelete: number[] = []
-    note.list.forEach((listItem) => {
-      const existedListItem = listData.find((listItemData) => listItem.id === listItemData.id)
-      if (!existedListItem && listItem.id) {
-        listItemsToDelete.push(listItem.id)
-      }
-    })
-    note.list = note.list.filter((listItem) => listItem.id && !listItemsToDelete.includes(listItem.id))
-  }
-  note.handleDataTransformation(noteData.user, noteData.coAuthors)
-  await nextTick()
-  note.isRawUpdate = false
-}
-
 function find(noteId: number) {
   const note = notes.value.find((note) => note.id === noteId)
   if (!note) {
@@ -214,7 +169,6 @@ export default {
   searchQuery,
   removingNotes,
   find,
-  updateNote,
   generateMaxOrder,
   generateNotes,
   findNoteListItemVariants,

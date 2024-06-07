@@ -6,6 +6,7 @@ import ApiService from '~/services/api/api'
 import BaseService from '~/services/base'
 import InitService from '~/services/init'
 import SocketIOService from '~/services/socket-io'
+import SyncService from '~/services/sync'
 import { useGlobalStore } from '~/stores/global'
 import { TEvents, TGlobalError } from '~/types'
 
@@ -60,9 +61,7 @@ export default boot(({ app }) => {
   }, 200)
   BaseService.eventBus.on('windowFocused', async () => {
     try {
-      if (store.isOnline) {
-        await InitService.handleApplicationUpdate()
-      }
+      await SyncService.handleApplicationUpdate()
     } catch (error) {
       BaseService.showError(error as Error)
     }
@@ -74,9 +73,9 @@ export default boot(({ app }) => {
   })
   window.addEventListener('online', () => {
     store.isOnline = true
-    InitService.synchronizeOfflineData()
+    SyncService.synchronizeOfflineData()
   })
 
-  // SocketIOService.init()
+  SocketIOService.init()
   InitService.initApplication()
 })

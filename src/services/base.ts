@@ -1,8 +1,11 @@
 import { AxiosError } from 'axios'
 import { Emitter } from 'mitt'
 import { Router } from 'vue-router'
+import { TNote } from '~/composables/models/note'
+import StatusesService from '~/composables/services/statuses'
 import { TEvents, TGlobalError } from '~/types'
 import ApiService from './api/api'
+import StorageService from './storage'
 
 export default class BaseService {
   static URL = 'https://api.notes.pavlo.ru/'
@@ -28,10 +31,5 @@ export default class BaseService {
     return new Promise((resolve) => {
       setTimeout(resolve, milliseconds)
     })
-  }
-
-  static clearRemovedOfflineNotesAndListItems() {
-    const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
-    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
   }
 }
