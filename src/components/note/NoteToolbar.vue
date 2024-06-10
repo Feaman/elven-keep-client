@@ -46,7 +46,7 @@
             :icon="mdiWatch"
             color="black"
             flat
-            round
+           round
           )
         q-space
         transition(
@@ -62,6 +62,7 @@
             v-if="note.id || !globalStore.isOnline"
             :note="note"
           )
+        div v.{{ version }}
         q-separator(vertical)
         UserMenu
 </template>
@@ -75,6 +76,7 @@ import {
   mdiWatch,
 } from '@quasar/extras/mdi-v6'
 import { computed } from 'vue'
+import { version } from '../../../package.json'
 import { useGlobalStore } from '~/stores/global'
 import { type TNoteModel } from '~/composables/models/note'
 import { ROUTE_NEW } from '~/router/routes'

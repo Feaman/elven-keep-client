@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable no-console */
 import { register } from 'register-service-worker'
 
 // The ready(), registered(), cached(), updatefound() and updated()
@@ -13,7 +13,7 @@ register(process.env.SERVICE_WORKER_FILE, {
   registrationOptions: { scope: './' },
 
   ready(/* registration */) {
-    // console.log('Service worker is active.')
+    console.log('Service worker is active.')
   },
 
   registered(/* registration */) {
@@ -30,10 +30,15 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   updated(/* registration */) {
     console.log('New content is available; please refresh.')
+
+    const channel = new BroadcastChannel('elven-keep-service-worker')
+    channel.postMessage({ updateReady: true })
   },
 
   offline() {
     console.log('No internet connection found. App is running in offline mode.')
+    const channel = new BroadcastChannel('sw-messages')
+    channel.postMessage({ title: 'Hello from SW offline' })
   },
 
   error(err) {

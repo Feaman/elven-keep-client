@@ -50,6 +50,7 @@ export default class InitService extends BaseService {
 
   static clearApplication() {
     StorageService.set({ [UsersService.AUTH_TOKEN_NAME]: undefined })
+    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: undefined })
     const globalStore = useGlobalStore()
     NotesService.notes.value = []
     globalStore.user = null

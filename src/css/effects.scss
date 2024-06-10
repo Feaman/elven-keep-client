@@ -161,3 +161,30 @@
   transform: scale(0);
   opacity: 0;
 }
+
+.animated.blink {
+  animation: blink 1s infinite;
+}
+
+// Slide Fade Out
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 0.25;
+  }
+
+  80% {
+    opacity: 0.5;
+  }
+
+  90% {
+    opacity: 0.75;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

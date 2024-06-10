@@ -3,11 +3,12 @@
   q-btn(
     @click="showDialog = true"
     :icon="mdiAlert"
-    color="purple"
+    class="animated blink "
+    color="purple-7"
     flat
     round
   )
-    ToolTip New version available
+    ToolTip New version available!
 
   q-dialog(
     @hide="showDialog =false"

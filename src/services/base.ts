@@ -1,14 +1,13 @@
 import { AxiosError } from 'axios'
-import { Emitter } from 'mitt'
+import mitt from 'mitt'
 import { Router } from 'vue-router'
-import { TNote } from '~/composables/models/note'
-import StatusesService from '~/composables/services/statuses'
 import { TEvents, TGlobalError } from '~/types'
 import ApiService from './api/api'
-import StorageService from './storage'
 
 export default class BaseService {
-  static URL = 'https://api.notes.pavlo.ru/'
+  static API_URL = 'https://api.notes.pavlo.ru/'
+
+  static URL = 'https://notes.pavlo.ru/'
 
   static OFFLINE_STORE_NAME = 'offline-data'
 
@@ -16,7 +15,7 @@ export default class BaseService {
 
   static showError: (error: Error | TGlobalError) => void
 
-  static eventBus: Emitter<TEvents>
+  static eventBus = mitt<TEvents>()
 
   static router: Router
 

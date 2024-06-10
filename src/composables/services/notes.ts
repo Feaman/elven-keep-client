@@ -154,7 +154,7 @@ async function removeNote(note: TNoteModel) {
   await BaseService.api.removeNote(note)
 }
 
-function find(noteId: number) {
+function find(noteId: number | string) {
   const note = notes.value.find((note) => note.id === noteId)
   if (!note) {
     throw new Error(`Note width id "${noteId}" not found`)

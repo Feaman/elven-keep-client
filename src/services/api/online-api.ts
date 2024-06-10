@@ -3,6 +3,7 @@ import { TListItemModel, type TListItem } from '~/composables/models/list-item'
 import { TNote, TNoteModel } from '~/composables/models/note'
 import AxiosApi from '~/services/api/axios-api'
 import IApi from '~/services/api/interface'
+import BaseService from '../base'
 import { ConfigObject } from './interface'
 
 export default class OnlineApiService implements IApi {
@@ -14,8 +15,13 @@ export default class OnlineApiService implements IApi {
     this.api = OnlineApiService.axiosApi
   }
 
-  async getConfig(includeRemoved = false): Promise<ConfigObject> {
-    const { data } = await this.api.get('config', { data: { includeRemoved } })
+  static async getCurrentVersion(): Promise<{ version: string }> {
+    const { data } = await this.axiosApi.get(`${BaseService.URL}version.json`)
+    return data as { version: string }
+  }
+
+  async getConfig(): Promise<ConfigObject> {
+    const { data } = await this.api.get('config')
     return data as ConfigObject
   }
 
@@ -53,7 +59,7 @@ export default class OnlineApiService implements IApi {
     return data as TNote
   }
 
-  async updateNote(id: number, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
+  async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
     const noteData = {
       title,
       text,
@@ -70,7 +76,7 @@ export default class OnlineApiService implements IApi {
     return data
   }
 
-  async restoreNote(noteId: number) {
+  async restoreNote(noteId: number | string) {
     const { data } = await this.api.put(`notes/restore/${noteId}`)
     return data
   }
@@ -104,7 +110,7 @@ export default class OnlineApiService implements IApi {
     return data
   }
 
-  async restoreListItem(_noteId: number, listItemId: number) {
+  async restoreListItem(_noteId: number | string, listItemId: number | string) {
     const { data } = await this.api.put(`list-items/restore/${listItemId}`)
     return data
   }

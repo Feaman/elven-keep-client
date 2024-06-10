@@ -16,12 +16,12 @@ export default class ApiService implements IApi {
     this.offlineApiService = new OfflineApiService()
   }
 
-  async getConfig(includeRemoved = false): Promise<ConfigObject> {
+  async getConfig(): Promise<ConfigObject> {
     if (!useGlobalStore().isOnline) {
       return this.offlineApiService.getConfig()
     }
 
-    return this.onlineApiService.getConfig(includeRemoved)
+    return this.onlineApiService.getConfig()
   }
 
   async addNote(
@@ -46,7 +46,7 @@ export default class ApiService implements IApi {
     return this.onlineApiService.getNote(id)
   }
 
-  async updateNote(id: number, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
+  async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
     if (useGlobalStore().isOnline) {
       this.onlineApiService.updateNote(id, title, text, typeId, isCompletedListExpanded)
     }
@@ -60,7 +60,7 @@ export default class ApiService implements IApi {
     return this.offlineApiService.removeNote(note)
   }
 
-  async restoreNote(noteId: number) {
+  async restoreNote(noteId: number | string) {
     if (useGlobalStore().isOnline) {
       this.onlineApiService.restoreNote(noteId)
     }
@@ -88,7 +88,7 @@ export default class ApiService implements IApi {
     return this.offlineApiService.removeListItem(listItem)
   }
 
-  async restoreListItem(noteId: number, listItemId: number) {
+  async restoreListItem(noteId: number | string, listItemId: number | string) {
     if (useGlobalStore().isOnline) {
       this.onlineApiService.restoreListItem(noteId, listItemId)
     }

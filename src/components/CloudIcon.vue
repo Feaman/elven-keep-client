@@ -36,11 +36,7 @@
           dense
         )
       .pa-6
-        .font-size-18 There's something about your Internet connection. Check your Internet.
-        q-btn.text-black.mt-4(
-          @click="reloadPage"
-          color="primary"
-        ) Reload page
+        .font-size-18 Seems like there is no Internet here. The app is working offline.
 </template>
 
 <script setup lang="ts">

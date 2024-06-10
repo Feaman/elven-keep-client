@@ -2,6 +2,9 @@
 q-layout.main-layout(
   view="hHh Lpr fFf"
 )
+  div(
+    style="position: absolute; z-index: 10000"
+  ) 3
   q-page-container(v-if="isNoOfflineDataError")
     .offline-data-error.q-flex.flex-center.pa-8
       q-card
@@ -34,12 +37,19 @@ q-layout.main-layout(
         type="rect"
         height="50px"
       )
-      .row.pa-4
-        q-skeleton.note.bg-grey-3.ma-2(
-          v-for="index in 6"
-          :key="index"
-          type="rect"
-        )
+      .column
+        .row.pa-4
+          q-skeleton.note.bg-grey-3.ma-2(
+            v-for="index in 6"
+            :key="index"
+            type="rect"
+          )
+        .row.pa-4
+          q-skeleton.note.bg-grey-3.ma-2(
+            v-for="index in 6"
+            :key="index"
+            type="rect"
+          )
     template(
       v-if="['existed-note', 'new-note'].includes(String($route.name))"
     )

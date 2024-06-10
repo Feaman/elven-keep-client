@@ -12,7 +12,7 @@ import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
 
 export type TNote = {
-  id?: number
+  id?: number | string
   title?: string | ''
   text?: string | ''
   type?: TTypeModel
@@ -285,7 +285,7 @@ export default function noteModel(noteData: TNote) {
     }
   }
 
-  function findListItem(listItemId: number) {
+  function findListItem(listItemId: number | string) {
     const listItem = list.value.find((listItem) => listItem.id === listItemId)
     if (!listItem) {
       throw new Error(`listItem width id "${listItemId}" not found`)

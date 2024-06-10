@@ -21,7 +21,7 @@ export default class SyncService extends BaseService {
     const globalStore = useGlobalStore()
     globalStore.isUpdating = true
     try {
-      const serverData = data || await BaseService.api.getConfig(true)
+      const serverData = data || await BaseService.api.getConfig()
 
       if (!data) {
         TypesService.generateTypes(serverData.types)
@@ -39,30 +39,34 @@ export default class SyncService extends BaseService {
         // Handle Note entity
         const serverNote = serverData.notes.find((serverNote) => serverNote.id === offlineNote.id)
         if (!serverNote) {
+          if (String(offlineNote.id).indexOf('offline') === 0) {
           // Create Note
-          // eslint-disable-next-line no-await-in-loop
-          const newNote = await onlineApi.addNote(
-            offlineNote.list || [],
-            offlineNote.title || '',
-            offlineNote.text || '',
-            offlineNote.typeId || 0,
-            offlineNote.order,
-            !!offlineNote.isCompletedListExpanded,
-          )
-          offlineNote.id = newNote.id
-          if ([ROUTE_EXISTED_NOTE, ROUTE_NEW].includes(String(this.router.currentRoute.value.name))) {
-            window.history.replaceState({}, '', `/note/${newNote.id}`)
-            if (NotesService.currentNote.value?.id) {
-              NotesService.currentNote.value.id = newNote.id
+            // eslint-disable-next-line no-await-in-loop
+            const newNote = await onlineApi.addNote(
+              offlineNote.list || [],
+              offlineNote.title || '',
+              offlineNote.text || '',
+              offlineNote.typeId || 0,
+              offlineNote.order,
+              !!offlineNote.isCompletedListExpanded,
+            )
+            offlineNote.id = newNote.id
+            if ([ROUTE_EXISTED_NOTE, ROUTE_NEW].includes(String(this.router.currentRoute.value.name))) {
+              window.history.replaceState({}, '', `/note/${newNote.id}`)
+              if (NotesService.currentNote.value?.id) {
+                NotesService.currentNote.value.id = newNote.id
+              }
             }
-          }
 
-          // Create list items
-          if (offlineNote.list) {
-            offlineNote.list.forEach((offlineListItem) => {
-              offlineListItem.noteId = newNote.id
-              onlineApi.addListItem(offlineListItem)
-            })
+            // Create list items
+            if (offlineNote.list) {
+              offlineNote.list.forEach((offlineListItem) => {
+                offlineListItem.noteId = newNote.id
+                onlineApi.addListItem(offlineListItem)
+              })
+            }
+          } else {
+            offlineData.notes.splice(noteIndex, 1)
           }
 
           // eslint-disable-next-line no-continue
@@ -90,9 +94,13 @@ export default class SyncService extends BaseService {
             const offlineListItem = offlineNote.list[listItemIndex]
             const serverListItem = serverNote?.list && serverNote.list.find((listItem) => listItem.id === offlineListItem.id)
             if (!serverListItem) {
-              // eslint-disable-next-line no-await-in-loop
-              const newListItem = await onlineApi.addListItem(offlineListItem)
-              offlineListItem.id = newListItem.id
+              if (String(offlineListItem.id).indexOf('offline') === 0) {
+                // eslint-disable-next-line no-await-in-loop
+                const newListItem = await onlineApi.addListItem(offlineListItem)
+                offlineListItem.id = newListItem.id
+              } else {
+                offlineNote.list.splice(listItemIndex, 1)
+              }
             } else {
               if (!offlineListItem.updated || !serverListItem.updated) {
                 throw new Error('"updated" or "created" field not found in offline note')

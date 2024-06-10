@@ -7,7 +7,13 @@
     elevated
   )
     q-toolbar
-      h6.text-black.text-weight-bold.text-grey-9.q-ma-none.q-pl-sm ELVEN NOTES
+      h6.text-black.text-weight-bold.text-grey-9.q-ma-none.q-pl-sm ELVEN NOTES sadf
+      transition(
+        :name="scale-fade"
+      )
+        CloudIcon(
+          v-if="!globalStore.isOnline"
+        )
   .row.flex-center.full-width.full-height
     .sign-page__container.column.flex-center.full-width.q-px-lg
       h5.full-width.text-left.q-ma-none Sign {{ isSignIn ? 'In' : 'Up' }}
@@ -116,9 +122,11 @@ import { useRouter } from 'vue-router'
 import UsersService from '~/composables/services/users'
 import StorageService from '~/services/storage'
 import KeyboardEvents from '~/helpers/keyboard-events'
+import { useGlobalStore } from '~/stores/global'
 
 const isTokenExists = StorageService.get(UsersService.AUTH_TOKEN_NAME)
 const router = useRouter()
+const globalStore = useGlobalStore()
 
 if (isTokenExists) {
   router.push('/')

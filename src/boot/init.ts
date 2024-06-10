@@ -1,5 +1,4 @@
 import { AxiosError } from 'axios'
-import mitt from 'mitt'
 import { boot } from 'quasar/wrappers'
 import draggable from 'zhyswan-vuedraggable'
 import ApiService from '~/services/api/api'
@@ -8,11 +7,10 @@ import InitService from '~/services/init'
 import SocketIOService from '~/services/socket-io'
 import SyncService from '~/services/sync'
 import { useGlobalStore } from '~/stores/global'
-import { TEvents, TGlobalError } from '~/types'
+import { TGlobalError } from '~/types'
 
 export default boot(({ app }) => {
   BaseService.api = new ApiService()
-  BaseService.eventBus = mitt<TEvents>()
   BaseService.showError = (error: Error | TGlobalError) => {
     let resultError: TGlobalError | Error = error
     if ((error as AxiosError).response) {
@@ -74,6 +72,15 @@ export default boot(({ app }) => {
   window.addEventListener('online', () => {
     store.isOnline = true
     SyncService.synchronizeOfflineData()
+  })
+
+  const channel = new BroadcastChannel('elven-keep-service-worker')
+  store.isNewVersionAvailable = true
+  channel.addEventListener('message', (event) => {
+    console.log('FE received: ', event.data)
+    if (event.data.updateReady === true) {
+      store.isNewVersionAvailable = true
+    }
   })
 
   SocketIOService.init()

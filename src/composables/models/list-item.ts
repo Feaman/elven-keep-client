@@ -1,17 +1,17 @@
 import { nextTick, ref, UnwrapRef, watch } from 'vue'
-import { type TNoteModel } from '~/composables/models/note'
-import { TStatusModel } from '~/composables/models/status'
 import StatusesService from '~/composables/services/statuses'
 import BaseService from '~/services/base'
 import ListItemsService from '../services/list-items'
 import NotesService from '../services/notes'
+import { TNoteModel } from './note'
+import { TStatusModel } from './status'
 
 const LAST_TEXTAREA = 'LAST_TEXTAREA'
 const FIRST_TEXTAREA = 'FIRST_TEXTAREA'
 
 export type TVariant = {
-  noteId: number,
-  listItemId: number,
+  noteId: number | string,
+  listItemId: number | string,
   text: string,
   highlightedText: string,
   isExists: boolean,
@@ -20,8 +20,8 @@ export type TVariant = {
 }
 
 export type TListItem = {
-  id?: number
-  noteId?: number
+  id?: number | string
+  noteId?: number | string
   order?: number
   text?: string | ''
   note?: TNoteModel | undefined

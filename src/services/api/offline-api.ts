@@ -37,7 +37,7 @@ export default class OfflineApiService implements IApi {
     const offlineNoteData = Object.assign(
       noteData,
       {
-        id: new Date().getTime(),
+        id: `offline-${new Date().getTime()}`,
         updated: currentDateTime,
         created: currentDateTime,
         userId: useGlobalStore().user?.id,
@@ -60,7 +60,7 @@ export default class OfflineApiService implements IApi {
     return Promise.resolve(offlineNote)
   }
 
-  async updateNote(id: number, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
+  async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
     const noteData = {
       title,
       text,
@@ -93,7 +93,7 @@ export default class OfflineApiService implements IApi {
     return Promise.resolve(offlineNote)
   }
 
-  async restoreNote(noteId: number) {
+  async restoreNote(noteId: number | string) {
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
     const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === noteId) as TNoteModel | undefined
     if (!offlineNote) {
@@ -137,7 +137,7 @@ export default class OfflineApiService implements IApi {
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
     const currentDateTime = new Date().toISOString()
     const listItemData = {
-      id: new Date().getTime(),
+      id: `offline-${new Date().getTime()}`,
       updated: currentDateTime,
       created: currentDateTime,
       text: listItem.text,
@@ -180,7 +180,7 @@ export default class OfflineApiService implements IApi {
     StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
   }
 
-  async restoreListItem(noteId: number, listItemId: number) {
+  async restoreListItem(noteId: number | string, listItemId: number | string) {
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
 
     const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === noteId) as TNoteModel | undefined
