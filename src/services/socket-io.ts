@@ -6,6 +6,7 @@ import NotesService from '~/composables/services/notes'
 import UsersService from '~/composables/services/users'
 import { ROUTE_EXISTED_NOTE } from '~/router/routes'
 import { useGlobalStore } from '~/stores/global'
+import OfflineApiService from './api/offline-api'
 import BaseService from './base'
 import StorageService from './storage'
 
@@ -44,36 +45,127 @@ export default class SocketIOService extends BaseService {
       console.error(error)
     })
 
-    socket.on(this.EVENT_LIST_ITEM_CHANGED, (listItemData: TListItem) => {
-      const note = NotesService.notes.value.find((note) => note.id === listItemData.noteId)
-      if (note) {
-        const listItem = note.list.find((listItem) => listItem.id === listItemData.id)
-        if (listItem) {
-          Object.assign(listItem, { text: listItemData.text, checked: listItemData.checked, completed: listItemData.completed })
-        }
-      }
-    })
-
-    socket.on(this.EVENT_NOTE_ADDED, (noteData: TNote) => {
+    socket.on(this.EVENT_NOTE_ADDED, async (noteData: TNote) => {
+      // Add note
       const note = noteModel(noteData)
       NotesService.notes.value.push(note as unknown as TNoteModel)
+
+      // Add offline note
+      const offlineApi = new OfflineApiService()
+      await offlineApi.addNote(
+        [],
+        noteData.title || '',
+        noteData.text || '',
+        Number(noteData.typeId),
+        noteData.order,
+        !!noteData.isCompletedListExpanded,
+        noteData.id,
+      )
     })
 
     socket.on(this.EVENT_NOTE_CHANGED, async (noteData: TNote) => {
-      const note = NotesService.notes.value.find((note) => note.id === noteData.id)
-      if (note) {
-        note.isRawUpdate = true
-        Object.assign(
-          note,
-          {
-            title: noteData.title,
-            text: noteData.text,
-            isCompletedListExpanded: noteData.isCompletedListExpanded,
-            order: noteData.order,
-          },
+      try {
+        // Change note
+        const note = NotesService.notes.value.find((note) => note.id === noteData.id)
+        if (note) {
+          note.isRawUpdate = true
+          Object.assign(
+            note,
+            {
+              title: noteData.title,
+              text: noteData.text,
+              isCompletedListExpanded: noteData.isCompletedListExpanded,
+              order: noteData.order,
+            },
+          )
+          await nextTick()
+          note.isRawUpdate = false
+        }
+
+        // Change offline note
+        const offlineApi = new OfflineApiService()
+        offlineApi.updateNote(
+          String(noteData.id),
+          noteData.title || '',
+          noteData.text || '',
+          Number(noteData.typeId),
+          !!noteData.isCompletedListExpanded,
         )
-        await nextTick()
-        note.isRawUpdate = false
+      } catch (error) {
+        BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
+      }
+    })
+
+    socket.on(this.EVENT_NOTE_REMOVED, async (noteData: TNote) => {
+      try {
+        // Remove offline note
+        const offlineApi = new OfflineApiService()
+        await offlineApi.removeNoteFinally(noteData)
+
+        // Remove note
+        const note = NotesService.notes.value.find((note) => note.id === noteData.id)
+        if (note) {
+          NotesService.notes.value = NotesService.notes.value.filter((_note) => _note.id !== note.id)
+        }
+        if (this.router.currentRoute.value.name === ROUTE_EXISTED_NOTE) {
+          this.router.push('/')
+        }
+      } catch (error) {
+        BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
+      }
+    })
+
+    socket.on(this.EVENT_LIST_ITEM_ADDED, async (listItemData: TListItem) => {
+      try {
+        // Add list item
+        const note = NotesService.notes.value.find((note) => note.id === listItemData.noteId)
+        if (note) {
+          note.addListItem(listItemModel(listItemData) as unknown as TListItemModel)
+        }
+
+        // Remove offline note
+        const offlineApi = new OfflineApiService()
+        await offlineApi.addListItem(listItemData)
+      } catch (error) {
+        BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
+      }
+    })
+
+    socket.on(this.EVENT_LIST_ITEM_CHANGED, async (listItemData: TListItem) => {
+      try {
+        // Update current list item
+        const note = NotesService.notes.value.find((note) => note.id === listItemData.noteId)
+        if (note) {
+          const listItem = note.list.find((listItem) => listItem.id === listItemData.id)
+          if (listItem) {
+            Object.assign(listItem, { text: listItemData.text, checked: listItemData.checked, completed: listItemData.completed })
+          }
+        }
+
+        // Update offline list item
+        const offlineApi = new OfflineApiService()
+        await offlineApi.updateListItem(listItemData)
+      } catch (error) {
+        BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
+      }
+    })
+
+    socket.on(this.EVENT_LIST_ITEM_REMOVED, async (listItemData: TListItem) => {
+      try {
+        // Remove offline list item
+        const offlineApi = new OfflineApiService()
+        offlineApi.removeListItemFinally(listItemData)
+
+        // Remove offline list item
+        const note = NotesService.notes.value.find((note) => note.id === listItemData.noteId)
+        if (note) {
+          const listItem = note.list.find((listItem) => listItem.id === listItemData.id)
+          if (listItem) {
+            await note.removeListItemSoft(listItem)
+          }
+        }
+      } catch (error) {
+        BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
       }
     })
 
@@ -86,33 +178,6 @@ export default class SocketIOService extends BaseService {
             listItem.order = Number(listItemData.order)
           }
         })
-      }
-    })
-
-    socket.on(this.EVENT_NOTE_REMOVED, (noteData: TNote) => {
-      const note = NotesService.notes.value.find((note) => note.id === noteData.id)
-      if (note) {
-        NotesService.notes.value = NotesService.notes.value.filter((_note) => _note.id !== note.id)
-      }
-      if (this.router.currentRoute.value.name === ROUTE_EXISTED_NOTE) {
-        this.router.push('/')
-      }
-    })
-
-    socket.on(this.EVENT_LIST_ITEM_ADDED, (listItemData: TListItem) => {
-      const note = NotesService.notes.value.find((note) => note.id === listItemData.noteId)
-      if (note) {
-        note.addListItem(listItemModel(listItemData) as unknown as TListItemModel)
-      }
-    })
-
-    socket.on(this.EVENT_LIST_ITEM_REMOVED, (listItemData: TListItem) => {
-      const note = NotesService.notes.value.find((note) => note.id === listItemData.noteId)
-      if (note) {
-        const listItem = note.list.find((listItem) => listItem.id === listItemData.id)
-        if (listItem) {
-          note.removeListItemSoft(listItem)
-        }
       }
     })
   }

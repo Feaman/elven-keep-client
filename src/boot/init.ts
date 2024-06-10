@@ -59,7 +59,12 @@ export default boot(({ app }) => {
   }, 200)
   BaseService.eventBus.on('windowFocused', async () => {
     try {
-      await SyncService.handleApplicationUpdate()
+      const currentDateTime = new Date()
+      if (currentDateTime.getTime() - BaseService.lastFocused.getTime() > 300000) {
+        window.location.reload()
+      } else {
+        await SyncService.handleApplicationUpdate()
+      }
     } catch (error) {
       BaseService.showError(error as Error)
     }
@@ -75,9 +80,7 @@ export default boot(({ app }) => {
   })
 
   const channel = new BroadcastChannel('elven-keep-service-worker')
-  store.isNewVersionAvailable = true
   channel.addEventListener('message', (event) => {
-    console.log('FE received: ', event.data)
     if (event.data.updateReady === true) {
       store.isNewVersionAvailable = true
     }

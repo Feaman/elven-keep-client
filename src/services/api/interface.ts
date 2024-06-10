@@ -29,7 +29,7 @@ export default interface IApi {
 
   updateNote(id: number, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote>
 
-  removeNote(note: TNoteModel): Promise<TNoteModel>
+  removeNote(note: TNoteModel | TNote): Promise<TNoteModel | TNote>
 
   restoreNote(noteId: number): Promise<TNoteModel>
 

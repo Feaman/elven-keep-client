@@ -8,9 +8,6 @@
     round
   )
     ToolTip {{ tooltipText }}
-  div(
-    @click="switchMode"
-  ) [O]
 
   q-dialog(
     @hide="showDialog = false"
@@ -57,18 +54,6 @@ import SyncService from '~/services/sync'
 const props = defineProps<{
   note?: TNoteModel,
 }>()
-
-async function switchMode() {
-  store.isOnline = !store.isOnline
-  const route = useRoute()
-  if (store.isOnline) {
-    try {
-      await SyncService.synchronizeOfflineData()
-    } catch (error) {
-      BaseService.showError(error as Error)
-    }
-  }
-}
 
 const store = useGlobalStore()
 const showDialog = ref(false)

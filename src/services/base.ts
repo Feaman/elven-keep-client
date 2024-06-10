@@ -19,6 +19,8 @@ export default class BaseService {
 
   static router: Router
 
+  static lastFocused = new Date()
+
   static parseAxiosError(error: AxiosError): TGlobalError {
     return {
       statusCode: Number(error.code) || error?.response?.status || undefined,

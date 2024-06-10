@@ -37,8 +37,6 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   offline() {
     console.log('No internet connection found. App is running in offline mode.')
-    const channel = new BroadcastChannel('sw-messages')
-    channel.postMessage({ title: 'Hello from SW offline' })
   },
 
   error(err) {

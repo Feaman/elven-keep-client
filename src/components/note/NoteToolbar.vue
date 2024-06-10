@@ -62,7 +62,6 @@
             v-if="note.id || !globalStore.isOnline"
             :note="note"
           )
-        div v.{{ version }}
         q-separator(vertical)
         UserMenu
 </template>

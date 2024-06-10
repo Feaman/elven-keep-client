@@ -181,7 +181,10 @@ export default class SyncService extends BaseService {
     globalStore.isUpdating = true
     try {
       await InitService.initApplication()
-      if (NotesService.currentNote.value) {
+      if (
+        [ROUTE_EXISTED_NOTE, ROUTE_NEW].includes(String(this.router.currentRoute.value.name))
+        && NotesService.currentNote.value
+      ) {
         const currentNote = NotesService.notes.value.find((note) => note.id === NotesService.currentNote.value?.id)
         if (!currentNote) {
           throw new Error('Current note id not found in new notes')

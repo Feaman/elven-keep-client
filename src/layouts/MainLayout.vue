@@ -2,9 +2,6 @@
 q-layout.main-layout(
   view="hHh Lpr fFf"
 )
-  div(
-    style="position: absolute; z-index: 10000"
-  ) 3
   q-page-container(v-if="isNoOfflineDataError")
     .offline-data-error.q-flex.flex-center.pa-8
       q-card

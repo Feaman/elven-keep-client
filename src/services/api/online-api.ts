@@ -71,7 +71,7 @@ export default class OnlineApiService implements IApi {
     return data as TNote
   }
 
-  async removeNote(note: TNoteModel) {
+  async removeNote(note: TNoteModel | TNote) {
     const { data } = await this.api.delete(`notes/${note.id}`)
     return data
   }
