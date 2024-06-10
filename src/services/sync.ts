@@ -1,5 +1,6 @@
 import { TListItem } from '~/composables/models/list-item'
 import { TNote } from '~/composables/models/note'
+import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
@@ -15,32 +16,36 @@ export default class SyncService extends BaseService {
   static async synchronizeOfflineData(data?: ConfigObject) {
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
     const onlineApi = new OnlineApiService()
+    let onlineNotesToRemove: TNote[] = []
+    let offlineNotesToRemove: TNote[] = []
+    let offlineListItemsToRemove: TListItem[] = []
+    let onlineListItemsToRemove: TListItem[] = []
 
     this.clearRemovedOfflineNotesAndListItems()
 
     const globalStore = useGlobalStore()
     globalStore.isUpdating = true
     try {
-      const serverData = data || await BaseService.api.getConfig()
+      const onlineData = data || await BaseService.api.getConfig()
 
       if (!data) {
-        TypesService.generateTypes(serverData.types)
-        StatusesService.generateStatuses(serverData.statuses)
+        TypesService.generateTypes(onlineData.types)
+        StatusesService.generateStatuses(onlineData.statuses)
       }
 
       // Apply statuses and types without checking
-      offlineData.statuses = serverData.statuses
-      offlineData.types = serverData.types
+      offlineData.statuses = onlineData.statuses
+      offlineData.types = onlineData.types
 
       // Handle offline notes
       for (let noteIndex = 0; noteIndex < offlineData.notes.length; noteIndex++) {
         const offlineNote = offlineData.notes[noteIndex] as TNote
 
         // Handle Note entity
-        const serverNote = serverData.notes.find((serverNote) => serverNote.id === offlineNote.id)
-        if (!serverNote) {
-          if (String(offlineNote.id).indexOf('offline') === 0) {
+        const onlineNote = onlineData.notes.find((onlineNote) => onlineNote.id === offlineNote.id)
+        if (!onlineNote) {
           // Create Note
+          if (String(offlineNote.id).indexOf('offline') === 0) {
             // eslint-disable-next-line no-await-in-loop
             const newNote = await onlineApi.addNote(
               offlineNote.list || [],
@@ -66,25 +71,33 @@ export default class SyncService extends BaseService {
               })
             }
           } else {
-            offlineData.notes.splice(noteIndex, 1)
+            offlineNotesToRemove.push(offlineNote)
           }
 
           // eslint-disable-next-line no-continue
           continue
         } else {
-          if (!offlineNote.updated || !serverNote.updated) {
+          if (!offlineNote.updated || !onlineNote.updated) {
             throw new Error('"updated" or "created" field not found in offline note')
           }
-          if ((new Date(offlineNote.updated)) < (new Date(serverNote.updated))) {
-            Object.assign(offlineNote, serverNote)
-          } else if ((new Date(offlineNote.updated)) > (new Date(serverNote.updated))) {
-            onlineApi.updateNote(
-              Number(offlineNote.id),
-              offlineNote.title || '',
-              offlineNote.text || '',
-              Number(offlineNote.typeId),
-              !!offlineNote.isCompletedListExpanded,
-            )
+          if ((new Date(offlineNote.updated)) < (new Date(onlineNote.updated))) {
+            Object.assign(offlineNote, onlineNote)
+          } else if ((new Date(offlineNote.updated)) > (new Date(onlineNote.updated))) {
+            if (offlineNote.statusId === StatusesService.inactive.value.id) {
+              onlineApi.removeNote(offlineNote)
+              offlineNotesToRemove.push(offlineNote)
+              onlineNotesToRemove.push(onlineNote)
+              // eslint-disable-next-line no-continue
+              continue
+            } else {
+              onlineApi.updateNote(
+                Number(offlineNote.id),
+                offlineNote.title || '',
+                offlineNote.text || '',
+                Number(offlineNote.typeId),
+                !!offlineNote.isCompletedListExpanded,
+              )
+            }
           }
         }
 
@@ -92,8 +105,8 @@ export default class SyncService extends BaseService {
         if (offlineNote.list) {
           for (let listItemIndex = 0; listItemIndex < offlineNote.list.length; listItemIndex++) {
             const offlineListItem = offlineNote.list[listItemIndex]
-            const serverListItem = serverNote?.list && serverNote.list.find((listItem) => listItem.id === offlineListItem.id)
-            if (!serverListItem) {
+            const onlineListItem = onlineNote?.list && onlineNote.list.find((listItem) => listItem.id === offlineListItem.id)
+            if (!onlineListItem) {
               if (String(offlineListItem.id).indexOf('offline') === 0) {
                 // eslint-disable-next-line no-await-in-loop
                 const newListItem = await onlineApi.addListItem(offlineListItem)
@@ -102,21 +115,44 @@ export default class SyncService extends BaseService {
                 offlineNote.list.splice(listItemIndex, 1)
               }
             } else {
-              if (!offlineListItem.updated || !serverListItem.updated) {
+              if (!offlineListItem.updated || !onlineListItem.updated) {
                 throw new Error('"updated" or "created" field not found in offline note')
               }
-              if ((new Date(offlineListItem.updated)) < (new Date(serverListItem.updated))) {
-                Object.assign(offlineListItem, serverListItem)
-              } else if ((new Date(offlineListItem.updated)) > (new Date(serverListItem.updated))) {
-                onlineApi.updateListItem(offlineListItem)
+              if ((new Date(offlineListItem.updated)) < (new Date(onlineListItem.updated))) {
+                Object.assign(offlineListItem, onlineListItem)
+              } else if ((new Date(offlineListItem.updated)) > (new Date(onlineListItem.updated))) {
+                if (offlineListItem.statusId === StatusesService.inactive.value.id) {
+                  // eslint-disable-next-line no-await-in-loop
+                  await onlineApi.removeListItem(offlineListItem)
+                  offlineListItemsToRemove.push(offlineListItem)
+                  onlineListItemsToRemove.push(onlineListItem)
+                } else {
+                  onlineApi.updateListItem(offlineListItem)
+                }
               }
             }
           }
 
+          // Remove online list items marked to remove
+          onlineListItemsToRemove.forEach((onlineListItem) => {
+            if (onlineNote.list) {
+              onlineNote.list.splice(onlineNote.list.indexOf(onlineListItem), 1)
+            }
+          })
+          onlineListItemsToRemove = []
+
+          // Remove offline list items marked to remove
+          offlineListItemsToRemove.forEach((offlineListItem) => {
+            if (offlineNote.list) {
+              offlineNote.list.splice(offlineNote.list.indexOf(offlineListItem), 1)
+            }
+          })
+          offlineListItemsToRemove = []
+
           // Handle online list items
-          if (serverNote?.list) {
+          if (onlineNote?.list) {
             const offlineListItemsIds = offlineNote.list.map((offlineNoteListItem: TListItem) => offlineNoteListItem.id)
-            const newListItems = serverNote.list.filter((serverNoteListItem) => !offlineListItemsIds.includes(serverNoteListItem.id))
+            const newListItems = onlineNote.list.filter((onlineNoteListItem) => !offlineListItemsIds.includes(onlineNoteListItem.id))
             newListItems.forEach((newListItem) => {
               if (offlineNote.list) {
                 offlineNote.list.push(newListItem)
@@ -126,11 +162,23 @@ export default class SyncService extends BaseService {
         }
       }
 
+      // Remove online notes marked to remove
+      onlineNotesToRemove.forEach((onlineNoteToRemove) => {
+        onlineData.notes.splice(onlineData.notes.indexOf(onlineNoteToRemove), 1)
+      })
+      onlineNotesToRemove = []
+
+      // Remove offline notes marked to remove
+      offlineNotesToRemove.forEach((offlineNoteToRemove) => {
+        offlineData.notes.splice(offlineData.notes.indexOf(offlineNoteToRemove), 1)
+      })
+      offlineNotesToRemove = []
+
       // Handle online notes
       const offlineNoteIds = offlineData.notes.map((offlineNote: TNote) => offlineNote.id)
-      const newNotes = serverData.notes.filter((serverNote) => !offlineNoteIds.includes(serverNote.id))
-      newNotes.forEach((serverNote) => {
-        offlineData.notes.push(serverNote)
+      const newNotes = onlineData.notes.filter((onlineNote) => !offlineNoteIds.includes(onlineNote.id))
+      newNotes.forEach((onlineNote) => {
+        offlineData.notes.push(onlineNote)
       })
 
       StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
@@ -150,15 +198,17 @@ export default class SyncService extends BaseService {
     const offlineListItemsIndicesToRemove: number[] = []
     offlineData.notes.forEach((offlineNote: TNote, index: number) => {
       if (
-        offlineNote.statusId === StatusesService.inactive.value.id
+        String(offlineNote.id).indexOf('offline') === 0
+        && offlineNote.statusId === StatusesService.inactive.value.id
         && ((new Date()).getTime() - (new Date(String(offlineNote.updated))).getTime() > 5000)
       ) {
         offlineNotesIndicesToRemove.push(index)
       } else if (offlineNote.list) {
         offlineNote.list.forEach((offlineListItem) => {
           if (
-            offlineListItem.statusId === StatusesService.inactive.value.id
-        && ((new Date()).getTime() - (new Date(String(offlineListItem.updated))).getTime() > 5000)
+            String(offlineListItem.id).indexOf('offline') === 0
+            && offlineListItem.statusId === StatusesService.inactive.value.id
+            && ((new Date()).getTime() - (new Date(String(offlineListItem.updated))).getTime() > 5000)
           ) {
             offlineListItemsIndicesToRemove.push(index)
           }
@@ -180,12 +230,14 @@ export default class SyncService extends BaseService {
 
     globalStore.isUpdating = true
     try {
+      const currentNoteId = NotesService.currentNote.value?.id
       await InitService.initApplication()
+
       if (
         [ROUTE_EXISTED_NOTE, ROUTE_NEW].includes(String(this.router.currentRoute.value.name))
-        && NotesService.currentNote.value
+        && currentNoteId
       ) {
-        const currentNote = NotesService.notes.value.find((note) => note.id === NotesService.currentNote.value?.id)
+        const currentNote = NotesService.notes.value.find((note) => note.id === currentNoteId)
         if (!currentNote) {
           throw new Error('Current note id not found in new notes')
         }
@@ -195,5 +247,10 @@ export default class SyncService extends BaseService {
       globalStore.isSocketErrorOnce = false
       globalStore.isUpdating = false
     }
+  }
+
+  static removeRemovedEntities() {
+    NotesService.removingNotes.value = []
+    ListItemsService.removingListItems.value = []
   }
 }

@@ -4,5 +4,6 @@ export type TEvents = {
   showGlobalError: TGlobalError
   keydown: KeyboardEvent
   windowFocused: boolean
+  windowUnFocused: boolean
   updateFound: boolean
 }

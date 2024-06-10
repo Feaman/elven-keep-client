@@ -32,8 +32,10 @@ export default class ApiService implements IApi {
     order: number,
     isCompletedListExpanded: boolean,
   ): Promise<TNote> {
+    let serverNote: TNote | undefined
     if (useGlobalStore().isOnline) {
-      this.onlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded)
+      serverNote = await this.onlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded)
+      return this.offlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded, serverNote.id)
     }
     return this.offlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded)
   }
@@ -75,8 +77,11 @@ export default class ApiService implements IApi {
   }
 
   async addListItem(listItem: TListItemModel): Promise<TListItem> {
+    let serverListItem: TListItem | undefined
     if (useGlobalStore().isOnline) {
-      this.onlineApiService.addListItem(listItem)
+      serverListItem = await this.onlineApiService.addListItem(listItem)
+      listItem.id = serverListItem.id
+      return this.offlineApiService.addListItem(listItem)
     }
     return this.offlineApiService.addListItem(listItem)
   }

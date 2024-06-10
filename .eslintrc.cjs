@@ -95,6 +95,7 @@ module.exports = {
     'object-curly-newline': 'off',
     'no-use-before-define': 'off',
     'class-methods-use-this': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
 
     // this rule, if on, would require explicit return type on the `render` function
     '@typescript-eslint/explicit-function-return-type': 'off',

@@ -18,7 +18,7 @@
         .note.ml-4.mt-4.pa-1
           NotePreview(
             @click="openNote(element)"
-            @remove="NotesService.removeNote(element)"
+            @remove="removeNote(element)"
             :note="element"
           )
   </template>
@@ -30,6 +30,7 @@ import draggable from 'zhyswan-vuedraggable'
 import NotesService from '~/composables/services/notes'
 import { type TNoteModel } from '~/composables/models/note'
 import { useGlobalStore } from '~/stores/global'
+import BaseService from '~/services/base'
 
 const { filtered } = NotesService
 const rootElement = ref<HTMLElement | null>(null)
@@ -44,6 +45,14 @@ function setDragGhostData(dataTransfer: DataTransfer) {
 
 function openNote(note: TNoteModel) {
   router.push(`/note/${note.id}`)
+}
+
+async function removeNote(note: TNoteModel) {
+  try {
+    await NotesService.removeNote(note)
+  } catch (error) {
+    BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
+  }
 }
 
 function setMainListScroll() {

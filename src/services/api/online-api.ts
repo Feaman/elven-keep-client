@@ -105,7 +105,7 @@ export default class OnlineApiService implements IApi {
     return data as TListItem
   }
 
-  async removeListItem(listItem: TListItemModel) {
+  async removeListItem(listItem: TListItemModel | TListItem) {
     const { data } = await this.api.delete(`list-items/${listItem.id}`)
     return data
   }

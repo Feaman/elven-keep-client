@@ -113,16 +113,13 @@ import {
   mdiAlertDecagram,
   mdiClose,
 } from '@quasar/extras/mdi-v6'
-import { TemplateMiddle } from 'typescript'
 import BaseService from '~/services/base'
 import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
 import { useGlobalStore } from '~/stores/global'
 import { type TGlobalError } from '~/types'
-import StorageService from '~/services/storage'
-import { type TNote } from '~/composables/models/note'
-import { type TListItemModel } from '~/composables/models/list-item'
 import { ROUTE_SIGN } from '~/router/routes'
+import SyncService from '~/services/sync'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -177,52 +174,38 @@ onMounted(() => {
 })
 
 watch(removedItemsQuantity, () => {
-  if (removedItemsQuantity.value) {
-    if (!notification) {
-      notification = $q.notify({
-        group: false, // required to be updatable
-        timeout: 0, // we want to be in control when it gets dismissed
-        message: removedItemsMessage.value,
-        actions: [
-          { label: 'Restore', color: 'primary', handler: restoreItems },
-        ],
-      })
-    } else {
-      notification({
-        message: removedItemsMessage.value,
-      })
-    }
-
-    if (removeTimeout) {
-      clearTimeout(removeTimeout)
-    }
-    removeTimeout = setTimeout(() => {
-      if (notification) {
-        notification({ timeout: 1 })
-        notification = null
+  try {
+    if (removedItemsQuantity.value) {
+      if (!notification) {
+        notification = $q.notify({
+          group: false, // required to be updatable
+          timeout: 0, // we want to be in control when it gets dismissed
+          message: removedItemsMessage.value,
+          actions: [
+            { label: 'Restore', color: 'primary', handler: restoreItems },
+          ],
+        })
+      } else {
+        notification({
+          message: removedItemsMessage.value,
+        })
       }
 
-      // Remove offline notes
-      const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
-      NotesService.removingNotes.value.forEach((removingNote) => {
-        const offlineNoteIndex = offlineData.notes.find((offlineNote: TNote) => offlineNote.id === removingNote.id)
-        offlineData.notes.splice(offlineNoteIndex, 1)
-      })
-      ListItemsService.removingListItems.value.forEach((removingListItem: TListItemModel) => {
-        const offlineNote = offlineData.notes.find((offlineNote: TNote) => offlineNote.id === removingListItem.noteId)
-        if (!offlineNote) {
-          throw new Error(`Offline note with id "${removingListItem.noteId}" not found`)
+      if (removeTimeout) {
+        clearTimeout(removeTimeout)
+      }
+      removeTimeout = setTimeout(() => {
+        if (notification) {
+          notification({ timeout: 1 })
+          notification = null
         }
-        const offlineListItemIndex = offlineNote.list.find((offlineListItem: TNote) => offlineListItem.id === removingListItem.id)
-        offlineNote.list.splice(offlineListItemIndex, 1)
-      })
-      StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
-
-      NotesService.removingNotes.value = []
-      ListItemsService.removingListItems.value = []
-    }, 5000)
-  } else if (notification) {
-    notification({ timeout: 1 })
+        SyncService.removeRemovedEntities()
+      }, 5000)
+    } else if (notification) {
+      notification({ timeout: 1 })
+    }
+  } catch (error) {
+    BaseService.showError(error as Error)
   }
 })
 

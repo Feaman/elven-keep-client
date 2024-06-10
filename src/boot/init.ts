@@ -57,6 +57,7 @@ export default boot(({ app }) => {
       isDocumentFocused = false
     }
   }, 200)
+
   BaseService.eventBus.on('windowFocused', async () => {
     try {
       const currentDateTime = new Date()

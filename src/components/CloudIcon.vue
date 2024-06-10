@@ -22,6 +22,7 @@
             q-icon(
               :name="mdiAlertDecagram"
               size="sm"
+              color="red"
             )
             .font-size-18.ml-2 Connection error
         q-btn(
@@ -33,7 +34,7 @@
           dense
         )
       .pa-6
-        .font-size-18 Seems like there is no Internet here. The app is working offline.
+        .font-size-18 Seems like there is no Internet here. The application is working offline.
 </template>
 
 <script setup lang="ts">

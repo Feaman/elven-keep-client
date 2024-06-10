@@ -1,5 +1,3 @@
-const generateFile = require('vite-plugin-generate-file')
-
 /* eslint-env node */
 const path = require('path')
 
