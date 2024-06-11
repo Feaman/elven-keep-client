@@ -136,22 +136,21 @@
 
 <script setup lang="ts">
 import { mdiCheckAll, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
-import { AxiosError } from 'axios'
 import {
-  ref, unref, computed, watch, nextTick,
+  ref, watch, nextTick,
 } from 'vue'
-import { type TNoteModel } from '~/composables/models/note'
 import { TYPE_LIST, TYPE_TEXT } from '~/composables/models/type'
 import NotesService from '~/composables/services/notes'
 import { useGlobalStore } from '~/stores/global'
 import ListItemsService from '~/composables/services/list-items'
+import { type TNoteModel } from '~/composables/models/note'
 
 const NOTE_TYPE_LIST = TYPE_LIST
 const NOTE_TYPE_TEXT = TYPE_TEXT
 
 const coAuthorEmail = ref('')
 const coAuthorError = ref('')
-const note = computed(() => unref(NotesService.currentNote as unknown as TNoteModel))
+const note = NotesService.currentNote as unknown as { value: TNoteModel }
 const globalStore = useGlobalStore()
 
 defineProps<{

@@ -64,7 +64,7 @@ export default boot(({ app }) => {
       if (currentDateTime.getTime() - BaseService.lastFocused.getTime() > 300000) {
         window.location.reload()
       } else {
-        await SyncService.handleApplicationUpdate()
+        // await SyncService.handleApplicationUpdate()
       }
     } catch (error) {
       BaseService.showError(error as Error)
@@ -87,6 +87,6 @@ export default boot(({ app }) => {
     }
   })
 
-  SocketIOService.init()
+  // SocketIOService.init()
   InitService.initApplication()
 })

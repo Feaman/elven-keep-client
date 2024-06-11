@@ -40,15 +40,8 @@ export default class ApiService implements IApi {
     return this.offlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded)
   }
 
-  async getNote(id: number): Promise<TNote> {
-    if (!useGlobalStore().isOnline) {
-      return this.offlineApiService.getNote(id)
-    }
-
-    return this.onlineApiService.getNote(id)
-  }
-
   async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
+    console.log(title)
     if (useGlobalStore().isOnline) {
       this.onlineApiService.updateNote(id, title, text, typeId, isCompletedListExpanded)
     }

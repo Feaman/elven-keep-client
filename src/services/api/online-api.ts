@@ -54,11 +54,6 @@ export default class OnlineApiService implements IApi {
     return data as TNote
   }
 
-  async getNote(id: number): Promise<TNote> {
-    const { data } = await this.api.get(`notes/${id}`)
-    return data as TNote
-  }
-
   async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
     const noteData = {
       title,

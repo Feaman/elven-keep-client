@@ -46,6 +46,8 @@ export default class SyncService extends BaseService {
         if (!onlineNote) {
           // Create Note
           if (String(offlineNote.id).indexOf('offline') === 0) {
+            const offlineNoteList = offlineNote.list
+            offlineNote.list = []
             // eslint-disable-next-line no-await-in-loop
             const newNote = await onlineApi.addNote(
               offlineNote.list || [],
@@ -57,18 +59,22 @@ export default class SyncService extends BaseService {
             )
             offlineNote.id = newNote.id
             if ([ROUTE_EXISTED_NOTE, ROUTE_NEW].includes(String(this.router.currentRoute.value.name))) {
-              window.history.replaceState({}, '', `/note/${newNote.id}`)
+              this.router.push(`/note/${newNote.id}`)
               if (NotesService.currentNote.value?.id) {
                 NotesService.currentNote.value.id = newNote.id
               }
             }
 
             // Create list items
-            if (offlineNote.list) {
-              offlineNote.list.forEach((offlineListItem) => {
+            if (offlineNoteList) {
+              for (let offlineListItemIndex = 0; offlineListItemIndex < offlineNoteList.length; offlineListItemIndex++) {
+                const offlineListItem = offlineNoteList[offlineListItemIndex]
                 offlineListItem.noteId = newNote.id
-                onlineApi.addListItem(offlineListItem)
-              })
+                // eslint-disable-next-line no-await-in-loop
+                const onlineListItem = await onlineApi.addListItem(offlineListItem)
+                offlineListItem.id = onlineListItem.id
+                offlineNote.list.push(offlineListItem)
+              }
             }
           } else {
             offlineNotesToRemove.push(offlineNote)
@@ -223,26 +229,13 @@ export default class SyncService extends BaseService {
 
   static async handleApplicationUpdate() {
     const globalStore = useGlobalStore()
-
-    if (!globalStore.isOnline) {
-      return
-    }
-
-    globalStore.isUpdating = true
     try {
-      const currentNoteId = NotesService.currentNote.value?.id
-      await InitService.initApplication()
-
-      if (
-        [ROUTE_EXISTED_NOTE, ROUTE_NEW].includes(String(this.router.currentRoute.value.name))
-        && currentNoteId
-      ) {
-        const currentNote = NotesService.notes.value.find((note) => note.id === currentNoteId)
-        if (!currentNote) {
-          throw new Error('Current note id not found in new notes')
-        }
-        NotesService.currentNote.value = currentNote
+      if (!globalStore.isOnline) {
+        return
       }
+
+      globalStore.isUpdating = true
+      await InitService.initApplication()
     } finally {
       globalStore.isSocketErrorOnce = false
       globalStore.isUpdating = false

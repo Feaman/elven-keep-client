@@ -131,7 +131,7 @@ const isVariantsShown = ref(false)
 const variantsMenuY = ref(0)
 const variantsMenuMaxWidth = ref(0)
 const variantsListItem = ref<TListItemModel | null>(null)
-const note = computed(() => unref(NotesService.currentNote as unknown as TNoteModel))
+const note = NotesService.currentNote as unknown as { value: TNoteModel }
 const globalStore = useGlobalStore()
 const isSemiFocus = ref(false)
 const variantsElement = ref<QCard | null>(null)

@@ -53,15 +53,6 @@ export default class OfflineApiService implements IApi {
     return Promise.resolve(offlineNoteData)
   }
 
-  async getNote(id: number): Promise<TNote> {
-    const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
-    const offlineNote = (offlineData as ConfigObject).notes.find((note) => note.id === id)
-    if (!offlineNote) {
-      throw new Error(`[GetNote]: Offline note with id "${id}" not found in offline data`)
-    }
-    return Promise.resolve(offlineNote)
-  }
-
   async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
     const noteData = {
       title,

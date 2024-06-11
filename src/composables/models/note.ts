@@ -28,6 +28,7 @@ export type TNote = {
   created?: string
   updated?: string
   isRawUpdate?: boolean
+  isLocalModel?: boolean
 }
 
 export default function noteModel(noteData: TNote) {
@@ -52,6 +53,7 @@ export default function noteModel(noteData: TNote) {
   const unSavedListItems = ref<TListItemModel[]>([])
   const isList = computed(() => type.value?.name === TYPE_LIST)
   const isRawUpdate = ref(false)
+  const isLocalModel = ref(!!noteData.isLocalModel)
 
   const globalStore = useGlobalStore()
 
@@ -94,13 +96,13 @@ export default function noteModel(noteData: TNote) {
         const noteData = await BaseService.api.addNote(list.value, title.value, text.value, typeId.value, order.value, isCompletedListExpanded.value)
         id.value = noteData.id
         userId.value = noteData.user?.id
-        window.history.replaceState({}, '', `/note/${noteData.id}`)
         isCreating.value = false
         if (isUpdateNeeded.value && id.value) {
           await BaseService.api.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value)
           isUpdateNeeded.value = false
         }
         unSavedListItems.value.forEach((listItem) => handleListItem(listItem))
+        BaseService.router.push(`/note/${noteData.id}`)
       }
       isSaving.value = false
     } catch (error) {
@@ -329,6 +331,7 @@ export default function noteModel(noteData: TNote) {
     order,
     isRawUpdate,
     activeListItems,
+    isLocalModel,
     filterAndSort,
     checkOrUncheckListItem,
     addCoAuthor,

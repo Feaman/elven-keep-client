@@ -44,6 +44,7 @@ function init() {
       typeId: TypesService.findByName(type).id,
       userId: globalStore.user?.id,
       order: NotesService.generateMaxOrder(),
+      isLocalModel: true,
     }) as unknown as TNoteModel
     note.handleDataTransformation()
     note.user = globalStore.user

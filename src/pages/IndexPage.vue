@@ -44,7 +44,11 @@ function setDragGhostData(dataTransfer: DataTransfer) {
 }
 
 function openNote(note: TNoteModel) {
-  router.push(`/note/${note.id}`)
+  if (note.isLocalModel) {
+    window.location.href = `/note/${note.id}`
+  } else {
+    router.push(`/note/${note.id}`)
+  }
 }
 
 async function removeNote(note: TNoteModel) {

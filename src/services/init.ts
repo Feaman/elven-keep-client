@@ -3,6 +3,7 @@ import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
 import UsersService from '~/composables/services/users'
+import { ROUTE_EXISTED_NOTE, ROUTE_NEW } from '~/router/routes'
 import BaseService from '~/services//base'
 import StorageService from '~/services/storage'
 import { useGlobalStore } from '~/stores/global'
@@ -41,6 +42,20 @@ export default class InitService extends BaseService {
 
       globalStore.setUser(data.user)
       SyncService.clearRemovedOfflineNotesAndListItems()
+
+      const currentNoteId = NotesService.currentNote.value?.id
+      if (
+        [ROUTE_EXISTED_NOTE].includes(String(this.router.currentRoute.value.name))
+        && currentNoteId
+      ) {
+        const currentNote = NotesService.notes.value.find((note) => note.id === currentNoteId)
+        if (!currentNote) {
+          throw new Error('Current note id not found in new notes')
+        }
+        if (NotesService.currentNote.value) {
+          NotesService.currentNote.value.title = currentNote.title
+        }
+      }
     } catch (error) {
       globalStore.initError = BaseService.parseAxiosError(error as AxiosError)
     } finally {

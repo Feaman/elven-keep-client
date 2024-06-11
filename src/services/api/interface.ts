@@ -25,8 +25,6 @@ export default interface IApi {
     isCompletedListExpanded: boolean,
   ): Promise<TNote>
 
-  getNote(id: number): Promise<TNote>
-
   updateNote(id: number, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote>
 
   removeNote(note: TNoteModel | TNote): Promise<TNoteModel | TNote>
