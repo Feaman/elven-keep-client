@@ -41,7 +41,6 @@ export default class ApiService implements IApi {
   }
 
   async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
-    console.log(title)
     if (useGlobalStore().isOnline) {
       this.onlineApiService.updateNote(id, title, text, typeId, isCompletedListExpanded)
     }
