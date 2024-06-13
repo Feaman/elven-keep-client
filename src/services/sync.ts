@@ -58,6 +58,7 @@ export default class SyncService extends BaseService {
               !!offlineNote.isCompletedListExpanded,
             )
             offlineNote.id = newNote.id
+            offlineNote.updated = newNote.updated
             if ([ROUTE_EXISTED_NOTE, ROUTE_NEW].includes(String(this.router.currentRoute.value.name))) {
               this.router.push(`/note/${newNote.id}`)
               if (NotesService.currentNote.value?.id) {
@@ -73,6 +74,7 @@ export default class SyncService extends BaseService {
                 // eslint-disable-next-line no-await-in-loop
                 const onlineListItem = await onlineApi.addListItem(offlineListItem)
                 offlineListItem.id = onlineListItem.id
+                offlineListItem.updated = onlineListItem.updated
                 offlineNote.list.push(offlineListItem)
               }
             }
@@ -96,13 +98,15 @@ export default class SyncService extends BaseService {
               // eslint-disable-next-line no-continue
               continue
             } else {
-              onlineApi.updateNote(
+              // eslint-disable-next-line no-await-in-loop
+              const updatedOnlineNote = await onlineApi.updateNote(
                 Number(offlineNote.id),
                 offlineNote.title || '',
                 offlineNote.text || '',
                 Number(offlineNote.typeId),
                 !!offlineNote.isCompletedListExpanded,
               )
+              offlineNote.updated = updatedOnlineNote.updated
             }
           }
         }
@@ -133,7 +137,9 @@ export default class SyncService extends BaseService {
                   offlineListItemsToRemove.push(offlineListItem)
                   onlineListItemsToRemove.push(onlineListItem)
                 } else {
-                  onlineApi.updateListItem(offlineListItem)
+                  // eslint-disable-next-line no-await-in-loop
+                  const updatedOnlineListItem = await onlineApi.updateListItem(offlineListItem)
+                  offlineListItem.updated = updatedOnlineListItem.updated
                 }
               }
             }

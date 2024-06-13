@@ -469,7 +469,7 @@ function setDragGhostData(dataTransfer: DataTransfer) {
   .note-list__create-button {
     height: 24px;
     position: relative;
-    margin-left: 23px;
+    margin-left: 21px;
     transition: opacity 0.3s;
 
     &.note-list__create-button--alone {
