@@ -132,7 +132,7 @@ export default class OnlineApiService implements IApi {
     return data
   }
 
-  async setListItemsOrder(note: TNoteModel, order: number[]) {
+  async setListItemsOrder(note: TNoteModel | TNote, order: number[]) {
     await this.api.put(`notes/${note.id}/set-order`, { order })
   }
 

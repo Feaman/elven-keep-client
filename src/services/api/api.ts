@@ -17,11 +17,11 @@ export default class ApiService implements IApi {
   }
 
   async getConfig(): Promise<ConfigObject> {
-    if (!useGlobalStore().isOnline) {
-      return this.offlineApiService.getConfig()
+    if (useGlobalStore().isOnline) {
+      return this.onlineApiService.getConfig()
     }
 
-    return this.onlineApiService.getConfig()
+    return this.offlineApiService.getConfig()
   }
 
   async addNote(
@@ -61,13 +61,6 @@ export default class ApiService implements IApi {
     return this.offlineApiService.restoreNote(noteId)
   }
 
-  async updateListItem(listItem: TListItemModel): Promise<TListItem> {
-    if (useGlobalStore().isOnline) {
-      this.onlineApiService.updateListItem(listItem)
-    }
-    return this.offlineApiService.updateListItem(listItem)
-  }
-
   async addListItem(listItem: TListItemModel): Promise<TListItem> {
     let serverListItem: TListItem | undefined
     if (useGlobalStore().isOnline) {
@@ -76,6 +69,13 @@ export default class ApiService implements IApi {
       return this.offlineApiService.addListItem(listItem)
     }
     return this.offlineApiService.addListItem(listItem)
+  }
+
+  async updateListItem(listItem: TListItemModel): Promise<TListItem> {
+    if (useGlobalStore().isOnline) {
+      this.onlineApiService.updateListItem(listItem)
+    }
+    return this.offlineApiService.updateListItem(listItem)
   }
 
   async removeListItem(listItem: TListItemModel) {
@@ -124,7 +124,7 @@ export default class ApiService implements IApi {
     return this.onlineApiService.removeNoteCoAuthor(coAuthor)
   }
 
-  async setListItemsOrder(note: TNoteModel, order: number[]) {
+  async setListItemsOrder(note: TNoteModel | TNote, order: number[]) {
     if (useGlobalStore().isOnline) {
       this.onlineApiService.setListItemsOrder(note, order)
     }

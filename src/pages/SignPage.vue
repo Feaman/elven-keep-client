@@ -9,7 +9,7 @@
     q-toolbar
       h6.text-black.text-weight-bold.text-grey-9.q-ma-none.q-pl-sm ELVEN NOTES sadf
       transition(
-        :name="scale-fade"
+        name="scale-fade"
       )
         CloudIcon(
           v-if="!globalStore.isOnline"

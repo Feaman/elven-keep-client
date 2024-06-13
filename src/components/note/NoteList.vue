@@ -146,17 +146,21 @@ const list = computed({
 
     return fullList.value
   },
-  set(newList: TListItemModel[]) {
-    let newWholeList = []
-    if (props.isMain) {
-      newWholeList = [...newList, ...note.value.completedListItems]
-    } else {
-      newWholeList = [...note.value.mainListItems, ...newList, ...fullList.value.slice(listItemsToShow.value)]
+  async set(newList: TListItemModel[]) {
+    try {
+      let newWholeList = []
+      if (props.isMain) {
+        newWholeList = [...newList, ...note.value.completedListItems]
+      } else {
+        newWholeList = [...note.value.mainListItems, ...newList, ...fullList.value.slice(listItemsToShow.value)]
+      }
+      newWholeList.forEach((listItem, index) => {
+        listItem.order = index + 1
+      })
+      await NotesService.setOrder(note.value, newWholeList.map((listItem) => Number(listItem.id)))
+    } catch (error) {
+      BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
     }
-    newWholeList.forEach((listItem, index) => {
-      listItem.order = index + 1
-    })
-    NotesService.setOrder(note.value, newWholeList.map((listItem) => Number(listItem.id)))
   },
 })
 

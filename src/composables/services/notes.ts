@@ -134,8 +134,8 @@ function findListItemVariants(listItem: TListItemModel) {
   return resultVariants.slice(0, 15)
 }
 
-function setListItemsOrder(note: TNoteModel, order: number[]) {
-  BaseService.api.setListItemsOrder(note, order)
+async function setListItemsOrder(note: TNoteModel, order: number[]) {
+  await BaseService.api.setListItemsOrder(note, order)
 }
 
 function generateMaxOrder() {

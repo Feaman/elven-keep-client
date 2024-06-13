@@ -7,8 +7,16 @@ import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
 import StorageService from '../storage'
 import IApi, { ConfigObject } from './interface'
+import UsersService from '~/composables/services/users'
 
 export default class OfflineApiService implements IApi {
+  checkAuthToken() {
+    const authToken = StorageService.get(UsersService.AUTH_TOKEN_NAME)
+    if (!authToken) {
+      throw new Error('Authentication is required. Please, find Internet connection, and log in.')
+    }
+  }
+
   async getConfig(): Promise<ConfigObject> {
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME)
     return Promise.resolve(offlineData as ConfigObject)
@@ -23,6 +31,8 @@ export default class OfflineApiService implements IApi {
     isCompletedListExpanded: boolean,
     id?: string | number,
   ): Promise<TNote> {
+    this.checkAuthToken()
+
     id = Number(id)
     const noteData = {
       title,
@@ -54,6 +64,7 @@ export default class OfflineApiService implements IApi {
   }
 
   async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
+    this.checkAuthToken()
     const noteData = {
       title,
       text,
@@ -74,6 +85,7 @@ export default class OfflineApiService implements IApi {
   }
 
   async removeNote(note: TNoteModel | TNote) {
+    this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
     const currentDateTime = new Date().toISOString()
     const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === note.id) as TNote
@@ -89,6 +101,7 @@ export default class OfflineApiService implements IApi {
   }
 
   async removeNoteFinally(note: TNoteModel | TNote) {
+    this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
     const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === note.id) as TNote
     if (!offlineNote) {
@@ -101,6 +114,7 @@ export default class OfflineApiService implements IApi {
   }
 
   async restoreNote(noteId: number | string) {
+    this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
     const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === noteId) as TNoteModel | undefined
     if (!offlineNote) {
@@ -114,6 +128,7 @@ export default class OfflineApiService implements IApi {
   }
 
   async addListItem(listItem: TListItemModel | TListItem): Promise<TListItem> {
+    this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
     const currentDateTime = new Date().toISOString()
     const listItemData = {
@@ -143,6 +158,7 @@ export default class OfflineApiService implements IApi {
   }
 
   async updateListItem(listItem: TListItemModel | TListItem): Promise<TListItem> {
+    this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
     const listItemData = {
       text: listItem.text,
@@ -170,6 +186,7 @@ export default class OfflineApiService implements IApi {
   }
 
   async removeListItem(listItem: TListItemModel | TListItem) {
+    this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
     const currentDateTime = new Date().toISOString()
 
@@ -190,6 +207,7 @@ export default class OfflineApiService implements IApi {
   }
 
   async removeListItemFinally(listItem: TListItemModel | TListItem) {
+    this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
 
     const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === listItem.noteId) as TNote | undefined
@@ -210,6 +228,7 @@ export default class OfflineApiService implements IApi {
   }
 
   async restoreListItem(noteId: number | string, listItemId: number | string) {
+    this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
 
     const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === noteId) as TNoteModel | undefined
@@ -243,15 +262,42 @@ export default class OfflineApiService implements IApi {
     throw new Error('This action is not available in offline mode')
   }
 
-  async setListItemsOrder(note: TNoteModel, order: number[]) {
-    throw new Error('This action is not available in offline mode')
+  async setListItemsOrder(note: TNoteModel | TNote, order: number[]) {
+    this.checkAuthToken()
+    const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
+    const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === note.id)
+    if (!offlineNote) {
+      throw new Error(`[UpdateNote]: Note with id "${note.id}" not found in offline data`)
+    }
+
+    order.forEach(async (listItemId: number, index: number) => {
+      const offlineListItem = offlineNote.list?.find((listItem: TListItem) => listItem.id === listItemId)
+      if (!offlineListItem) {
+        throw new Error(`[setListItemsOrder]: Offline note list item with id "${listItemId}" not found in offline data`)
+      }
+      offlineListItem.order = index + 1
+    })
+
+    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
   }
 
   async setNotesOrder(order: number[]) {
-    throw new Error('This action is not available in offline mode')
+    this.checkAuthToken()
+    const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
+
+    order.forEach(async (noteId: number, index: number) => {
+      const offlineNote = offlineData.notes.find((note) => note.id === noteId)
+      if (!offlineNote) {
+        throw new Error(`[setNotesOrder]: Offline note list item with id "${noteId}" not found in offline data`)
+      }
+      offlineNote.order = index + 1
+    })
+
+    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
   }
 
   async updateUser(showChecked: boolean) {
+    this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
 
     offlineData.user.showChecked = showChecked
