@@ -196,7 +196,10 @@ watch(removedItemsQuantity, () => {
       }
       removeTimeout = setTimeout(() => {
         if (notification) {
-          notification({ timeout: 1 })
+          notification({
+            timeout: 1,
+            actions: [],
+          })
           notification = null
         }
         SyncService.removeRemovedEntities()

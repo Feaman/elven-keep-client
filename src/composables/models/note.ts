@@ -215,7 +215,7 @@ export default function noteModel(noteData: TNote) {
       if (addToRestore) {
         ListItemsService.removingListItems.value.push(listItem as unknown as TListItemModel)
       }
-      await BaseService.api.removeListItem(listItem)
+      await BaseService.api.removeListItem(listItem, !addToRestore)
     }
   }
 

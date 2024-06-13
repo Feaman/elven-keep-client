@@ -1,4 +1,4 @@
-import { TCoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
+import { TCoAuthor } from '~/composables/models/co-author'
 import { TListItemModel, type TListItem } from '~/composables/models/list-item'
 import { TNote, TNoteModel } from '~/composables/models/note'
 import AxiosApi from '~/services/api/axios-api'
@@ -100,8 +100,8 @@ export default class OnlineApiService implements IApi {
     return data as TListItem
   }
 
-  async removeListItem(listItem: TListItemModel | TListItem) {
-    const { data } = await this.api.delete(`list-items/${listItem.id}`)
+  async removeListItem(listItem: TListItemModel | TListItem, completely = false) {
+    const { data } = await this.api.delete(`list-items/${listItem.id}`, { data: { completely } })
     return data
   }
 
@@ -127,7 +127,7 @@ export default class OnlineApiService implements IApi {
     return data as TCoAuthor
   }
 
-  async removeNoteCoAuthor(coAuthor: TCoAuthorModel) {
+  async removeNoteCoAuthor(coAuthor: TCoAuthor) {
     const { data } = await this.api.delete(`notes/co-author/${coAuthor.id}`)
     return data
   }

@@ -1,4 +1,4 @@
-import { TCoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
+import { TCoAuthor } from '~/composables/models/co-author'
 import { TListItemModel, type TListItem } from '~/composables/models/list-item'
 import { TNote, TNoteModel } from '~/composables/models/note'
 import { IStatus } from '~/composables/models/status'
@@ -35,7 +35,7 @@ export default interface IApi {
 
   addListItem(listItem: TListItemModel): Promise<TListItem>
 
-  removeListItem(listItem: TListItemModel): void
+  removeListItem(listItem: TListItemModel | TListItem, completely: boolean): void
 
   restoreListItem(noteId: number, listItemId: number): void
 
@@ -45,7 +45,7 @@ export default interface IApi {
 
   addNoteCoAuthor(noteId: number, email: string): Promise<TCoAuthor>
 
-  removeNoteCoAuthor(coAuthor: TCoAuthorModel): void
+  removeNoteCoAuthor(coAuthor: TCoAuthor): void
 
   setListItemsOrder(note: TNoteModel, order: number[]): void
 

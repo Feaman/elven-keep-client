@@ -3,17 +3,17 @@ import { TListItemModel, type TListItem } from '~/composables/models/list-item'
 import { TNote, TNoteModel } from '~/composables/models/note'
 import { TUser } from '~/composables/models/user'
 import StatusesService from '~/composables/services/statuses'
+import UsersService from '~/composables/services/users'
 import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
 import StorageService from '../storage'
 import IApi, { ConfigObject } from './interface'
-import UsersService from '~/composables/services/users'
 
 export default class OfflineApiService implements IApi {
   checkAuthToken() {
     const authToken = StorageService.get(UsersService.AUTH_TOKEN_NAME)
     if (!authToken) {
-      throw new Error('Authentication is required. Please, find Internet connection, and log in.')
+      throw new Error('Authentication is required. Please, find Internet connection and sign in.')
     }
   }
 
@@ -185,46 +185,28 @@ export default class OfflineApiService implements IApi {
     return Promise.resolve(offlineNoteListItem)
   }
 
-  async removeListItem(listItem: TListItemModel | TListItem) {
-    this.checkAuthToken()
-    const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
-    const currentDateTime = new Date().toISOString()
-
-    const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === listItem.noteId) as TNoteModel | undefined
-    if (!offlineNote) {
-      throw new Error(`Offline note with id "${listItem.noteId}" not found in offline data`)
-    }
-
-    const offlineNoteListItem = offlineNote.list.find((offlineNoteListItem) => offlineNoteListItem.id === listItem.id) as TListItem | undefined
-    if (!offlineNoteListItem) {
-      throw new Error(`Offline note list item with id "${listItem.noteId}" not found in offline data`)
-    }
-
-    offlineNoteListItem.statusId = StatusesService.inactive.value.id
-    offlineNoteListItem.updated = currentDateTime
-
-    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
-  }
-
-  async removeListItemFinally(listItem: TListItemModel | TListItem) {
+  async removeListItem(listItem: TListItemModel | TListItem, completely = false) {
     this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
 
     const offlineNote = offlineData.notes.find((offlineNote) => offlineNote.id === listItem.noteId) as TNote | undefined
     if (!offlineNote) {
-      throw new Error(`Offline note with id "${listItem.noteId}" not found in offline data`)
+      throw new Error(`[RemoveListItem]: Offline note with id "${listItem.noteId}" not found in offline data`)
     }
 
-    if (offlineNote.list) {
-      const offlineNoteListItem = offlineNote.list.find((offlineNoteListItem) => offlineNoteListItem.id === listItem.id) as TListItem | TListItem | undefined
-      if (!offlineNoteListItem) {
-        throw new Error(`Offline note list item with id "${listItem.noteId}" not found in offline data`)
-      }
-
-      offlineNote.list.splice(offlineNote.list.indexOf(offlineNoteListItem), 1)
-
-      StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
+    const offlineNoteListItem = offlineNote.list?.find((offlineNoteListItem) => offlineNoteListItem.id === listItem.id) as TListItem | undefined
+    if (!offlineNoteListItem) {
+      throw new Error(`[RemoveListItem]: Offline note list item with id "${listItem.noteId}" not found in offline data`)
     }
+
+    if (completely) {
+      offlineNote.list?.splice(offlineNote.list.indexOf(offlineNoteListItem), 1)
+    } else {
+      offlineNoteListItem.statusId = StatusesService.inactive.value.id
+      offlineNoteListItem.updated = new Date().toISOString()
+    }
+
+    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
   }
 
   async restoreListItem(noteId: number | string, listItemId: number | string) {

@@ -1,4 +1,4 @@
-import { TCoAuthor, TCoAuthorModel } from '~/composables/models/co-author'
+import { TCoAuthor } from '~/composables/models/co-author'
 import { TListItemModel, type TListItem } from '~/composables/models/list-item'
 import { TNote, TNoteModel } from '~/composables/models/note'
 import { useGlobalStore } from '~/stores/global'
@@ -78,11 +78,12 @@ export default class ApiService implements IApi {
     return this.offlineApiService.updateListItem(listItem)
   }
 
-  async removeListItem(listItem: TListItemModel) {
+  async removeListItem(listItem: TListItemModel | TListItem, completely = false) {
     if (useGlobalStore().isOnline) {
-      this.onlineApiService.removeListItem(listItem)
+      this.onlineApiService.removeListItem(listItem, completely)
     }
-    return this.offlineApiService.removeListItem(listItem)
+
+    return this.offlineApiService.removeListItem(listItem, completely)
   }
 
   async restoreListItem(noteId: number | string, listItemId: number | string) {
@@ -116,7 +117,7 @@ export default class ApiService implements IApi {
     return this.onlineApiService.addNoteCoAuthor(noteId, email)
   }
 
-  async removeNoteCoAuthor(coAuthor: TCoAuthorModel) {
+  async removeNoteCoAuthor(coAuthor: TCoAuthor) {
     if (!useGlobalStore().isOnline) {
       return this.offlineApiService.removeNoteCoAuthor()
     }
