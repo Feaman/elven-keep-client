@@ -49,6 +49,9 @@ export default function listItemModel(listItemData: TListItem) {
   const statusId = ref(listItemData.statusId || StatusesService.active.value.id)
   const isCreating = ref(false)
   const isUpdateNeeded = ref(false)
+  const counterQuantity = ref<number | undefined>(undefined)
+  const counterMeasurement = ref<string | undefined>(undefined)
+  const counterIndex = ref<number | undefined>(undefined)
   let saveTimeout: ReturnType<typeof setTimeout> | undefined
 
   async function restore() {
@@ -106,6 +109,9 @@ export default function listItemModel(listItemData: TListItem) {
     isCreating,
     isUpdateNeeded,
     saveTimeout,
+    counterQuantity,
+    counterMeasurement,
+    counterIndex,
     handleDataTransformation,
     restore,
     generateTextareaRefName,

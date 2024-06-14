@@ -24,7 +24,7 @@
             )
   template(v-else)
     .no-data
-      .no-data--text.pt-16.px-10
+      .no-data__text.pt-16.px-10
         .text-center No notes found. <br>Try to create one!
       .justify-center.row.mt-8
         q-btn(
@@ -39,7 +39,7 @@
           text-color="black"
         )
           div CREATE LIST NOTE
-      .no-data--image.row.flex-center.full-width
+      .no-data__image.row.flex-center.full-width
         img(
           src="/images/no-data.jpg"
         )

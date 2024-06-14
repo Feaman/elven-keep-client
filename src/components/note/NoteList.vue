@@ -1,6 +1,6 @@
 <template lang="pug">
 .note-list(
-  :class="{  'note-list--focused': note.isFocused, 'note-list--semi-focused': isSemiFocus }"
+  :class="{  'note-list--focused': note?.isFocused, 'note-list--semi-focused': isSemiFocus }"
   ref="rootElement"
 )
   .note-list__container(
@@ -46,6 +46,15 @@
                   @blur="note.blurListItem(element)"
                   :value="element.text"
                   :id="element.generateTextareaRefName()"
+                )
+
+              .list-item-counter__icon.px-2(
+                @click="showCounterDialog(element)"
+                :class="{ 'mr-14': !!globalStore.user?.showChecked, 'mr-7': !globalStore.user?.showChecked }"
+              )
+                q-icon(
+                  :name="mdiNumeric2BoxMultiple"
+                  color="purple"
                 )
 
               input.list-item__checkbox.mr-1(
@@ -103,10 +112,42 @@
               q-space
               .text-green.font-size-12.ml-2(v-if="variant.isExists") exists
               .list-item__variant-info.text-red.font-size-12.ml-2(v-if="variant.duplicatesQuantity") •&nbsp; {{ variant.duplicatesQuantity }}
+
+  q-dialog(
+    @hide="hideCounterDialog"
+    :model-value="isCounterDialogShown"
+    :backdrop-filter="'blur(4px)'"
+    transition-show="flip-up"
+    transition-hide="flip-down"
+  )
+    .list-item-counter__container.text-center.pa-1
+      .list-item-counter__list-item.pa-3 {{ counterListItem.text }}
+      .d-flex.row.no-wrap.mt-10
+        .list-item-counter__measurements.mt-3.ml-1.text-uppercase
+          .list-item-counter__measurement.bg-amber.px-3.text-center(
+              @click="setCounterMeasurement(COUNTER_MEASUREMENT_PIECES)"
+              :class="{ 'list-item-counter--current': counterListItem.counterMeasurement === COUNTER_MEASUREMENT_PIECES }"
+            ) {{ COUNTER_MEASUREMENT_PIECES }}
+          .list-item-counter__measurement.bg-amber.px-3.mt-3.text-center(
+              @click="setCounterMeasurement(COUNTER_MEASUREMENT_PACKAGES)"
+              :class="{ 'list-item-counter--current': counterListItem.counterMeasurement === COUNTER_MEASUREMENT_PACKAGES }"
+            ) {{ COUNTER_MEASUREMENT_PACKAGES }}
+        .list-item-counter__numbers.row.justify-end
+          .list-item-counter__quantity.bg-amber.px-3.mt-3.ml-3(
+            v-for="(quantity, index) in [1, 2, 3, 4, 5, 6, 7, 8]"
+            :key="index"
+            @click="setCounterQuantity(quantity)"
+            :class="{ 'list-item-counter--current': counterListItem.counterQuantity === quantity }"
+          ) {{ quantity }}
+      q-btn.mt-16(
+        @click="isCounterDialogShown = false"
+        color="pink-5"
+      )
+        .px-10 Close
 </template>
 
 <script setup lang="ts">
-import { mdiDrag, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
+import { mdiDrag, mdiClose, mdiPlus, mdiNumeric2BoxMultiple } from '@quasar/extras/mdi-v6'
 import { ref, unref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { QCard } from 'quasar'
 import draggable from 'zhyswan-vuedraggable'
@@ -117,6 +158,9 @@ import ListItemsService from '~/composables/services/list-items'
 import { useGlobalStore } from '~/stores/global'
 import KeyboardEvents from '~/helpers/keyboard-events'
 import BaseService from '~/services/base'
+
+const COUNTER_MEASUREMENT_PIECES = 'шт'
+const COUNTER_MEASUREMENT_PACKAGES = 'уп'
 
 const props = defineProps<{
   isMain?: boolean,
@@ -137,6 +181,8 @@ const isSemiFocus = ref(false)
 const variantsElement = ref<QCard | null>(null)
 const listItemsToShow = ref(Math.round((window.innerHeight - 140) / ListItemsService.listItemMinHeight))
 const fullList = computed(() => (props.isMain ? note.value.mainListItems : note.value.completedListItems))
+const counterListItem = ref<TListItemModel | undefined>(undefined)
+const isCounterDialogShown = ref(false)
 const drag = ref(false)
 const list = computed({
   get() {
@@ -314,12 +360,14 @@ function complete(event: Event, listItem: TListItemModel) {
   note.value.completeListItem(listItem, (event.target as HTMLInputElement).checked)
 }
 
-async function updateText(listItem: TListItemModel, event: Event) {
-  const $textarea = event.target as HTMLTextAreaElement
-  if (listItem.saveTimeout) {
-    clearTimeout(listItem.saveTimeout)
+async function updateText(listItem: TListItemModel, event?: Event) {
+  if (event) {
+    const $textarea = event.target as HTMLTextAreaElement
+    if (listItem.saveTimeout) {
+      clearTimeout(listItem.saveTimeout)
+    }
+    listItem.text = ($textarea as unknown as HTMLTextAreaElement).value
   }
-  listItem.text = ($textarea as unknown as HTMLTextAreaElement).value
   listItem.saveTimeout = setTimeout(() => {
     note.value.saveListItem(listItem)
     listItem.saveTimeout = undefined
@@ -337,6 +385,47 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
   }
 }
 
+function showCounterDialog(listItem: TListItemModel) {
+  counterListItem.value = listItem
+  const regExp = new RegExp(`\\s(\\d+)\\s?(${COUNTER_MEASUREMENT_PIECES}|${COUNTER_MEASUREMENT_PACKAGES})$`, 'i')
+  const matches = listItem.text.match(regExp)
+  if (matches) {
+    listItem.counterQuantity = Number(matches[1])
+    listItem.counterMeasurement = String(matches[2]).toLocaleLowerCase()
+    listItem.counterIndex = listItem.text.indexOf(matches[0])
+  } else {
+    listItem.counterMeasurement = COUNTER_MEASUREMENT_PIECES
+    listItem.counterIndex = listItem.text.length
+  }
+  isCounterDialogShown.value = true
+}
+
+function hideCounterDialog(listItem: TListItemModel) {
+  counterListItem.value = undefined
+  isCounterDialogShown.value = false
+}
+
+function setCounterQuantity(number: number) {
+  if (counterListItem.value) {
+    counterListItem.value.counterQuantity = number
+    if (counterListItem.value) {
+      counterListItem.value.text = `${counterListItem.value.text.substring(0, counterListItem.value.counterIndex)} ${number} ${String(counterListItem.value.counterMeasurement)}`
+      updateText(counterListItem.value)
+    }
+    isCounterDialogShown.value = false
+  }
+}
+
+function setCounterMeasurement(measurement: string) {
+  if (counterListItem.value && counterListItem.value.counterQuantity) {
+    counterListItem.value.counterMeasurement = measurement
+    if (counterListItem.value) {
+      counterListItem.value.text = `${counterListItem.value.text.substring(0, counterListItem.value.counterIndex)} ${counterListItem.value.counterQuantity} ${measurement}`
+      updateText(counterListItem.value)
+    }
+  }
+}
+
 function setDragGhostData(dataTransfer: DataTransfer) {
   dataTransfer.setDragImage(document.createElement('div'), 0, 0)
 }
@@ -344,6 +433,8 @@ function setDragGhostData(dataTransfer: DataTransfer) {
 
 <style lang="scss" scoped>
 .note-list {
+  position: relative;
+
   &.note-list--focused {
     .list-item {
       opacity: 0.5;
@@ -466,6 +557,12 @@ function setDragGhostData(dataTransfer: DataTransfer) {
     }
   }
 
+  .list-item-counter__icon {
+    position: absolute;
+    right: 0;
+    opacity: 0.7;
+  }
+
   .note-list__create-button {
     height: 24px;
     position: relative;
@@ -495,6 +592,37 @@ function setDragGhostData(dataTransfer: DataTransfer) {
 
     .list-item__variant--focused {
       background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+.list-item-counter__container {
+  font-size: 24px;
+  width: 310px;
+
+  .list-item-counter__list-item {
+    max-height: 280px;
+    overflow: auto;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 6px;
+  }
+
+  .list-item-counter__numbers {
+    .list-item-counter__quantity {
+      height: 36px;
+      border-radius: 6px;
+
+      &.list-item-counter--current {
+        box-shadow: 0 0 10px #000;
+      }
+    }
+  }
+
+  .list-item-counter__measurement {
+    border-radius: 6px;
+
+    &.list-item-counter--current {
+      box-shadow: 0 0 10px #000;
     }
   }
 }
