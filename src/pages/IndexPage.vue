@@ -1,26 +1,48 @@
 <template lang="pug">
 .index-page.full-height(ref="rootElement")
   NotesToolbar.full-width
-  .row.pr-4.pb-4
-    draggable(
-      v-model="filtered"
-      :set-data="setDragGhostData"
-      :component-data="{ name: 'horizontal-list-effect' }"
-      :delay="1000"
-      @start="drag = true"
-      @end="drag = false"
-      tag="transition-group"
-      item-key="id"
-    )
-      template(
-        #item="{element}"
+  template(v-if="filtered?.length")
+    .row.pr-4.pb-4
+      draggable(
+        v-model="filtered"
+        :set-data="setDragGhostData"
+        :component-data="{ name: 'horizontal-list-effect' }"
+        :delay="1000"
+        @start="drag = true"
+        @end="drag = false"
+        tag="transition-group"
+        item-key="id"
       )
-        .note.ml-4.mt-4.pa-1
-          NotePreview(
-            @click="openNote(element)"
-            @remove="removeNote(element)"
-            :note="element"
-          )
+        template(
+          #item="{element}"
+        )
+          .note.ml-4.mt-4.pa-1
+            NotePreview(
+              @click="openNote(element)"
+              @remove="removeNote(element)"
+              :note="element"
+            )
+  template(v-else)
+    .no-data
+      .no-data--text.pt-16.px-10
+        .text-center No notes found. <br>Try to create one!
+      .justify-center.row.mt-8
+        q-btn(
+          @click="router.push('/new/text')"
+          color="amber"
+          text-color="black"
+        )
+          div CREATE TEXT NOTE
+        q-btn.ml-4(
+          @click="router.push('/new/list')"
+          color="amber"
+          text-color="black"
+        )
+          div CREATE LIST NOTE
+      .no-data--image.row.flex-center.full-width
+        img(
+          src="/images/no-data.jpg"
+        )
   </template>
 
 <script setup lang="ts">
@@ -88,9 +110,22 @@ onMounted(() => {
     flex: 1;
   }
 
+  .no-data {
+    img {
+      width: 30%;
+      max-width: 600px;
+    }
+  }
+
   @media (max-width: 700px) {
     .note {
       min-width: 148px;
+    }
+
+    .no-data {
+      img {
+        width: 60%;
+      }
     }
   }
 }
