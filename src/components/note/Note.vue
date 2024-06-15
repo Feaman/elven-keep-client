@@ -19,15 +19,16 @@
           debounce="400"
           dense
         )
-        q-checkbox.note__complete-checked-button.text-black.mr-4(
+        q-icon.note__complete-checked-button.text-black.mr-4.cursor-pointer(
           v-if="note.type?.name === NOTE_TYPE_LIST"
-          v-model="note.isCountable"
-          color="primary"
+          @click="note.isCountable = !note.isCountable"
+          :name="mdiNumeric2BoxMultiple"
+          :color="`purple-${note.isCountable ? '7' : '3'}`"
         )
           ToolTip(
             anchor="center left"
             self="center right"
-          ) Toggle countable action
+          ) Toggle counter action
         q-btn.note__complete-checked-button.text-black(
           @click="note.completeAllChecked()"
           :disabled="!note.checkedListItems.length"
@@ -144,7 +145,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiCheckAll, mdiClose, mdiPlus } from '@quasar/extras/mdi-v6'
+import { mdiCheckAll, mdiClose, mdiPlus, mdiNumeric2BoxMultiple } from '@quasar/extras/mdi-v6'
 import {
   ref, watch, nextTick,
 } from 'vue'
