@@ -34,6 +34,9 @@ export type TListItem = {
   updated?: string
 }
 
+export const COUNTER_MEASUREMENT_PIECES = 'шт'
+export const COUNTER_MEASUREMENT_PACKAGES = 'уп'
+
 export default function listItemModel(listItemData: TListItem) {
   const currentMilliseconds = (new Date()).getMilliseconds()
   const id = ref(listItemData.id)
@@ -69,6 +72,13 @@ export default function listItemModel(listItemData: TListItem) {
     return `textarea-${generatedId.value}`
   }
 
+  function getHighlightedCounterText() {
+    if (counterIndex.value && counterIndex.value !== text.value.length) {
+      return `${text.value.substring(0, counterIndex.value)}<span style="color: #00ff22;">${text.value.substring(counterIndex.value)}<span>`
+    }
+    return text.value
+  }
+
   function getTextarea(which = LAST_TEXTAREA) {
     const textAreas = document.querySelectorAll(`textarea[id="${generateTextareaRefName()}"]`)
     return textAreas[which === FIRST_TEXTAREA ? 0 : textAreas.length - 1] as HTMLTextAreaElement
@@ -79,7 +89,23 @@ export default function listItemModel(listItemData: TListItem) {
     updated.value = updated.value ? new Date(updated.value) : new Date()
   }
 
-  async function updateTextArea(which = LAST_TEXTAREA) {
+  function handleCounter(which = LAST_TEXTAREA) {
+    const regExp = new RegExp(`\\s+(\\d+)\\s+?(${COUNTER_MEASUREMENT_PIECES}|${COUNTER_MEASUREMENT_PACKAGES})\\s*$`, 'i')
+    const matches = text.value.match(regExp)
+    if (matches) {
+      counterQuantity.value = Number(matches[1])
+      counterMeasurement.value = String(matches[2]).toLocaleLowerCase()
+      counterIndex.value = text.value.indexOf(matches[0])
+    } else {
+      counterMeasurement.value = COUNTER_MEASUREMENT_PIECES
+      counterIndex.value = text.value.length
+    }
+  }
+
+  async function onTextUpdated(which = LAST_TEXTAREA) {
+    handleCounter()
+
+    // Handle textarea
     await nextTick()
     const $textArea = getTextarea(which)
     if ($textArea) {
@@ -91,8 +117,10 @@ export default function listItemModel(listItemData: TListItem) {
     }
   }
 
-  watch(text, () => updateTextArea())
-  watch(completed, () => updateTextArea(completed.value ? LAST_TEXTAREA : FIRST_TEXTAREA))
+  handleCounter()
+
+  watch(text, () => onTextUpdated())
+  watch(completed, () => onTextUpdated(completed.value ? LAST_TEXTAREA : FIRST_TEXTAREA))
 
   return {
     id,
@@ -112,6 +140,7 @@ export default function listItemModel(listItemData: TListItem) {
     counterQuantity,
     counterMeasurement,
     counterIndex,
+    getHighlightedCounterText,
     handleDataTransformation,
     restore,
     generateTextareaRefName,

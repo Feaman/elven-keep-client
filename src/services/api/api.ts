@@ -31,20 +31,21 @@ export default class ApiService implements IApi {
     typeId: number,
     order: number,
     isCompletedListExpanded: boolean,
+    isCountable: boolean,
   ): Promise<TNote> {
     let serverNote: TNote | undefined
     if (useGlobalStore().isOnline) {
-      serverNote = await this.onlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded)
-      return this.offlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded, serverNote.id)
+      serverNote = await this.onlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded, isCountable)
+      return this.offlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded, isCountable, serverNote.id)
     }
-    return this.offlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded)
+    return this.offlineApiService.addNote(list, title, text, typeId, order, isCompletedListExpanded, isCountable)
   }
 
-  async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
+  async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean, isCountable: boolean): Promise<TNote> {
     if (useGlobalStore().isOnline) {
-      this.onlineApiService.updateNote(id, title, text, typeId, isCompletedListExpanded)
+      this.onlineApiService.updateNote(id, title, text, typeId, isCompletedListExpanded, isCountable)
     }
-    return this.offlineApiService.updateNote(id, title, text, typeId, isCompletedListExpanded)
+    return this.offlineApiService.updateNote(id, title, text, typeId, isCompletedListExpanded, isCountable)
   }
 
   async removeNote(note: TNoteModel | TNote) {

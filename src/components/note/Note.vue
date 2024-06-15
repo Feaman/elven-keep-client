@@ -19,6 +19,15 @@
           debounce="400"
           dense
         )
+        q-checkbox.note__complete-checked-button.text-black.mr-4(
+          v-if="note.type?.name === NOTE_TYPE_LIST"
+          v-model="note.isCountable"
+          color="primary"
+        )
+          ToolTip(
+            anchor="center left"
+            self="center right"
+          ) Toggle countable action
         q-btn.note__complete-checked-button.text-black(
           @click="note.completeAllChecked()"
           :disabled="!note.checkedListItems.length"

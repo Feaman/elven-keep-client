@@ -37,17 +37,6 @@
             flat
             round
           )
-        transition(
-          :name="isNewNoteRoute ? 'scale-fade' : undefined"
-        )
-          q-btn(
-            v-if="note.id && note.isList && note.mainListItems.length"
-            @click="emit('is-watch')"
-            :icon="mdiWatch"
-            color="black"
-            flat
-           round
-          )
         q-space
         transition(
           name="scale-fade"

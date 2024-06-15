@@ -29,6 +29,7 @@ export default class OfflineApiService implements IApi {
     typeId: number,
     order: number,
     isCompletedListExpanded: boolean,
+    isCountable: boolean,
     id?: string | number,
   ): Promise<TNote> {
     this.checkAuthToken()
@@ -41,6 +42,7 @@ export default class OfflineApiService implements IApi {
       list: [] as TListItem[],
       order,
       isCompletedListExpanded,
+      isCountable,
       statusId: StatusesService.active.value.id,
     }
 
@@ -63,13 +65,21 @@ export default class OfflineApiService implements IApi {
     return Promise.resolve(offlineNoteData)
   }
 
-  async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
+  async updateNote(
+    id: number | string,
+    title: string,
+    text: string,
+    typeId: number,
+    isCompletedListExpanded: boolean,
+    isCountable: boolean,
+  ): Promise<TNote> {
     this.checkAuthToken()
     const noteData = {
       title,
       text,
       typeId,
       isCompletedListExpanded,
+      isCountable,
     }
 
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
@@ -79,6 +89,7 @@ export default class OfflineApiService implements IApi {
     }
     Object.assign(offlineNote, noteData)
     offlineNote.updated = new Date().toISOString()
+
     StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
 
     return Promise.resolve(offlineNote)
@@ -109,6 +120,8 @@ export default class OfflineApiService implements IApi {
     }
 
     offlineData.notes.splice(offlineData.notes.indexOf(offlineNote), 1)
+
+    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
 
     return Promise.resolve(offlineNote)
   }

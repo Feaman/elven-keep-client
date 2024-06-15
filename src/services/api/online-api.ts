@@ -32,6 +32,7 @@ export default class OnlineApiService implements IApi {
     typeId: number,
     order: number,
     isCompletedListExpanded: boolean,
+    isCountable: boolean,
   ): Promise<TNote> {
     const noteData = {
       title,
@@ -40,6 +41,7 @@ export default class OnlineApiService implements IApi {
       list: [] as TListItem[],
       order,
       isCompletedListExpanded,
+      isCountable,
     }
 
     list.forEach((listItem: TListItemModel | TListItem) => noteData.list.push({
@@ -54,12 +56,20 @@ export default class OnlineApiService implements IApi {
     return data as TNote
   }
 
-  async updateNote(id: number | string, title: string, text: string, typeId: number, isCompletedListExpanded: boolean): Promise<TNote> {
+  async updateNote(
+    id: number | string,
+    title: string,
+    text: string,
+    typeId: number,
+    isCompletedListExpanded: boolean,
+    isCountable: boolean,
+  ): Promise<TNote> {
     const noteData = {
       title,
       text,
       typeId,
       isCompletedListExpanded,
+      isCountable,
     }
 
     const { data } = await this.api.put(`notes/${id}`, noteData)

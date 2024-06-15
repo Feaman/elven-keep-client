@@ -48,7 +48,8 @@
                   :id="element.generateTextareaRefName()"
                 )
 
-              .list-item-counter__icon.px-2(
+              .list-item-counter__icon.px-2.cursor-pointer(
+                v-if="note.isCountable"
                 @click="showCounterDialog(element)"
                 :class="{ 'mr-14': !!globalStore.user?.showChecked, 'mr-7': !globalStore.user?.showChecked }"
               )
@@ -121,19 +122,21 @@
     transition-hide="flip-down"
   )
     .list-item-counter__container.text-center.pa-1
-      .list-item-counter__list-item.pa-3 {{ counterListItem.text }}
+      .list-item-counter__list-item.pa-3(
+        v-html="counterListItem.getHighlightedCounterText()"
+      )
       .d-flex.row.no-wrap.mt-10
         .list-item-counter__measurements.mt-3.ml-1.text-uppercase
-          .list-item-counter__measurement.bg-amber.px-3.text-center(
+          .list-item-counter__measurement.bg-amber.px-3.text-center.cursor-pointer(
               @click="setCounterMeasurement(COUNTER_MEASUREMENT_PIECES)"
               :class="{ 'list-item-counter--current': counterListItem.counterMeasurement === COUNTER_MEASUREMENT_PIECES }"
             ) {{ COUNTER_MEASUREMENT_PIECES }}
-          .list-item-counter__measurement.bg-amber.px-3.mt-3.text-center(
+          .list-item-counter__measurement.bg-amber.px-3.mt-3.text-center.cursor-pointer(
               @click="setCounterMeasurement(COUNTER_MEASUREMENT_PACKAGES)"
               :class="{ 'list-item-counter--current': counterListItem.counterMeasurement === COUNTER_MEASUREMENT_PACKAGES }"
             ) {{ COUNTER_MEASUREMENT_PACKAGES }}
         .list-item-counter__numbers.row.justify-end
-          .list-item-counter__quantity.bg-amber.px-3.mt-3.ml-3(
+          .list-item-counter__quantity.bg-amber.px-3.mt-3.ml-3.cursor-pointer(
             v-for="(quantity, index) in [1, 2, 3, 4, 5, 6, 7, 8]"
             :key="index"
             @click="setCounterQuantity(quantity)"
@@ -151,16 +154,13 @@ import { mdiDrag, mdiClose, mdiPlus, mdiNumeric2BoxMultiple } from '@quasar/extr
 import { ref, unref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { QCard } from 'quasar'
 import draggable from 'zhyswan-vuedraggable'
-import { type TVariant, type TListItemModel } from '~/composables/models/list-item'
+import listItemModel, { type TVariant, type TListItemModel, COUNTER_MEASUREMENT_PACKAGES, COUNTER_MEASUREMENT_PIECES } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
 import ListItemsService from '~/composables/services/list-items'
 import { useGlobalStore } from '~/stores/global'
 import KeyboardEvents from '~/helpers/keyboard-events'
 import BaseService from '~/services/base'
-
-const COUNTER_MEASUREMENT_PIECES = 'шт'
-const COUNTER_MEASUREMENT_PACKAGES = 'уп'
 
 const props = defineProps<{
   isMain?: boolean,
@@ -387,16 +387,6 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
 
 function showCounterDialog(listItem: TListItemModel) {
   counterListItem.value = listItem
-  const regExp = new RegExp(`\\s(\\d+)\\s?(${COUNTER_MEASUREMENT_PIECES}|${COUNTER_MEASUREMENT_PACKAGES})$`, 'i')
-  const matches = listItem.text.match(regExp)
-  if (matches) {
-    listItem.counterQuantity = Number(matches[1])
-    listItem.counterMeasurement = String(matches[2]).toLocaleLowerCase()
-    listItem.counterIndex = listItem.text.indexOf(matches[0])
-  } else {
-    listItem.counterMeasurement = COUNTER_MEASUREMENT_PIECES
-    listItem.counterIndex = listItem.text.length
-  }
   isCounterDialogShown.value = true
 }
 
@@ -417,9 +407,9 @@ function setCounterQuantity(number: number) {
 }
 
 function setCounterMeasurement(measurement: string) {
-  if (counterListItem.value && counterListItem.value.counterQuantity) {
+  if (counterListItem.value) {
     counterListItem.value.counterMeasurement = measurement
-    if (counterListItem.value) {
+    if (counterListItem.value.counterQuantity) {
       counterListItem.value.text = `${counterListItem.value.text.substring(0, counterListItem.value.counterIndex)} ${counterListItem.value.counterQuantity} ${measurement}`
       updateText(counterListItem.value)
     }
@@ -613,7 +603,9 @@ function setDragGhostData(dataTransfer: DataTransfer) {
       border-radius: 6px;
 
       &.list-item-counter--current {
-        box-shadow: 0 0 10px #000;
+        box-shadow: 0 0 10px #00ff22;
+        border: 1px solid #00ff3e;
+        box-sizing: border-box;
       }
     }
   }
@@ -622,7 +614,9 @@ function setDragGhostData(dataTransfer: DataTransfer) {
     border-radius: 6px;
 
     &.list-item-counter--current {
-      box-shadow: 0 0 10px #000;
+      box-shadow: 0 0 10px #00ff22;
+      border: 1px solid #00ff3e;
+      box-sizing: border-box;
     }
   }
 }
