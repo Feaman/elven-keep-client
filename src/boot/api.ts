@@ -35,7 +35,6 @@ export default boot(() => {
       if (config.headers) {
         config.headers['socket-io-id'] = SocketIOService.socketId
       }
-      // config.headers['x-sse-salt'] = this.vuex.state.SSESalt
     } catch (error) {
       BaseService.showError(error as Error)
     }

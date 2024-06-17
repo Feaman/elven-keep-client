@@ -67,8 +67,8 @@ const icon = computed(() => {
   return props.note?.isSaving ? mdiCloudUploadOutline : mdiCloudCheckOutline
 })
 const tooltipText = computed(() => {
-  if (isSocketError.value) {
-    return 'Connection error, click to reload the page'
+  if (isSocketError.value || !store.isOnline) {
+    return 'Connection error, click for information.'
   }
 
   return props.note?.isSaving ? 'Saving to cloud' : 'Saved to cloud'

@@ -48,7 +48,7 @@
           :name="isNewNoteRoute ? 'scale-fade' : undefined"
         )
           CloudIcon(
-            v-if="note.id || !globalStore.isOnline"
+            v-if="note.id"
             :note="note"
           )
         q-separator(vertical)
