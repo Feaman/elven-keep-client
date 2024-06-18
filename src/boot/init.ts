@@ -56,7 +56,7 @@ export default boot(({ app }) => {
     } else {
       isDocumentFocused = false
     }
-  }, 200)
+  }, 100)
 
   BaseService.eventBus.on('windowFocused', async () => {
     try {

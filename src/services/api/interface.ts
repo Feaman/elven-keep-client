@@ -37,7 +37,7 @@ export default interface IApi {
 
   removeNote(note: TNoteModel | TNote): Promise<TNoteModel | TNote>
 
-  restoreNote(noteId: number): Promise<TNoteModel>
+  restoreNote(noteId: number): Promise<TNoteModel | TNote>
 
   updateListItem(listItem: TListItemModel): Promise<TListItem>
 

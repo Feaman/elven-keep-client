@@ -45,12 +45,8 @@ import {
   mdiCloudCheckOutline,
   mdiClose,
 } from '@quasar/extras/mdi-v6'
-import { useRoute } from 'vue-router'
 import { type TNoteModel } from '~/composables/models/note'
 import { useGlobalStore } from '~/stores/global'
-import InitService from '~/services/init'
-import BaseService from '~/services/base'
-import SyncService from '~/services/sync'
 
 const props = defineProps<{
   note?: TNoteModel,

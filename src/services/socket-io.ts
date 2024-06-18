@@ -103,7 +103,7 @@ export default class SocketIOService extends BaseService {
       try {
         // Remove offline note
         const offlineApi = new OfflineApiService()
-        await offlineApi.removeNoteFinally(noteData)
+        await offlineApi.removeNote(noteData, true)
 
         // Remove note
         const note = NotesService.notes.value.find((note) => note.id === noteData.id)

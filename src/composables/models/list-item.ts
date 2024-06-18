@@ -121,6 +121,7 @@ export default function listItemModel(listItemData: TListItem) {
 
   watch(text, () => onTextUpdated())
   watch(completed, () => onTextUpdated(completed.value ? LAST_TEXTAREA : FIRST_TEXTAREA))
+  watch(statusId, () => onTextUpdated())
 
   return {
     id,

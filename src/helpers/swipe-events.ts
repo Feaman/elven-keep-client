@@ -26,6 +26,10 @@ export default class SwipeEvents {
   constructor($element: HTMLElement) {
     this.$element = $element
 
+    if (!this.$element) {
+      return
+    }
+
     this.$element.addEventListener('touchstart', (event: Event) => {
       const firstTouch = (event as TouchEvent).touches[0]
       this.startX = firstTouch.clientX

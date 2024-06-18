@@ -79,23 +79,19 @@ export default class ApiService implements IApi {
     return this.offlineApiService.updateListItem(listItem)
   }
 
-  removeListItem(listItem: TListItemModel | TListItem, completely = false) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(listItem)
-      }, 2000)
-    })
-    // if (useGlobalStore().isOnline) {
-    //   this.onlineApiService.removeListItem(listItem, completely)
-    // }
+  async removeListItem(listItem: TListItemModel | TListItem, completely = false) {
+    if (useGlobalStore().isOnline) {
+      this.onlineApiService.removeListItem(listItem, completely)
+    }
 
-    // return this.offlineApiService.removeListItem(listItem, completely)
+    return this.offlineApiService.removeListItem(listItem, completely)
   }
 
   async restoreListItem(noteId: number | string, listItemId: number | string) {
     if (useGlobalStore().isOnline) {
       this.onlineApiService.restoreListItem(noteId, listItemId)
     }
+
     return this.offlineApiService.restoreListItem(noteId, listItemId)
   }
 

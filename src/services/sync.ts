@@ -44,7 +44,7 @@ export default class SyncService extends BaseService {
         // Handle Note entity
         const onlineNote = onlineData.notes.find((onlineNote) => onlineNote.id === offlineNote.id)
         if (!onlineNote) {
-          // Create Note
+          // Create online note
           if (String(offlineNote.id).indexOf('offline') === 0) {
             const offlineNoteList = offlineNote.list
             offlineNote.list = []
@@ -67,7 +67,7 @@ export default class SyncService extends BaseService {
               }
             }
 
-            // Create list items
+            // Create online list items
             if (offlineNoteList) {
               for (let offlineListItemIndex = 0; offlineListItemIndex < offlineNoteList.length; offlineListItemIndex++) {
                 const offlineListItem = offlineNoteList[offlineListItemIndex]
@@ -90,8 +90,10 @@ export default class SyncService extends BaseService {
             throw new Error('"updated" or "created" field not found in offline note')
           }
           if ((new Date(offlineNote.updated)) < (new Date(onlineNote.updated))) {
+            // Update offline note
             Object.assign(offlineNote, onlineNote)
           } else if ((new Date(offlineNote.updated)) > (new Date(onlineNote.updated))) {
+            // Remove both offline and online note
             if (offlineNote.statusId === StatusesService.inactive.value.id) {
               onlineApi.removeNote(offlineNote)
               offlineNotesToRemove.push(offlineNote)
@@ -99,6 +101,7 @@ export default class SyncService extends BaseService {
               // eslint-disable-next-line no-continue
               continue
             } else {
+              // Update online note
               // eslint-disable-next-line no-await-in-loop
               const updatedOnlineNote = await onlineApi.updateNote(
                 Number(offlineNote.id),
@@ -120,10 +123,13 @@ export default class SyncService extends BaseService {
             const onlineListItem = onlineNote?.list && onlineNote.list.find((listItem) => listItem.id === offlineListItem.id)
             if (!onlineListItem) {
               if (String(offlineListItem.id).indexOf('offline') === 0) {
+                // Add online list item
                 // eslint-disable-next-line no-await-in-loop
                 const newListItem = await onlineApi.addListItem(offlineListItem)
                 offlineListItem.id = newListItem.id
+                offlineListItem.updated = newListItem.updated
               } else {
+                // Remove offline list item
                 offlineNote.list.splice(listItemIndex, 1)
               }
             } else {
@@ -131,14 +137,17 @@ export default class SyncService extends BaseService {
                 throw new Error('"updated" or "created" field not found in offline note')
               }
               if ((new Date(offlineListItem.updated)) < (new Date(onlineListItem.updated))) {
+                // Update offline list item
                 Object.assign(offlineListItem, onlineListItem)
               } else if ((new Date(offlineListItem.updated)) > (new Date(onlineListItem.updated))) {
                 if (offlineListItem.statusId === StatusesService.inactive.value.id) {
+                  // Remove both offline and onlne list item
                   // eslint-disable-next-line no-await-in-loop
                   await onlineApi.removeListItem(offlineListItem)
                   offlineListItemsToRemove.push(offlineListItem)
                   onlineListItemsToRemove.push(onlineListItem)
                 } else {
+                  // Update online list item
                   // eslint-disable-next-line no-await-in-loop
                   const updatedOnlineListItem = await onlineApi.updateListItem(offlineListItem)
                   offlineListItem.updated = updatedOnlineListItem.updated
