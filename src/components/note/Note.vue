@@ -20,7 +20,7 @@
           dense
         )
         q-icon.note__complete-checked-button.text-black.mr-4.cursor-pointer(
-          v-if="note.type?.name === NOTE_TYPE_LIST"
+          v-if="note.type?.name === NOTE_TYPE_LIST && note.list.length"
           @click="note.isCountable = !note.isCountable"
           :name="mdiNumeric2BoxMultiple"
           :color="`purple-${note.isCountable ? '7' : '3'}`"
