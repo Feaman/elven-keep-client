@@ -10,6 +10,7 @@ import { useGlobalStore } from '~/stores/global'
 import { TGlobalError } from '~/types'
 
 export default boot(({ app }) => {
+  const store = useGlobalStore()
   BaseService.api = new ApiService()
   BaseService.showError = (error: Error | TGlobalError) => {
     let resultError: TGlobalError | Error = error
@@ -55,13 +56,15 @@ export default boot(({ app }) => {
       isDocumentFocused = true
     } else {
       isDocumentFocused = false
+      store.isUpdating = true
+      SyncService.removeRemovedEntities()
     }
   }, 100)
 
   BaseService.eventBus.on('windowFocused', async () => {
     try {
       const currentDateTime = new Date()
-      if (currentDateTime.getTime() - BaseService.lastFocused.getTime() > 300000) {
+      if (currentDateTime.getTime() - BaseService.lastFocused.getTime() > 180000) {
         window.location.reload()
       } else {
         await SyncService.handleApplicationUpdate()
@@ -71,7 +74,6 @@ export default boot(({ app }) => {
     }
   })
 
-  const store = useGlobalStore()
   window.addEventListener('offline', () => {
     store.isOnline = false
   })

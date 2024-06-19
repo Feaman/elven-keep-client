@@ -205,7 +205,7 @@ watch(removedItemsQuantity, () => {
         SyncService.removeRemovedEntities()
       }, 5000)
     } else if (notification) {
-      notification({ timeout: 1 })
+      notification({ timeout: 1, actions: [] })
     }
   } catch (error) {
     BaseService.showError(error as Error)
