@@ -23,23 +23,23 @@
               :note="element"
             )
   template(v-else)
-    .no-data
+    .no-data.full-height.q-flex.column
       .no-data__text.pt-16.px-10
         .text-center No notes found. <br>Try to create one!
-      .justify-center.row.mt-8
+      .justify-center.column.mt-8.self-center
         q-btn(
           @click="router.push('/new/text')"
           color="amber"
           text-color="black"
         )
           div CREATE TEXT NOTE
-        q-btn.ml-4(
+        q-btn.mt-4.self-center(
           @click="router.push('/new/list')"
           color="amber"
           text-color="black"
         )
           div CREATE LIST NOTE
-      .no-data__image.row.flex-center.full-width
+      .no-data__image.row.flex-center.full-width.col
         img(
           src="/images/no-data.jpg"
         )
@@ -114,6 +114,7 @@ onMounted(() => {
     img {
       width: 30%;
       max-width: 600px;
+      margin-top: -40px;
     }
   }
 
