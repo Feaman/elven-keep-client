@@ -209,9 +209,7 @@ export default class SyncService extends BaseService {
         NotesService.generateNotes(offlineData.notes)
       }
     } finally {
-      setTimeout(() => {
-        globalStore.isUpdating = false
-      }, 1000)
+      globalStore.isUpdating = false
     }
   }
 

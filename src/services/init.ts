@@ -53,7 +53,7 @@ export default class InitService extends BaseService {
           throw new Error('Current note id not found in new notes')
         }
         if (NotesService.currentNote.value) {
-          NotesService.currentNote.value.title = currentNote.title
+          NotesService.currentNote.value = currentNote
         }
       }
     } catch (error) {
