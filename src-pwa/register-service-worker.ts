@@ -16,12 +16,21 @@ register(process.env.SERVICE_WORKER_FILE, {
     console.log('Service worker is active.')
   },
 
-  registered(/* registration */) {
+  registered(registration) {
     console.log('Service worker has been registered.')
+    const channel = new BroadcastChannel('elven-keep-service-worker')
+    channel.addEventListener('message', (event) => {
+      if (event.data.requestUpdate === true) {
+        registration.update()
+      }
+    })
   },
 
   cached(/* registration */) {
     console.log('Content has been cached for offline use.')
+
+    const channel = new BroadcastChannel('elven-keep-service-worker')
+    channel.postMessage({ updateReady: true })
   },
 
   updatefound(/* registration */) {

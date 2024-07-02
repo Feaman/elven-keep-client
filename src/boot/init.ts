@@ -63,12 +63,9 @@ export default boot(({ app }) => {
 
   BaseService.eventBus.on('windowFocused', async () => {
     try {
-      const currentDateTime = new Date()
-      if (currentDateTime.getTime() - BaseService.lastFocused.getTime() > 180000) {
-        window.location.reload()
-      } else {
-        await SyncService.handleApplicationUpdate()
-      }
+      const channel = new BroadcastChannel('elven-keep-service-worker')
+      channel.postMessage({ requestUpdate: true })
+      await SyncService.handleApplicationUpdate()
     } catch (error) {
       BaseService.showError(error as Error)
     }

@@ -34,7 +34,7 @@
           dense
         )
       .pa-6
-        .font-size-18 A new version of the application available.
+        .font-size-18 A new version of the application was downloaded and ready to use, just click "Update" button!
         q-btn.text-black.mt-4(
           @click="reloadPage"
           color="primary"
