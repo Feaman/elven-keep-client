@@ -7,7 +7,7 @@
     elevated
   )
     q-toolbar
-      h6.text-black.text-weight-bold.text-grey-9.q-ma-none.q-pl-sm ELVEN NOTES sadf
+      h6.text-black.text-weight-bold.text-grey-9.q-ma-none.q-pl-sm ELVEN NOTES
       transition(
         name="scale-fade"
       )
