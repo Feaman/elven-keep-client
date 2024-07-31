@@ -51,7 +51,7 @@
               .list-item-counter__icon.px-2.cursor-pointer(
                 v-if="note.isCountable"
                 @click="showCounterDialog(element)"
-                :class="{ 'mr-14': !!globalStore.user?.showChecked, 'mr-7': !globalStore.user?.showChecked }"
+                :class="`${note.isShowCheckedCheckboxes ? 'mr-14' : 'mr-7'}`"
               )
                 q-icon(
                   :name="mdiNumeric2BoxMultiple"
@@ -59,7 +59,7 @@
                 )
 
               input.list-item__checkbox.mr-1(
-                v-if="globalStore.user?.showChecked"
+                v-if="note.isShowCheckedCheckboxes"
                 @change="check($event, element)"
                 :checked="element.checked"
                 :class="{ 'ml-9': !element.text }"

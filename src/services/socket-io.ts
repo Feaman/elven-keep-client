@@ -60,6 +60,7 @@ export default class SocketIOService extends BaseService {
         noteData.order,
         !!noteData.isCompletedListExpanded,
         !!noteData.isCountable,
+        !!noteData.isShowCheckedCheckboxes,
         noteData.id,
       )
     })
@@ -77,6 +78,7 @@ export default class SocketIOService extends BaseService {
               text: noteData.text,
               isCompletedListExpanded: noteData.isCompletedListExpanded,
               isCountable: noteData.isCountable,
+              isShowCheckedCheckboxes: noteData.isShowCheckedCheckboxes,
               order: noteData.order,
             },
           )
@@ -93,6 +95,7 @@ export default class SocketIOService extends BaseService {
           Number(noteData.typeId),
           !!noteData.isCompletedListExpanded,
           !!noteData.isCountable,
+          !!noteData.isShowCheckedCheckboxes,
         )
       } catch (error) {
         BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })

@@ -30,6 +30,7 @@ export default class OfflineApiService implements IApi {
     order: number,
     isCompletedListExpanded: boolean,
     isCountable: boolean,
+    isShowCheckedCheckboxes: boolean,
     id?: string | number,
   ): Promise<TNote> {
     this.checkAuthToken()
@@ -43,6 +44,7 @@ export default class OfflineApiService implements IApi {
       order,
       isCompletedListExpanded,
       isCountable,
+      isShowCheckedCheckboxes,
       statusId: StatusesService.active.value.id,
     }
 
@@ -72,6 +74,7 @@ export default class OfflineApiService implements IApi {
     typeId: number,
     isCompletedListExpanded: boolean,
     isCountable: boolean,
+    isShowCheckedCheckboxes: boolean,
   ): Promise<TNote> {
     this.checkAuthToken()
 
@@ -89,6 +92,7 @@ export default class OfflineApiService implements IApi {
         typeId,
         isCompletedListExpanded,
         isCountable,
+        isShowCheckedCheckboxes,
         updated: new Date().toISOString(),
       },
     )
@@ -291,11 +295,9 @@ export default class OfflineApiService implements IApi {
     StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
   }
 
-  async updateUser(showChecked: boolean) {
+  async updateUser() {
     this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
-
-    offlineData.user.showChecked = showChecked
 
     StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
   }

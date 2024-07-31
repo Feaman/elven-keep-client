@@ -33,6 +33,7 @@ export default class OnlineApiService implements IApi {
     order: number,
     isCompletedListExpanded: boolean,
     isCountable: boolean,
+    isShowCheckedCheckboxes: boolean,
   ): Promise<TNote> {
     const noteData = {
       title,
@@ -42,6 +43,7 @@ export default class OnlineApiService implements IApi {
       order,
       isCompletedListExpanded,
       isCountable,
+      isShowCheckedCheckboxes,
     }
 
     list.forEach((listItem: TListItemModel | TListItem) => noteData.list.push({
@@ -63,12 +65,14 @@ export default class OnlineApiService implements IApi {
     typeId: number,
     isCompletedListExpanded: boolean,
     isCountable: boolean,
+    isShowCheckedCheckboxes: boolean,
   ): Promise<TNote> {
     const noteData = {
       title,
       text,
       typeId,
       isCompletedListExpanded,
+      isShowCheckedCheckboxes,
       isCountable,
     }
 
@@ -150,10 +154,8 @@ export default class OnlineApiService implements IApi {
     await this.api.put('notes/set-order', { order })
   }
 
-  async updateUser(showChecked: boolean) {
-    const userData = {
-      showChecked,
-    }
+  async updateUser() {
+    const userData = {}
     await this.api.put('users', userData)
   }
 }

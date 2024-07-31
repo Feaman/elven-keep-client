@@ -19,29 +19,49 @@
           debounce="400"
           dense
         )
-        q-icon.note__complete-checked-button.text-black.mr-4.cursor-pointer(
+        template(
           v-if="note.type?.name === NOTE_TYPE_LIST && note.list.length"
-          @click="note.isCountable = !note.isCountable"
-          :name="mdiNumeric2BoxMultiple"
-          :color="`purple-${note.isCountable ? '7' : '3'}`"
         )
-          ToolTip(
-            anchor="center left"
-            self="center right"
-          ) Toggle counter action
-        q-btn.note__complete-checked-button.text-black(
-          @click="note.completeAllChecked()"
-          :disabled="!note.checkedListItems.length"
-          :icon="mdiCheckAll"
-          size="sm"
-          color="primary"
-          glossy
-          round
-        )
-          ToolTip(
-            anchor="center left"
-            self="center right"
-          ) Complete checked items
+          q-btn.note__complete-checked-button.text-black(
+            @click="note.completeAllChecked()"
+            :disabled="!note.checkedListItems.length"
+            :icon="mdiCheckAll"
+            flat
+            round
+          )
+            ToolTip Complete checked items
+
+          q-btn.ml-1.margin-right-minus-10(
+            :icon="mdiDotsVertical"
+            flat
+            round
+          )
+            q-menu(
+              auto-close
+            )
+              q-list.font-size-14(
+                dense
+              )
+                q-item.pl-1(
+                  clickable
+                )
+                  q-item-section
+                    q-toggle(
+                      v-model="note.isShowCheckedCheckboxes"
+                      label="Show checked checkboxes"
+                      color="blue"
+                      v-close-popup
+                    )
+                q-item.pl-1(
+                  clickable
+                )
+                  q-item-section
+                    q-toggle(
+                      v-model="note.isCountable"
+                      label="Show counter action"
+                      color="blue"
+                      v-close-popup
+                    )
       q-input.note__text(
         v-if="note.type?.name === NOTE_TYPE_TEXT"
         v-model="note.text"
@@ -145,7 +165,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiCheckAll, mdiClose, mdiPlus, mdiNumeric2BoxMultiple } from '@quasar/extras/mdi-v6'
+import { mdiDotsVertical, mdiCheckAll, mdiClose, mdiPlus, mdiNumeric2BoxMultiple } from '@quasar/extras/mdi-v6'
 import {
   ref, watch, nextTick,
 } from 'vue'
@@ -196,7 +216,7 @@ async function addCoAuthor() {
   }
 }
 
-watch(() => globalStore.user?.showChecked, async () => {
+watch(() => note.value.isShowCheckedCheckboxes, async () => {
   await nextTick()
   if (note.value.isCompletedListExpanded) {
     note.value.activeListItems.forEach((listItem) => ListItemsService.handleListItemTextAreaHeight(listItem.getTextarea()))
@@ -212,6 +232,10 @@ watch(() => globalStore.user?.showChecked, async () => {
     max-width: 900px;
     overflow: auto;
     flex: 1;
+
+    .margin-right-minus-10 {
+      margin-right: -10px;
+    }
 
     .note__title-field {
       width: 100%;
@@ -241,6 +265,10 @@ watch(() => globalStore.user?.showChecked, async () => {
     .note__complete-checked-button {
       width: 24px;
       height: 24px;
+
+      &[disabled] {
+        opacity: 0.1 !important;
+      }
     }
 
     .note__text {

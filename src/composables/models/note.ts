@@ -24,6 +24,7 @@ export type TNote = {
   order: number
   isCompletedListExpanded?: boolean
   isCountable?: boolean,
+  isShowCheckedCheckboxes?: boolean,
   list?: TListItem[]
   coAuthors?: TCoAuthor[]
   created?: string
@@ -50,6 +51,7 @@ export default function noteModel(noteData: TNote) {
   const user = ref<TUserModel | null>(null)
   const isCompletedListExpanded = ref(!!noteData.isCompletedListExpanded)
   const isCountable = ref(!!noteData.isCountable)
+  const isShowCheckedCheckboxes = ref(!!noteData.isShowCheckedCheckboxes)
   const isCreating = ref(false)
   const isUpdateNeeded = ref(false)
   const unSavedListItems = ref<TListItemModel[]>([])
@@ -90,17 +92,42 @@ export default function noteModel(noteData: TNote) {
     try {
       isSaving.value = true
       if (id.value) {
-        await BaseService.api.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value, isCountable.value)
+        await BaseService.api.updateNote(
+          id.value,
+          title.value,
+          text.value,
+          typeId.value,
+          isCompletedListExpanded.value,
+          isCountable.value,
+          isShowCheckedCheckboxes.value,
+        )
       } else if (isCreating.value) {
         isUpdateNeeded.value = true
       } else {
         isCreating.value = true
-        const noteData = await BaseService.api.addNote(list.value, title.value, text.value, typeId.value, order.value, isCompletedListExpanded.value, isCountable.value)
+        const noteData = await BaseService.api.addNote(
+          list.value,
+          title.value,
+          text.value,
+          typeId.value,
+          order.value,
+          isCompletedListExpanded.value,
+          isCountable.value,
+          isShowCheckedCheckboxes.value,
+        )
         id.value = noteData.id
         userId.value = noteData.user?.id
         isCreating.value = false
         if (isUpdateNeeded.value && id.value) {
-          await BaseService.api.updateNote(id.value, title.value, text.value, typeId.value, isCompletedListExpanded.value, isCountable.value)
+          await BaseService.api.updateNote(
+            id.value,
+            title.value,
+            text.value,
+            typeId.value,
+            isCompletedListExpanded.value,
+            isCountable.value,
+            isShowCheckedCheckboxes.value,
+          )
           isUpdateNeeded.value = false
         }
         unSavedListItems.value.forEach((listItem) => handleListItem(listItem))
@@ -305,6 +332,7 @@ export default function noteModel(noteData: TNote) {
   watch(text, () => updateOnChange(save))
   watch(isCompletedListExpanded, () => updateOnChange(save))
   watch(isCountable, () => updateOnChange(save))
+  watch(isShowCheckedCheckboxes, () => updateOnChange(save))
   watch(isRawUpdate, (value) => isRawUpdate.value = value)
 
   return {
@@ -336,6 +364,7 @@ export default function noteModel(noteData: TNote) {
     activeListItems,
     isLocalModel,
     isCountable,
+    isShowCheckedCheckboxes,
     filterAndSort,
     checkOrUncheckListItem,
     addCoAuthor,

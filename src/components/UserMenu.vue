@@ -19,16 +19,6 @@
           .bg-grey-3.px-4.pt-2.pb-2.full-width
             .text-weight-bold {{ globalStore.user?.getFio() }}
             .font-size-14.text-grey-8.text--darken-1 {{globalStore.user?.email }}
-        q-item.pl-1(
-          v-if="globalStore.user"
-          clickable
-        )
-          q-item-section
-            q-toggle(
-              label="Checked checkboxes"
-              v-model="globalStore.user.showChecked"
-              color="blue"
-            )
         q-item(
           @click="globalStore.user?.signOut()"
           clickable

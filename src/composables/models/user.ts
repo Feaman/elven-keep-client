@@ -1,4 +1,4 @@
-import { ref, UnwrapRef, watch } from 'vue'
+import { ref, UnwrapRef } from 'vue'
 import BaseService from '~/services/base'
 import InitService from '~/services/init'
 import { useGlobalStore } from '~/stores/global'
@@ -8,7 +8,6 @@ export type TUser = {
   firstName: string,
   secondName: string,
   email: string,
-  showChecked: boolean,
 }
 
 export default function userModel(userData: TUser) {
@@ -16,7 +15,6 @@ export default function userModel(userData: TUser) {
   const firstName = ref(userData.firstName)
   const secondName = ref(userData.secondName)
   const email = ref(userData.email)
-  const showChecked = ref(userData.showChecked)
   const globalStore = useGlobalStore()
 
   function getFio() {
@@ -34,16 +32,14 @@ export default function userModel(userData: TUser) {
 
   async function save() {
     try {
-      await BaseService.api.updateUser(!!globalStore.user?.showChecked)
+      // await BaseService.api.updateUser(!!globalStore.user?.showChecked)
     } catch (error) {
       BaseService.showError(error as Error)
     }
   }
 
-  watch(showChecked, () => save())
-
   return {
-    id, firstName, secondName, email, showChecked, getFio, getInitials, signOut, save,
+    id, firstName, secondName, email, getFio, getInitials, signOut, save,
   }
 }
 
