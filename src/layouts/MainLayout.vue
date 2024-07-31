@@ -214,27 +214,19 @@ watch(removedItemsQuantity, () => {
 
 watch(
   () => globalStore.initError,
-  () => {
-    if (globalStore.initError) {
-      if (globalStore.initError?.statusCode === 401) {
-        router.push({ name: ROUTE_SIGN })
-      } else {
-        isErrorShown.value = true
-      }
-    }
-  },
+  () => isErrorShown.value = !!globalStore.initError,
 )
 
 watch(
   () => globalStore.isUpdating,
   () => {
-    if (globalStore.isUpdating) {
+    if (globalStore.isUpdating && router.currentRoute.value.name !== ROUTE_SIGN) {
       const $overlay = document.createElement('div')
       $overlay.classList.add('updating-overlay')
       document.body.appendChild($overlay)
       document.body.classList.add('is-updating')
     } else {
-      (document.querySelector('.updating-overlay') as HTMLDivElement).remove()
+      (document.querySelector('.updating-overlay') as HTMLDivElement)?.remove()
       document.body.classList.remove('is-updating')
     }
   },

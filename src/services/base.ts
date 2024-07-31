@@ -22,7 +22,7 @@ export default class BaseService {
   static parseAxiosError(error: AxiosError): TGlobalError {
     return {
       statusCode: Number(error.code) || error?.response?.status || undefined,
-      message: error.message || (error?.response?.data as { message: string }).message,
+      message: (error?.response?.data as { message: string }).message || error.message,
     }
   }
 

@@ -1,7 +1,5 @@
 import { ref, UnwrapRef } from 'vue'
 import BaseService from '~/services/base'
-import InitService from '~/services/init'
-import { useGlobalStore } from '~/stores/global'
 
 export type TUser = {
   id: number,
@@ -15,7 +13,6 @@ export default function userModel(userData: TUser) {
   const firstName = ref(userData.firstName)
   const secondName = ref(userData.secondName)
   const email = ref(userData.email)
-  const globalStore = useGlobalStore()
 
   function getFio() {
     return `${secondName.value} ${firstName.value}`
@@ -25,13 +22,9 @@ export default function userModel(userData: TUser) {
     return `${secondName.value.charAt(0).toUpperCase()}${firstName.value.charAt(0).toUpperCase()}`
   }
 
-  function signOut() {
-    InitService.clearApplication()
-    BaseService.router.push('/sign')
-  }
-
   async function save() {
     try {
+      // const globalStore = useGlobalStore()
       // await BaseService.api.updateUser(!!globalStore.user?.showChecked)
     } catch (error) {
       BaseService.showError(error as Error)
@@ -39,7 +32,7 @@ export default function userModel(userData: TUser) {
   }
 
   return {
-    id, firstName, secondName, email, getFio, getInitials, signOut, save,
+    id, firstName, secondName, email, getFio, getInitials, save,
   }
 }
 

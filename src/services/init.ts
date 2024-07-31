@@ -57,7 +57,12 @@ export default class InitService extends BaseService {
         }
       }
     } catch (error) {
-      globalStore.initError = BaseService.parseAxiosError(error as AxiosError)
+      const initError = BaseService.parseAxiosError(error as AxiosError)
+      if (initError.statusCode === 401) {
+        UsersService.signOut()
+      } else {
+        globalStore.initError = initError
+      }
     } finally {
       globalStore.isInitDataLoading = false
     }

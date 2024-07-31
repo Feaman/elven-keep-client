@@ -9,7 +9,7 @@ import SyncService from '~/services/sync'
 import { useGlobalStore } from '~/stores/global'
 import { TGlobalError } from '~/types'
 
-export default boot(({ app }) => {
+export default boot(async ({ app }) => {
   const store = useGlobalStore()
   BaseService.api = new ApiService()
   BaseService.showError = (error: Error | TGlobalError) => {
@@ -87,5 +87,5 @@ export default boot(({ app }) => {
   })
 
   SocketIOService.init()
-  InitService.initApplication()
+  await InitService.initApplication()
 })

@@ -20,7 +20,7 @@
             .text-weight-bold {{ globalStore.user?.getFio() }}
             .font-size-14.text-grey-8.text--darken-1 {{globalStore.user?.email }}
         q-item(
-          @click="globalStore.user?.signOut()"
+          @click="signOut()"
           clickable
         )
           q-item-section
@@ -34,7 +34,11 @@
 
 <script setup lang="ts">
 import { mdiAccountOutline, mdiLogout } from '@quasar/extras/mdi-v6'
+import UsersService from '~/composables/services/users'
 import { useGlobalStore } from '~/stores/global'
 
 const globalStore = useGlobalStore()
+function signOut() {
+  UsersService.signOut()
+}
 </script>

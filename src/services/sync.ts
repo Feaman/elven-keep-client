@@ -4,7 +4,7 @@ import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
-import { ROUTE_EXISTED_NOTE, ROUTE_NEW } from '~/router/routes'
+import { ROUTE_EXISTED_NOTE, ROUTE_NEW, ROUTE_SIGN } from '~/router/routes'
 import { useGlobalStore } from '~/stores/global'
 import { ConfigObject } from './api/interface'
 import OnlineApiService from './api/online-api'
@@ -247,7 +247,7 @@ export default class SyncService extends BaseService {
   static async handleApplicationUpdate() {
     const globalStore = useGlobalStore()
     try {
-      if (!globalStore.isOnline) {
+      if (!globalStore.isOnline || this.router.currentRoute.value.name === ROUTE_SIGN) {
         return
       }
 
