@@ -4,7 +4,7 @@
     q-toolbar.note-toolbar__toolbar.full-width.pa-0
       .q-flex.full-width
         q-btn(
-          @click="router.push('/')"
+          @click="goToMainPage()"
           :icon="mdiHome"
           color="black"
           flat
@@ -37,6 +37,14 @@
             flat
             round
           )
+        q-btn(
+          v-if="Number(globalStore.user.id) === 1"
+          @click="setWatchMode(true); emit('fullscreen')"
+          :icon="mdiWatch"
+          color="black"
+          flat
+          round
+        )
         q-space
         transition(
           name="scale-fade"
@@ -67,15 +75,27 @@ import { computed } from 'vue'
 import { version } from '../../../package.json'
 import { useGlobalStore } from '~/stores/global'
 import { type TNoteModel } from '~/composables/models/note'
-import { ROUTE_NEW } from '~/router/routes'
+import { ROUTE_NEW, ROUTE_NOTES } from '~/router/routes'
+import BaseService from '~/services/base'
 
 const router = useRouter()
 const globalStore = useGlobalStore()
 const route = useRoute()
 
+function setWatchMode(isWatchMode: boolean) {
+  BaseService.setWatchMode(isWatchMode)
+}
+
+function goToMainPage() {
+  const query: { 'is-watch'?: string } = {}
+  if (globalStore.isWatchMode) {
+    query['is-watch'] = globalStore.isWatchMode ? '1' : '0'
+  }
+  router.push({ name: ROUTE_NOTES, query })
+}
+
 // eslint-disable-next-line
 const emit = defineEmits<{
-  (event: 'is-watch'): void
   (event: 'fullscreen'): void
   (event: 'co-authors-clicked'): void
 }>()

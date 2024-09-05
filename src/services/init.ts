@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios'
+import { useRoute } from 'vue-router'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
@@ -13,6 +14,7 @@ import SyncService from './sync'
 export default class InitService extends BaseService {
   static async initApplication(data?: ConfigObject): Promise<void> {
     const globalStore = useGlobalStore()
+    const route = useRoute()
 
     try {
       globalStore.isInitDataLoading = true
@@ -44,10 +46,7 @@ export default class InitService extends BaseService {
       SyncService.clearRemovedOfflineNotesAndListItems()
 
       const currentNoteId = NotesService.currentNote.value?.id
-      if (
-        [ROUTE_EXISTED_NOTE].includes(String(this.router.currentRoute.value.name))
-        && currentNoteId
-      ) {
+      if (this.router.currentRoute.value.name === ROUTE_EXISTED_NOTE && currentNoteId) {
         const currentNote = NotesService.notes.value.find((note) => note.id === currentNoteId)
         if (!currentNote) {
           throw new Error('Current note id not found in new notes')

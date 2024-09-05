@@ -11,25 +11,25 @@
     seamless
   )
     q-card.full-width.full-height.q-flex.justify-center(
-      :class="{ 'is-watch': isWatch }"
+      :class="{ 'is-watch': globalStore.isWatchMode }"
     )
       q-card-section.fullscreen__card-section.full-height.column.no-wrap.pb-4.px-2(
-        :class="{ 'q-pt-none': isWatch }"
+        :class="{ 'q-pt-none': globalStore.isWatchMode }"
       )
         .watch-buttons.watch-buttons--top.text-center(
-          v-if="isWatch"
+          v-if="globalStore.isWatchMode"
         )
           q-icon(
             @click="emit('close')"
             :name="mdiCheck"
             color="black"
-            size="58px"
+            size="68px"
           )
           q-icon(
             @click="note.completeAllChecked()"
             :name="mdiCheckAll"
             color="black"
-            size="58px"
+            size="68px"
           )
         TransitionGroup(
           name="vertical-list"
@@ -41,32 +41,32 @@
             :class="{ 'list-item--checked': listItem.checked}"
           )
             q-checkbox.ml-1(
-              v-if="!isWatch"
+              v-if="!globalStore.isWatchMode"
               @update:model-value="note.checkOrUncheckListItem(listItem, $event)"
               :model-value="listItem.checked"
               color="blue"
             )
-            .list-item__text.full-width.q-flex.items-center.ml-1.py-2(
-              :class="`text-grey-${listItem.checked ? '4' : '9'}`"
+            .list-item__text.full-width.q-flex.items-center.ml-1(
+              :class="globalStore.isWatchMode ? `py-5 text-${listItem.checked ? 'grey' : ''}` : `py-2 text-grey-${listItem.checked ? '4' : '9'}`"
             ) {{ listItem.text }}
         q-space
         .watch-buttons.watch-buttons--bottom.text-center(
-          v-if="isWatch"
+          v-if="globalStore.isWatchMode"
         )
-          q-icon(
+          q-icon.pt-2(
             @click="emit('close')"
             :name="mdiCheck"
             color="black"
-            size="58px"
+            size="68px"
           )
-          q-icon(
+          q-icon.pt-2(
             @click="note.completeAllChecked()"
             :name="mdiCheckAll"
             color="black"
-            size="58px"
+            size="68px"
           )
         .text-center.pt-6.pb-4(
-          v-if="!isWatch"
+          v-if="!globalStore.isWatchMode"
         )
           q-btn(
             @click="emit('close')"
@@ -79,14 +79,14 @@
 
 <script setup lang="ts">
 import { mdiCheck, mdiCheckAll } from '@quasar/extras/mdi-v6'
-import { unref } from 'vue'
+import { ref, unref } from 'vue'
 import { type TListItemModel } from '~/composables/models/list-item'
 import { type TNoteModel } from '~/composables/models/note'
 import NotesService from '~/composables/services/notes'
+import { useGlobalStore } from '~/stores/global'
 
 defineProps<{
   show: boolean,
-  isWatch: boolean,
 }>()
 
 // eslint-disable-next-line
@@ -97,6 +97,7 @@ const emit = defineEmits<{
 }>()
 
 const note = unref(NotesService.currentNote as unknown as TNoteModel)
+const globalStore = useGlobalStore()
 </script>
 
 <style lang="scss" scoped>
@@ -131,7 +132,7 @@ const note = unref(NotesService.currentNote as unknown as TNoteModel)
 
   .watch-buttons {
     width: 100%;
-    min-height: 64px;
+    min-height: 84px;
     position: relative;
     display: flex;
     justify-content: center;
@@ -173,7 +174,6 @@ const note = unref(NotesService.currentNote as unknown as TNoteModel)
     }
 
     .q-icon {
-      // border: 2px solid black;
       padding: 0 16px 6px 16px;
     }
   }

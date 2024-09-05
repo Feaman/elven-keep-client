@@ -5,6 +5,14 @@
       .q-flex.full-width
         NotesSearch
         CreateTools
+        q-btn(
+          v-if="Number(globalStore.user.id) === 1"
+          @click="setWatchMode(true)"
+          :icon="mdiWatch"
+          color="black"
+          flat
+          round
+        )
         q-space
         transition(
           name="scale-fade"
@@ -18,8 +26,14 @@
 </template>
 
 <script setup lang="ts">
+import { mdiWatch } from '@quasar/extras/mdi-v6'
 import CreateTools from '../CreateTools.vue'
 import { useGlobalStore } from '~/stores/global'
+import BaseService from '~/services/base'
 
 const globalStore = useGlobalStore()
+
+function setWatchMode(isWatchMode: boolean) {
+  BaseService.setWatchMode(isWatchMode)
+}
 </script>

@@ -4,15 +4,12 @@
 )
   NoteToolbar(
     @fullscreen="fullscreen = true"
-    @is-watch="isWatch = true"
     @co-authors-clicked="showAuthors = true"
     :note="currentNote"
   ).full-width
   Note(
     @fullscreen="fullscreen = $event"
-    @is-watch="isWatch = $event"
     @hide-authors="showAuthors = false"
-    :is-watch="isWatch"
     :fullscreen="fullscreen"
     :show-authors="showAuthors"
   )
@@ -34,7 +31,6 @@ const globalStore = useGlobalStore()
 const route = useRoute()
 const router = useRouter()
 const fullscreen = ref(false)
-const isWatch = ref(false)
 const showAuthors = ref(false)
 
 function init() {

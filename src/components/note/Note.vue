@@ -3,12 +3,11 @@
   .note__content.column.no-wrap.full-width.full-height.py-2.px-3
 
     FullScreenView(
-      @close="emit('is-watch', false); emit('fullscreen', false)"
+      @close="emit('fullscreen', false)"
       @list-item-check="note.checkOrUncheckListItem($event, true)"
       @list-item-uncheck="note.checkOrUncheckListItem($event, false)"
       :note="note"
-      :show="fullscreen || isWatch"
-      :is-watch="isWatch"
+      :show="fullscreen"
     )
 
     template(v-if="!fullscreen")
@@ -182,10 +181,10 @@ const coAuthorEmail = ref('')
 const coAuthorError = ref('')
 const note = NotesService.currentNote as unknown as { value: TNoteModel }
 const globalStore = useGlobalStore()
+const test = globalStore.isWatchMode
 
 defineProps<{
   fullscreen: boolean
-  isWatch: boolean
   showAuthors: boolean
 }>()
 

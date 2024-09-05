@@ -66,10 +66,11 @@ function setDragGhostData(dataTransfer: DataTransfer) {
 }
 
 function openNote(note: TNoteModel) {
+  const watchModeQuery = globalStore.isWatchMode ? '?is-watch=1' : ''
   if (note.isLocalModel) {
-    window.location.href = `/note/${note.id}`
+    window.location.href = `/note/${note.id}${watchModeQuery}`
   } else {
-    router.push(`/note/${note.id}`)
+    router.push(`/note/${note.id}${watchModeQuery}`)
   }
 }
 

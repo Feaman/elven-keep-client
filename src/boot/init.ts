@@ -22,6 +22,10 @@ export default boot(async ({ app }) => {
     BaseService.eventBus.emit('showGlobalError', resultError as TGlobalError)
   }
 
+  // Handle watch mode
+  const urlParams = new URLSearchParams(window.location.search)
+  store.isWatchMode = !!Number(urlParams.get('is-watch'))
+
   // Keydown events
   document.onkeydown = (event: KeyboardEvent) => {
     BaseService.eventBus.emit('keydown', event)
@@ -56,7 +60,9 @@ export default boot(async ({ app }) => {
       isDocumentFocused = true
     } else {
       isDocumentFocused = false
-      store.isUpdating = true
+      if (!store.isWatchMode) {
+        store.isUpdating = true
+      }
       SyncService.removeRemovedEntities()
     }
   }, 100)
@@ -65,7 +71,9 @@ export default boot(async ({ app }) => {
     try {
       const channel = new BroadcastChannel('elven-keep-service-worker')
       channel.postMessage({ requestUpdate: true })
-      await SyncService.handleApplicationUpdate()
+      if (!store.isWatchMode) {
+        await SyncService.handleApplicationUpdate()
+      }
     } catch (error) {
       BaseService.showError(error as Error)
     }

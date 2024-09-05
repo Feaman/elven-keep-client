@@ -15,6 +15,7 @@ export const useGlobalStore = defineStore('global', () => {
   const isSocketErrorOnce = ref(false)
   const isNewVersionAvailable = ref(false)
   const isUpdating = ref(false)
+  const isWatchMode = ref(false)
 
   function setUser(userData: TUser) {
     user.value = useUserStore(userData) as unknown as TUserModel
@@ -22,6 +23,7 @@ export const useGlobalStore = defineStore('global', () => {
 
   return {
     user,
+    isWatchMode,
     isUpdating,
     initError,
     isNewVersionAvailable,

@@ -1,6 +1,7 @@
 import { AxiosError } from 'axios'
 import mitt from 'mitt'
 import { Router } from 'vue-router'
+import { useGlobalStore } from '~/stores/global'
 import { TEvents, TGlobalError } from '~/types'
 import ApiService from './api/api'
 
@@ -30,5 +31,10 @@ export default class BaseService {
     return new Promise((resolve) => {
       setTimeout(resolve, milliseconds)
     })
+  }
+
+  static setWatchMode(isWatchMode: boolean) {
+    useGlobalStore().isWatchMode = isWatchMode
+    this.router.push({ query: { 'is-watch': isWatchMode ? '1' : '0' } })
   }
 }
