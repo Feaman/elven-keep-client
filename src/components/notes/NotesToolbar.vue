@@ -7,7 +7,7 @@
         CreateTools
         q-btn(
           v-if="Number(globalStore.user.id) === 1"
-          @click="setWatchMode(true)"
+          @click="switchWatchMode(true)"
           :icon="mdiWatch"
           color="black"
           flat
@@ -33,7 +33,7 @@ import BaseService from '~/services/base'
 
 const globalStore = useGlobalStore()
 
-function setWatchMode(isWatchMode: boolean) {
-  BaseService.setWatchMode(isWatchMode)
+function switchWatchMode() {
+  BaseService.switchWatchMode()
 }
 </script>

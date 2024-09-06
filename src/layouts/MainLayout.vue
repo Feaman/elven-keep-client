@@ -152,11 +152,6 @@ if (globalStore.isNoOfflineDataError) {
   isNoOfflineDataError = true
 }
 
-function handleWindowResize() {
-  // Fix 100vh for mobile
-  document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)
-}
-
 function restoreItems() {
   notification = null
   NotesService.removingNotes.value.forEach((note) => note.restore())
@@ -166,6 +161,11 @@ function restoreItems() {
   if (removeTimeout) {
     clearTimeout(removeTimeout)
   }
+}
+
+function handleWindowResize() {
+  // Fix 100vh for mobile
+  document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)
 }
 
 onMounted(() => {

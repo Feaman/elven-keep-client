@@ -39,8 +39,16 @@
           )
         q-btn(
           v-if="Number(globalStore.user.id) === 1"
-          @click="setWatchMode(true); emit('fullscreen')"
+          @click="switchWatchMode()"
           :icon="mdiWatch"
+          :color="globalStore.isWatchMode ? 'black' : 'grey-5'"
+          flat
+          round
+        )
+        q-btn(
+          v-if="Number(globalStore.user.id) === 1"
+          @click="goToMainPage()"
+          :icon="mdiHome"
           color="black"
           flat
           round
@@ -82,8 +90,8 @@ const router = useRouter()
 const globalStore = useGlobalStore()
 const route = useRoute()
 
-function setWatchMode(isWatchMode: boolean) {
-  BaseService.setWatchMode(isWatchMode)
+function switchWatchMode() {
+  BaseService.switchWatchMode()
 }
 
 function goToMainPage() {

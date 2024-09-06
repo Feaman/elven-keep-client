@@ -181,7 +181,7 @@ const globalStore = useGlobalStore()
   .fullscreen__card-section {
     border-radius: 50%;
     padding-bottom: 0px !important;
-    // border: 2px solid red;
+    overflow: initial;
 
     .list-item {
       border-bottom: 2px solid rgba(255, 216, 0, 0.4);

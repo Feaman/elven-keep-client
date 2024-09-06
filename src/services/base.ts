@@ -33,8 +33,9 @@ export default class BaseService {
     })
   }
 
-  static setWatchMode(isWatchMode: boolean) {
-    useGlobalStore().isWatchMode = isWatchMode
-    this.router.push({ query: { 'is-watch': isWatchMode ? '1' : '0' } })
+  static switchWatchMode() {
+    const store = useGlobalStore()
+    store.isWatchMode = !store.isWatchMode
+    this.router.push({ query: { 'is-watch': store.isWatchMode ? '1' : '0' } })
   }
 }
