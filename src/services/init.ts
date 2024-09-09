@@ -14,7 +14,6 @@ import SyncService from './sync'
 export default class InitService extends BaseService {
   static async initApplication(data?: ConfigObject): Promise<void> {
     const globalStore = useGlobalStore()
-    const route = useRoute()
 
     try {
       globalStore.isInitDataLoading = true

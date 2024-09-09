@@ -6,7 +6,7 @@
         NotesSearch
         CreateTools
         q-btn(
-          v-if="Number(globalStore.user.id) === 1"
+          v-if="isWatch"
           @click="switchWatchMode(true)"
           :icon="mdiWatch"
           color="black"
@@ -30,6 +30,7 @@ import { mdiWatch } from '@quasar/extras/mdi-v6'
 import CreateTools from '../CreateTools.vue'
 import { useGlobalStore } from '~/stores/global'
 import BaseService from '~/services/base'
+import { isWatch } from '~/composables/services/users'
 
 const globalStore = useGlobalStore()
 

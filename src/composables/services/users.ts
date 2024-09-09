@@ -1,7 +1,9 @@
+import { computed } from 'vue'
 import { ConfigObject } from '~/services/api/interface'
 import BaseService from '~/services/base'
 import InitService from '~/services/init'
 import StorageService from '~/services/storage'
+import { useGlobalStore } from '~/stores/global'
 
 const AUTH_TOKEN_NAME = 'auth-token'
 
@@ -24,6 +26,12 @@ function signOut() {
   InitService.clearApplication()
   BaseService.router.push('/sign')
 }
+
+export const isWatch = computed(() => {
+  const globalStore = useGlobalStore()
+  return Number(globalStore?.user?.id) === 1
+  && window.navigator.userAgent.toLocaleLowerCase().includes('samsungbrowser')
+})
 
 export default {
   AUTH_TOKEN_NAME,

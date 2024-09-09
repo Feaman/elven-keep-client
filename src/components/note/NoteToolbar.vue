@@ -38,7 +38,7 @@
             round
           )
         q-btn(
-          v-if="Number(globalStore.user.id) === 1"
+          v-if="isWatch"
           @click="switchWatchMode()"
           :icon="mdiWatch"
           :color="globalStore.isWatchMode ? 'black' : 'grey-5'"
@@ -46,7 +46,7 @@
           round
         )
         q-btn(
-          v-if="Number(globalStore.user.id) === 1"
+          v-if="isWatch"
           @click="goToMainPage()"
           :icon="mdiHome"
           color="black"
@@ -85,6 +85,7 @@ import { useGlobalStore } from '~/stores/global'
 import { type TNoteModel } from '~/composables/models/note'
 import { ROUTE_NEW, ROUTE_NOTES } from '~/router/routes'
 import BaseService from '~/services/base'
+import { isWatch } from '~/composables/services/users'
 
 const router = useRouter()
 const globalStore = useGlobalStore()
