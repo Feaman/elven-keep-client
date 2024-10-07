@@ -400,7 +400,7 @@ function setCounterQuantity(number: number) {
   if (counterListItem.value) {
     counterListItem.value.counterQuantity = number
     if (counterListItem.value) {
-      counterListItem.value.text = `${counterListItem.value.text.substring(0, counterListItem.value.counterIndex)} ${number}${String(counterListItem.value.counterMeasurement)}`
+      counterListItem.value.text = `${counterListItem.value.text.substring(0, counterListItem.value.counterIndex)} — ${number}${String(counterListItem.value.counterMeasurement)}`
       updateText(counterListItem.value)
     }
     isCounterDialogShown.value = false

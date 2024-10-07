@@ -34,16 +34,6 @@ export default route((/* { store, ssrContext } */) => {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   })
 
-  // Router.beforeEach((to, _from, next) => {
-  //   debugger
-  //   const isTokenExists = StorageService.get(UsersService.AUTH_TOKEN_NAME)
-  //   if (to.name !== ROUTE_SIGN && !isTokenExists) {
-  //     next({ name: ROUTE_SIGN })
-  //   } else {
-  //     next()
-  //   }
-  // })
-
   BaseService.router = Router
 
   return Router

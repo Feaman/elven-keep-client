@@ -1,5 +1,4 @@
 import { AxiosError } from 'axios'
-import { useRoute } from 'vue-router'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'

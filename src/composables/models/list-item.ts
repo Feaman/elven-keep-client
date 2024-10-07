@@ -89,12 +89,12 @@ export default function listItemModel(listItemData: TListItem) {
     updated.value = updated.value ? new Date(updated.value) : new Date()
   }
 
-  function handleCounter(which = LAST_TEXTAREA) {
-    const regExp = new RegExp(`\\s+(\\d+)\\s*(${COUNTER_MEASUREMENT_PIECES}|${COUNTER_MEASUREMENT_PACKAGES})?\\s*$`, 'i')
+  function handleCounter() {
+    const regExp = new RegExp(`\\s+(-|—)?\\s?(\\d+)\\s*(${COUNTER_MEASUREMENT_PIECES}|${COUNTER_MEASUREMENT_PACKAGES})?\\s*$`, 'i')
     const matches = text.value.match(regExp)
     if (matches) {
-      counterQuantity.value = Number(matches[1])
-      counterMeasurement.value = matches[2] ? String(matches[2]).toLocaleLowerCase() : COUNTER_MEASUREMENT_PIECES
+      counterQuantity.value = Number(matches[2])
+      counterMeasurement.value = matches[3] ? String(matches[3]).toLocaleLowerCase() : COUNTER_MEASUREMENT_PIECES
       counterIndex.value = matches.index
     } else {
       counterMeasurement.value = COUNTER_MEASUREMENT_PIECES

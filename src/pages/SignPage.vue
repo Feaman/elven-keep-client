@@ -97,7 +97,7 @@
         enter-active-class="animated zoomIn"
         leave-active-class="animated zoomOut"
       )
-        .text-red.q-mt-lg(
+        .text-red(
           v-if="errorText"
         ) {{ errorText }}
 
