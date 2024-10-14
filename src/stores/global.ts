@@ -8,6 +8,7 @@ export const useGlobalStore = defineStore('global', () => {
   const isOnline = ref<boolean>(window.navigator.onLine)
   const isNoOfflineDataError = ref<boolean>(false)
   const isInitDataLoading = ref(false)
+  const isInitialLoading = ref(true)
   const isSocketError = ref<boolean | undefined>(undefined)
   const user = ref<TUserModel | null>(null)
   const mainListScrollTop = ref(0)
@@ -26,6 +27,7 @@ export const useGlobalStore = defineStore('global', () => {
     isUpdating,
     initError,
     isNewVersionAvailable,
+    isInitialLoading,
     isInitDataLoading,
     isSocketError,
     isNoOfflineDataError,

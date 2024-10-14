@@ -10,7 +10,7 @@
       draggable(
         v-model="list"
         :set-data="setDragGhostData"
-        :component-data="{ name: drag ?  null : 'vertical-list' }"
+        :component-data="{ name: drag || globalStore.isInitialLoading ?  null : 'vertical-list' }"
         @start="drag = true"
         @end="drag = false"
         tag="transition-group"
@@ -313,13 +313,9 @@ async function init() {
   document.addEventListener('mousedown', hideVariants)
   BaseService.eventBus.on('keydown', handleKeyDown)
 
-  if (props.isMain) {
+  setTimeout(() => {
     handleWindowResize()
-  } else {
-    setTimeout(() => {
-      handleWindowResize()
-    }, 100)
-  }
+  }, 200)
 
   list.value.forEach((listItem) => ListItemsService.addTextareaSwipeEvent(note.value, listItem))
   $root?.querySelectorAll('.list-item textarea').forEach(($textarea) => {
@@ -534,7 +530,7 @@ watch(() => isCounterDialogShown.value, async () => {
             height: 36px;
             border: none;
             color: rgba(0, 0, 0, 0.87);
-            line-height: 20px;
+            line-height: 18px;
             padding: 8px 0;
             outline: none;
             resize: none;

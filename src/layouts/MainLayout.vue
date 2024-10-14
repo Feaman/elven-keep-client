@@ -171,6 +171,9 @@ function handleWindowResize() {
 onMounted(() => {
   handleWindowResize()
   window.addEventListener('resize', handleWindowResize)
+  setTimeout(() => {
+    globalStore.isInitialLoading = false
+  }, 1000)
 })
 
 watch(removedItemsQuantity, () => {
