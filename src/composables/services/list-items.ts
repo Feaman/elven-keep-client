@@ -9,6 +9,7 @@ import SwipeEvents, { LEFT_SWIPE_WIDTH } from '~/helpers/swipe-events'
 const removingListItems = ref<TListItemModel[]>([])
 const listItemMinHeight = 36
 const variantsListItemMinHeight = 34
+const isMainListReady = ref(false)
 
 function handleListItemTextAreaHeight($textArea: HTMLTextAreaElement) {
   let textAreaHeight = 0
@@ -178,6 +179,7 @@ export default {
   listItemMinHeight,
   removingListItems,
   variantsListItemMinHeight,
+  isListReady: isMainListReady,
   focusNextItem,
   generateMaxOrder,
   addTextareaSwipeEvent,

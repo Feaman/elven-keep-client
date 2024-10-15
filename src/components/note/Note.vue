@@ -68,24 +68,27 @@
         debounce="400"
         placeholder="Text"
       )
-      template(v-if="note.type?.name === NOTE_TYPE_LIST")
+      template(v-else-if="note.type?.name === NOTE_TYPE_LIST")
         NoteList(
           is-main
         )
         template(v-if="note.completedListItems.length")
-          q-separator.my-2
-          q-expansion-item(
-            header-style="padding-right: 0; padding-left: 8px"
-            v-model="note.isCompletedListExpanded"
+          .completed-list(
+            :style="{ opacity: isListReady ? 1 : 0 }"
           )
-            template(v-slot:header)
-              .completed-list-header.text-green.q-flex.items-center
-                .text-weight-bold.font-size-16 {{ note.completedListItems.length }}
-                .ml-2 completed
-              q-space
-            NoteList(
-              v-if="note.isCompletedListExpanded"
+            q-separator.my-2
+            q-expansion-item(
+              header-style="padding-right: 0; padding-left: 8px"
+              v-model="note.isCompletedListExpanded"
             )
+              template(v-slot:header)
+                .text-green.q-flex.items-center
+                  .text-weight-bold.font-size-16 {{ note.completedListItems.length }}
+                  .ml-2 completed
+                q-space
+              NoteList(
+                v-if="note.isCompletedListExpanded"
+              )
 
   q-dialog(
     v-if="note.userId"
@@ -181,7 +184,7 @@ const coAuthorEmail = ref('')
 const coAuthorError = ref('')
 const note = NotesService.currentNote as unknown as { value: TNoteModel }
 const globalStore = useGlobalStore()
-const test = globalStore.isWatchMode
+const { isListReady } = ListItemsService
 
 defineProps<{
   fullscreen: boolean
@@ -231,6 +234,10 @@ watch(() => note.value.isShowCheckedCheckboxes, async () => {
     max-width: 900px;
     overflow: auto;
     flex: 1;
+
+    .completed-list {
+      transition: opacity 0.1s;
+    }
 
     .margin-right-minus-10 {
       margin-right: -10px;

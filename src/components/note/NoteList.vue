@@ -1,12 +1,14 @@
 <template lang="pug">
 .note-list(
-  :class="{  'note-list--focused': note?.isFocused, 'note-list--semi-focused': isSemiFocus }"
+  :class="{ 'note-list--focused': note?.isFocused, 'note-list--semi-focused': isSemiFocus }"
   ref="rootElement"
 )
   .note-list__container(
     :class="{ 'pb-3': isMain }"
   )
-    .note-list__list
+    .note-list__list(
+      :style="{ opacity: isListReady ? 1 : 0 }"
+    )
       draggable(
         v-model="list"
         :set-data="setDragGhostData"
@@ -75,7 +77,7 @@
               )
 
     .note-list__create-button.q-flex.items-center.cursor-text.mt-2(
-      v-if="props.isMain"
+      v-if="props.isMain && isListReady"
       :class="{ 'note-list__create-button--alone': !list.length }"
       @click="add"
     )
@@ -169,6 +171,7 @@ const props = defineProps<{
 
 let $root: HTMLElement | null
 let focusTimeout: ReturnType<typeof setTimeout> | undefined
+const { isListReady } = ListItemsService
 const rootElement = ref<HTMLElement | null>(null)
 const variants = ref<TVariant[]>([])
 const variantsMenuX = ref(0)
@@ -210,6 +213,8 @@ const list = computed({
     }
   },
 })
+
+isListReady.value = false
 
 async function checkVariants(listItem: TListItemModel) {
   variants.value = NotesService.findListItemVariants(listItem)
@@ -303,7 +308,8 @@ function loadMore() {
 function handleWindowResize() {
   setTimeout(() => {
     ListItemsService.handleTextAreaHeights($root as HTMLDivElement)
-  })
+    isListReady.value = true
+  }, 200)
 }
 
 async function init() {
@@ -313,9 +319,7 @@ async function init() {
   document.addEventListener('mousedown', hideVariants)
   BaseService.eventBus.on('keydown', handleKeyDown)
 
-  setTimeout(() => {
-    handleWindowResize()
-  }, 200)
+  handleWindowResize()
 
   list.value.forEach((listItem) => ListItemsService.addTextareaSwipeEvent(note.value, listItem))
   $root?.querySelectorAll('.list-item textarea').forEach(($textarea) => {
@@ -441,6 +445,8 @@ watch(() => isCounterDialogShown.value, async () => {
   }
 
   .note-list__list {
+    transition: opacity 0.1s;
+
     .sortable-ghost {
       position: relative;
       background-color: #fff;

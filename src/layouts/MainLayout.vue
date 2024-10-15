@@ -50,48 +50,7 @@ q-layout.main-layout(
     template(
       v-if="['existed-note', 'new-note'].includes(String($route.name))"
     )
-      q-skeleton(
-        type="rect"
-        height="50px"
-      )
-      .column.flex-center.pa-4
-        div(
-          :style="{ maxWidth: '900px', width: '100%', }"
-        )
-          .q-flex
-            q-skeleton.col.bg-grey-3(
-              type="rect"
-              height="40px"
-            )
-            q-skeleton.bg-grey-3.ml-2(
-              width="40px"
-              height="40px"
-              type="rect"
-            )
-          div(
-            v-for="index in 10"
-            :key="index"
-          )
-            .q-flex
-              q-skeleton.mt-4.bg-grey-3(
-                type="rect"
-                width="24px"
-                height="24px"
-              )
-              q-skeleton.bg-grey-3.mt-4.ml-2(
-                type="rect"
-                width="24px"
-                height="24px"
-              )
-              q-skeleton.col.bg-grey-3.mt-4.ml-2(
-                type="rect"
-                height="24px"
-              )
-              q-skeleton.bg-grey-3.mt-4.ml-2(
-                type="rect"
-                width="24px"
-                height="24px"
-              )
+      NotListSkeletons
   q-page-container.page.pa-0(v-else)
     router-view.page-content(
       v-slot="{ Component }"
