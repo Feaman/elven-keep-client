@@ -27,7 +27,7 @@ q-card.note-preview.cursor-pointer.gradient.full-height.pa-4.pt-2(
   .text.column(
     v-else
   )
-    .text-grey-8(style="white-space: pre") {{ note.text }}
+    .text-grey-8 {{ note.text }}
     NoteCoAuthors(:co-authors="note.coAuthors")
 
   q-btn.remove-button(

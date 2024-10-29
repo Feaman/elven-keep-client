@@ -7,7 +7,7 @@ export const useGlobalStore = defineStore('global', () => {
   const initError = ref<TGlobalError | undefined>(undefined)
   const isOnline = ref<boolean>(window.navigator.onLine)
   const isNoOfflineDataError = ref<boolean>(false)
-  const isInitDataLoading = ref(false)
+  const isInitDataLoading = ref(true)
   const isInitialLoading = ref(true)
   const isSocketError = ref<boolean | undefined>(undefined)
   const user = ref<TUserModel | null>(null)
