@@ -150,6 +150,20 @@
             @click="setCounterQuantity(quantity)"
             :class="{ 'list-item-counter--current': counterListItem.counterQuantity === quantity }"
           ) {{ quantity }}
+      .list-item-counter__custom.row.mt-6
+        q-input.list-item-counter__custom-input.col(
+          @click.stop="$event.target.select()"
+          v-model="customQuantity"
+          type="number"
+          dark
+          dense
+          outlined
+        )
+        q-btn.list-item-counter__custom-button.bg-primary.ml-2(
+          @click.stop="setCounterQuantity(customQuantity)"
+          icon="check"
+          flat
+        )
 </template>
 
 <script setup lang="ts">
@@ -172,6 +186,7 @@ const props = defineProps<{
 let $root: HTMLElement | null
 let focusTimeout: ReturnType<typeof setTimeout> | undefined
 const { isListReady } = ListItemsService
+const customQuantity = ref('')
 const rootElement = ref<HTMLElement | null>(null)
 const variants = ref<TVariant[]>([])
 const variantsMenuX = ref(0)
@@ -388,6 +403,7 @@ async function selectVariant(listItem: TListItemModel | null, variant: TVariant)
 
 function showCounterDialog(listItem: TListItemModel) {
   counterListItem.value = listItem
+  customQuantity.value = String(counterListItem.value?.counterQuantity) || ''
   isCounterDialogShown.value = true
 }
 
@@ -397,6 +413,10 @@ function hideCounterDialog(listItem: TListItemModel) {
 }
 
 function setCounterQuantity(number: number) {
+  if (Number.isNaN(number)) {
+    return
+  }
+
   if (counterListItem.value) {
     counterListItem.value.counterQuantity = number
     if (counterListItem.value) {
@@ -411,7 +431,7 @@ function setCounterMeasurement(measurement: string) {
   if (counterListItem.value) {
     counterListItem.value.counterMeasurement = measurement
     if (counterListItem.value.counterQuantity) {
-      counterListItem.value.text = `${counterListItem.value.text.substring(0, counterListItem.value.counterIndex)} ${counterListItem.value.counterQuantity}${measurement}`
+      counterListItem.value.text = `${counterListItem.value.text.substring(0, counterListItem.value.counterIndex)} — ${counterListItem.value.counterQuantity}${measurement}`
       updateText(counterListItem.value)
     }
   }

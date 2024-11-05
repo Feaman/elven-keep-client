@@ -30,3 +30,7 @@ body {
   backdrop-filter: blur(10px);
   opacity: 0.8;
 }
+
+.q-dialog__inner--minimized > div {
+  max-height: calc(100vh -  48px) !important;
+}
