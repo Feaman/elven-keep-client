@@ -104,10 +104,13 @@ function addTextareaKeydownEvent($textarea: HTMLTextAreaElement, isCompletedList
   }
 }
 
-function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number) {
+function calculateVariantsMenuYPosition(yPosition: number, menuHeight: number, elementHeight: number) {
   const headerHeight = 50
   const offset = 8
-  if (yPosition - headerHeight > menuHeight) {
+  const $noteContent = document.querySelector('.note__content')
+  const scrollTop = $noteContent ? $noteContent.scrollTop - elementHeight * 1.5 : 0
+  yPosition += scrollTop - headerHeight
+  if (yPosition > menuHeight) {
     return yPosition - menuHeight
   }
   return headerHeight + offset

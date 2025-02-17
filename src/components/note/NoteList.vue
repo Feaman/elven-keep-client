@@ -238,10 +238,9 @@ async function checkVariants(listItem: TListItemModel) {
     variantsListItem.value = listItem
     const boundingBox = $textarea.getBoundingClientRect()
     const menuHeight = variants.value.length * ListItemsService.variantsListItemMinHeight
-    const y = ListItemsService.calculateVariantsMenuYPosition(boundingBox.y, menuHeight)
     await nextTick()
     variantsMenuX.value = boundingBox.x
-    variantsMenuY.value = y
+    variantsMenuY.value = ListItemsService.calculateVariantsMenuYPosition(boundingBox.y, menuHeight, boundingBox.height)
     variantsMenuMaxWidth.value = (rootElement.value?.offsetWidth || 350) - 52
     isVariantsShown.value = true
   } else {
