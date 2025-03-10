@@ -8,6 +8,7 @@ import ListItemsService from '~/composables/services/list-items'
 import NotesService from '~/composables/services/notes'
 import StatusesService from '~/composables/services/statuses'
 import TypesService from '~/composables/services/types'
+import OfflineApiService from '~/services/api/offline-api'
 import BaseService from '~/services/base'
 import { useGlobalStore } from '~/stores/global'
 
@@ -255,9 +256,21 @@ export default function noteModel(noteData: TNote) {
   }
 
   async function completeAllChecked() {
-    checkedListItems.value.forEach((listItem) => {
-      completeListItem(listItem, true)
-    })
+    if (id.value) {
+      list.value.forEach((listItem: TListItemModel) => {
+        if (!listItem.completed && listItem.checked) {
+          listItem.completed = true
+        }
+      })
+      const noteData = await BaseService.api.completeNote(id.value)
+      noteData.list?.forEach((listItem) => {
+        listItem.completed = true
+      })
+
+      // Change offline note
+      const offlineApi = new OfflineApiService()
+      await offlineApi.completeNote(Number(noteData.id))
+    }
   }
 
   function blurListItem(listItem: TListItemModel) {

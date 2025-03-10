@@ -15,6 +15,8 @@ export default class SocketIOService extends BaseService {
 
   static EVENT_NOTE_CHANGED = 'EVENT_NOTE_CHANGED'
 
+  static EVENT_NOTE_COMPLETED = 'EVENT_NOTE_COMPLETED'
+
   static EVENT_NOTE_REMOVED = 'EVENT_NOTE_REMOVED'
 
   static EVENT_NOTE_ORDER_SET = 'EVENT_NOTE_ORDER_SET'
@@ -97,6 +99,28 @@ export default class SocketIOService extends BaseService {
           !!noteData.isCountable,
           !!noteData.isShowCheckedCheckboxes,
         )
+      } catch (error) {
+        BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
+      }
+    })
+
+    socket.on(this.EVENT_NOTE_COMPLETED, async (noteData: TNote) => {
+      try {
+        // Change note
+        const note = NotesService.notes.value.find((note) => note.id === noteData.id)
+        if (note) {
+          note.list?.forEach((listItem: TListItemModel) => {
+            if (!listItem.completed && listItem.checked) {
+              listItem.completed = true
+            }
+          })
+          await nextTick()
+          note.isRawUpdate = false
+        }
+
+        // Change offline note
+        const offlineApi = new OfflineApiService()
+        await offlineApi.completeNote(Number(noteData.id))
       } catch (error) {
         BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
       }

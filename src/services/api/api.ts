@@ -57,6 +57,15 @@ export default class ApiService implements IApi {
     return this.offlineApiService.updateNote(id, title, text, typeId, isCompletedListExpanded, isCountable, isShowCheckedCheckboxes)
   }
 
+  async completeNote(
+    id: number | string,
+  ): Promise<TNote> {
+    if (useGlobalStore().isOnline) {
+      this.onlineApiService.completeNote(id)
+    }
+    return this.offlineApiService.completeNote(id)
+  }
+
   async removeNote(note: TNoteModel | TNote) {
     if (useGlobalStore().isOnline) {
       this.onlineApiService.removeNote(note)

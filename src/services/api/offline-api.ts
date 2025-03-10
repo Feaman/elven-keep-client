@@ -102,6 +102,32 @@ export default class OfflineApiService implements IApi {
     return Promise.resolve(offlineNote)
   }
 
+  async completeNote(id: number | string): Promise<TNote> {
+    this.checkAuthToken()
+
+    const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject
+    const offlineNote = offlineData.notes.find((note) => note.id === id)
+    if (!offlineNote) {
+      throw new Error(`[UpdateNote]: Note with id "${id}" not found in offline data`)
+    }
+
+    offlineNote.list?.forEach((offlineNoteListItem: TListItem) => {
+      if (!offlineNoteListItem.completed && offlineNoteListItem.checked) {
+        Object.assign(
+          offlineNoteListItem,
+          {
+            updated: new Date().toISOString(),
+            completed: 1,
+          },
+        )
+      }
+    })
+
+    StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
+
+    return Promise.resolve(offlineNote)
+  }
+
   async removeNote(note: TNoteModel | TNote, completely = false) {
     this.checkAuthToken()
     const offlineData = StorageService.get(BaseService.OFFLINE_STORE_NAME) as ConfigObject

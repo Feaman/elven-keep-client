@@ -80,6 +80,11 @@ export default class OnlineApiService implements IApi {
     return data as TNote
   }
 
+  async completeNote(id: number | string): Promise<TNote> {
+    const { data } = await this.api.put(`notes/complete/${id}`)
+    return data as TNote
+  }
+
   async removeNote(note: TNoteModel | TNote) {
     const { data } = await this.api.delete(`notes/${note.id}`)
     return data
