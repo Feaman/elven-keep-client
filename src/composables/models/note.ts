@@ -148,7 +148,7 @@ export default function noteModel(noteData: TNote) {
   async function saveListItem(listItem: TListItemModel) {
     try {
       if (!list.value.includes(listItem)) {
-        throw new Error(`List item with id "${listItem.id}" doesn't exists in note's with id "${id.value}" list`)
+        throw new Error(`List item with id "${listItem.id}" doesn't exists in note "${id.value}" list`)
       }
       isSaving.value = true
       if (listItem.id) {

@@ -17,8 +17,12 @@ function generateNotes(notesData: TNote[]) {
   })
 }
 
-function setNotesOrder(order: number[]) {
-  BaseService.api.setNotesOrder(order)
+async function setNotesOrder(order: number[]) {
+  try {
+    await BaseService.api.setNotesOrder(order)
+  } catch (error) {
+    BaseService.eventBus.emit('showGlobalError', { statusCode: 500, message: (error as Error).message })
+  }
 }
 
 const filtered = computed({
