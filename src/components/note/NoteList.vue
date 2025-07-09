@@ -70,7 +70,7 @@
               )
               q-btn.list-item__remove-button(
                 @click="note.removeListItem(element)"
-                :icon="mdiClose"
+                :icon="mdiTrashCanOutline"
                 color="grey-5"
                 flat
                 round
@@ -167,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiDrag, mdiClose, mdiPlus, mdiNumeric2BoxMultiple } from '@quasar/extras/mdi-v6'
+import { mdiDrag, mdiTrashCanOutline, mdiPlus, mdiNumeric2BoxMultiple } from '@quasar/extras/mdi-v6'
 import { ref, unref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { QCard } from 'quasar'
 import draggable from 'zhyswan-vuedraggable'

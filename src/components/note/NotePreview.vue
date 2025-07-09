@@ -33,14 +33,16 @@ q-card.note-preview.cursor-pointer.gradient.full-height.pa-4.pt-2(
   q-btn.remove-button(
     v-if="note.isMyNote"
     @click.stop="$emit('remove')"
-    icon="close"
+    :icon="mdiTrashCanOutline"
+    size="md"
+    color="red-3"
     flat
     round
   )
 </template>
 
 <script setup lang="ts">
-import { mdiCheckboxBlankOutline } from '@quasar/extras/mdi-v6'
+import { mdiCheckboxBlankOutline, mdiTrashCanOutline } from '@quasar/extras/mdi-v6'
 import { TYPE_LIST } from '~/composables/models/type'
 import NoteCoAuthors from './NoteCoAuthors.vue'
 import { type TNoteModel } from '~/composables/models/note'

@@ -13,7 +13,7 @@
     template(v-if="!fullscreen")
       .q-flex.items-center
         q-input.note__title-field.mt-1.mb-2(
-          v-model.trim ="note.title"
+          v-model ="note.title"
           placeholder="Title"
           debounce="400"
           dense
@@ -140,7 +140,7 @@
                     q-space
                     q-btn(
                       @click="note.removeCoAuthor(coAuthor)"
-                      :icon="mdiClose"
+                      :icon="mdiTrashCanOutline"
                       color="grey"
                       round
                       flat
@@ -167,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiDotsVertical, mdiCheckAll, mdiClose, mdiPlus, mdiNumeric2BoxMultiple } from '@quasar/extras/mdi-v6'
+import { mdiDotsVertical, mdiCheckAll, mdiClose, mdiTrashCanOutline, mdiPlus, mdiNumeric2BoxMultiple } from '@quasar/extras/mdi-v6'
 import {
   ref, watch, nextTick,
 } from 'vue'

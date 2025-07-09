@@ -95,8 +95,8 @@ export default function noteModel(noteData: TNote) {
       if (id.value) {
         await BaseService.api.updateNote(
           id.value,
-          title.value,
-          text.value,
+          title.value.trim(),
+          text.value.trim(),
           typeId.value,
           isCompletedListExpanded.value,
           isCountable.value,
@@ -108,8 +108,8 @@ export default function noteModel(noteData: TNote) {
         isCreating.value = true
         const noteData = await BaseService.api.addNote(
           list.value,
-          title.value,
-          text.value,
+          title.value.trim(),
+          text.value.trim(),
           typeId.value,
           order.value,
           isCompletedListExpanded.value,
@@ -122,8 +122,8 @@ export default function noteModel(noteData: TNote) {
         if (isUpdateNeeded.value && id.value) {
           await BaseService.api.updateNote(
             id.value,
-            title.value,
-            text.value,
+            title.value.trim(),
+            text.value.trim(),
             typeId.value,
             isCompletedListExpanded.value,
             isCountable.value,
