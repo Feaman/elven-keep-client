@@ -11,11 +11,13 @@ import { ConfigObject } from './api/interface'
 import SyncService from './sync'
 
 export default class InitService extends BaseService {
-  static async initApplication(data?: ConfigObject): Promise<void> {
+  static async initApplication(data?: ConfigObject, isUpdating = false): Promise<void> {
     const globalStore = useGlobalStore()
 
     try {
-      globalStore.isInitDataLoading = true
+      if (!isUpdating) {
+        globalStore.isInitDataLoading = true
+      }
 
       if (!data) {
         data = await BaseService.api.getConfig()

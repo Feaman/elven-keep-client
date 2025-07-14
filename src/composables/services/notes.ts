@@ -3,6 +3,7 @@ import { TListItemModel, type TVariant } from '~/composables/models/list-item'
 import noteModel, { TNote, TNoteModel } from '~/composables/models/note'
 import StatusesService from '~/composables/services/statuses'
 import BaseService from '~/services/base'
+import ListItemsService from '../services/list-items'
 
 const currentNote: Ref<TNoteModel | null> = ref(null)
 const notes: Ref<TNoteModel[]> = ref([])
@@ -10,11 +11,42 @@ const removingNotes = ref<TNoteModel[]>([])
 export const searchQuery = ref('')
 
 function generateNotes(notesData: TNote[]) {
-  notes.value = []
+  // Update existing notes
   notesData.forEach((noteData: TNote) => {
-    const note = noteModel(noteData)
-    notes.value.push(note as unknown as TNoteModel)
+    const newNote = noteModel(noteData)
+    const existingNote = notes.value.find((_note) => _note.id === newNote.id.value)
+    if (existingNote) {
+      existingNote.title = newNote.title.value
+      existingNote.text = newNote.text.value
+      existingNote.typeId = newNote.typeId.value
+      existingNote.statusId = newNote.statusId.value
+      existingNote.order = newNote.order.value
+
+      // Update existing list items
+      newNote.list.value.forEach((newListItem) => {
+        const existingListItem = existingNote.list.find((_listItem) => _listItem.id === newListItem.id)
+        if (existingListItem) {
+          existingListItem.text = newListItem.text
+          existingListItem.order = newListItem.order
+          existingListItem.checked = newListItem.checked
+          existingListItem.completed = newListItem.completed
+        } else {
+          existingNote.list.push(newListItem)
+          setTimeout(() => {
+            ListItemsService.handleListItemTextAreaHeight(newListItem.getTextarea())
+          })
+        }
+      })
+
+      // Remove removed list items
+      existingNote.list = existingNote.list.filter((note) => (noteData.list || []).find((newNoteData) => newNoteData.id === note.id))
+    } else {
+      notes.value.push(newNote as unknown as TNoteModel)
+    }
   })
+
+  // Remove removed notes
+  notes.value = notes.value.filter((note) => notesData.find((_note) => _note.id === note.id))
 }
 
 async function setNotesOrder(order: number[]) {

@@ -244,7 +244,7 @@ export default class SyncService extends BaseService {
     StorageService.set({ [BaseService.OFFLINE_STORE_NAME]: offlineData })
   }
 
-  static async handleApplicationUpdate() {
+  static async handleApplicationUpdate(isUpdating = false) {
     const globalStore = useGlobalStore()
     try {
       if (!globalStore.isOnline || this.router.currentRoute.value.name === ROUTE_SIGN) {
@@ -252,10 +252,10 @@ export default class SyncService extends BaseService {
       }
 
       globalStore.isUpdating = true
-      await InitService.initApplication()
+      await InitService.initApplication(undefined, isUpdating)
     } finally {
       globalStore.isSocketErrorOnce = false
-      globalStore.isUpdating = false
+      // globalStore.isUpdating = false
     }
   }
 

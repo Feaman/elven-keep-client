@@ -60,9 +60,6 @@ export default boot(async ({ app }) => {
       isDocumentFocused = true
     } else {
       isDocumentFocused = false
-      if (!store.isWatchMode) {
-        store.isUpdating = true
-      }
       SyncService.removeRemovedEntities()
     }
   }, 100)
@@ -72,7 +69,7 @@ export default boot(async ({ app }) => {
       const channel = new BroadcastChannel('elven-keep-service-worker')
       channel.postMessage({ requestUpdate: true })
       if (!store.isWatchMode) {
-        await SyncService.handleApplicationUpdate()
+        await SyncService.handleApplicationUpdate(true)
       }
     } catch (error) {
       BaseService.showError(error as Error)

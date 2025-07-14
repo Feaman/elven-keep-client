@@ -52,6 +52,12 @@ q-layout.main-layout(
     )
       NotListSkeletons
   q-page-container.page.pa-0(v-else)
+    q-spinner-cube(
+      v-if="globalStore.isUpdating"
+      class="is-loading-icon"
+      color="deep-purple"
+      size="xl"
+    )
     router-view.page-content(
       v-slot="{ Component }"
     )
@@ -178,21 +184,6 @@ watch(
   () => globalStore.initError,
   () => isErrorShown.value = !!globalStore.initError,
 )
-
-watch(
-  () => globalStore.isUpdating,
-  () => {
-    if (globalStore.isUpdating && router.currentRoute.value.name !== ROUTE_SIGN) {
-      const $overlay = document.createElement('div')
-      $overlay.classList.add('updating-overlay')
-      document.body.appendChild($overlay)
-      document.body.classList.add('is-updating')
-    } else {
-      (document.querySelector('.updating-overlay') as HTMLDivElement)?.remove()
-      document.body.classList.remove('is-updating')
-    }
-  },
-)
 </script>
 
 <style lang="scss" scoped>
@@ -207,14 +198,20 @@ watch(
 .note {
   min-width: 250px;
   max-width: 300px;
-  height: 300px;
+  height: 260px;
   flex: 1;
+}
+
+.is-loading-icon {
+  position: fixed;
+  top: calc(100% - 60px);
+  right: 20px;
+  z-index: 30;
 }
 
 @media (max-width: 700px) {
   .note {
     min-width: 148px;
-    height: 260px;
   }
 }
 
