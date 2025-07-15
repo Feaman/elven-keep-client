@@ -52,12 +52,6 @@ q-layout.main-layout(
     )
       NotListSkeletons
   q-page-container.page.pa-0(v-else)
-    q-spinner-cube(
-      v-if="globalStore.isUpdating"
-      class="is-loading-icon"
-      color="deep-purple"
-      size="xl"
-    )
     router-view.page-content(
       v-slot="{ Component }"
     )
@@ -103,6 +97,7 @@ const removedItemsMessage = computed(() => {
   return `${notesMessage}${middleWord}${listItemsMessage} removed`
 })
 let notification: null | ((props: object | undefined) => void) = null
+let updateNotification: null | ((props: object | undefined) => void) = null
 
 BaseService.eventBus.on('showGlobalError', (errorObject: TGlobalError) => {
   globalStore.initError = errorObject
@@ -183,6 +178,26 @@ watch(removedItemsQuantity, () => {
 watch(
   () => globalStore.initError,
   () => isErrorShown.value = !!globalStore.initError,
+)
+
+watch(
+  () => globalStore.isUpdating,
+  () => {
+    if (globalStore.isUpdating) {
+      updateNotification = $q.notify({
+        group: false,
+        message: 'Updating...',
+        textColor: 'primary',
+        icon: 'update',
+        timeout: 0,
+      })
+    } else if (updateNotification) {
+      updateNotification({
+        timeout: 1,
+      })
+      updateNotification = null
+    }
+  },
 )
 </script>
 
