@@ -34,7 +34,7 @@ q-card.note-preview.cursor-pointer.gradient.full-height.pa-4.pt-2(
     v-if="note.isMyNote"
     @click.stop="$emit('remove')"
     :icon="mdiTrashCanOutline"
-    size="md"
+    size="12px"
     color="red-3"
     flat
     round
@@ -93,6 +93,7 @@ const NOTE_TYPE_LIST = TYPE_LIST
     right: 2px;
     top: 3px;
     background: radial-gradient(#fff 30%, transparent);
+    padding-top: 8px;
   }
 
   .text {
