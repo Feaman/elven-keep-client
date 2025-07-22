@@ -143,7 +143,7 @@ export default class SyncService extends BaseService {
                 Object.assign(offlineListItem, onlineListItem)
               } else if ((new Date(offlineListItem.updated)) > (new Date(onlineListItem.updated))) {
                 if (offlineListItem.statusId === StatusesService.inactive.value.id) {
-                  // Remove both offline and onlne list item
+                  // Remove both offline and online list item
                   // eslint-disable-next-line no-await-in-loop
                   await onlineApi.removeListItem(offlineListItem)
                   offlineListItemsToRemove.push(offlineListItem)

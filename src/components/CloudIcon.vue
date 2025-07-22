@@ -75,10 +75,6 @@ function handleClick() {
     showDialog.value = true
   }
 }
-
-function reloadPage() {
-  window.location.reload()
-}
 </script>
 
 <style lang="scss" scoped>
