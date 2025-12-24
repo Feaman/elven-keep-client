@@ -9,9 +9,9 @@ export const useGlobalStore = defineStore('global', () => {
   const isNoOfflineDataError = ref<boolean>(false)
   const isInitDataLoading = ref(true)
   const isInitialLoading = ref(true)
-  const isSocketError = ref<boolean | undefined>(undefined)
   const user = ref<TUserModel | null>(null)
   const mainListScrollTop = ref(0)
+  const isSocketError = ref<boolean | undefined>(undefined)
   const isSocketErrorOnce = ref(false)
   const isNewVersionAvailable = ref(false)
   const isUpdating = ref(false)
@@ -29,8 +29,8 @@ export const useGlobalStore = defineStore('global', () => {
     isNewVersionAvailable,
     isInitialLoading,
     isInitDataLoading,
-    isSocketError,
     isNoOfflineDataError,
+    isSocketError,
     isSocketErrorOnce,
     mainListScrollTop,
     isOnline,

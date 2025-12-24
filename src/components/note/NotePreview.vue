@@ -93,7 +93,6 @@ const NOTE_TYPE_LIST = TYPE_LIST
     right: 2px;
     top: 3px;
     background: radial-gradient(#fff 30%, transparent);
-    padding-top: 8px;
   }
 
   .text {
