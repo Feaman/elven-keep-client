@@ -90,8 +90,8 @@ const NOTE_TYPE_LIST = TYPE_LIST
 
   .remove-button {
     position: absolute;
-    right: 2px;
-    top: 3px;
+    right: 6px;
+    top: 6px;
     background: radial-gradient(#fff 30%, transparent);
   }
 
